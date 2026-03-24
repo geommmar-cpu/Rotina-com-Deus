@@ -379,10 +379,91 @@ section {
   letter-spacing: 0.1em;
 }
 
+/* Sticky Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 0;
+  z-index: 100;
+  background: rgba(10, 10, 26, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+  transition: var(--transition);
+}
+
+header.scrolled {
+  padding: 1rem 0;
+  background: rgba(10, 10, 26, 0.95);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #fff;
+  text-decoration: none;
+}
+
 /* Mobile Adjustments */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 3.2rem; }
-  .phone-mockup { display: none; }
-  .section-title h2 { font-size: 2.8rem; }
-  .features-grid { grid-template-columns: 1fr; }
+  :root {
+    --section-padding: 6rem;
+  }
+  
+  section {
+    padding: var(--section-padding) 0;
+  }
+  
+  .hero {
+    text-align: center;
+    padding-top: 120px;
+  }
+  
+  .hero h1 {
+    font-size: 3rem;
+    line-height: 1.1;
+  }
+  
+  .hero p {
+    font-size: 1.1rem;
+    margin: 0 auto 2.5rem auto;
+  }
+  
+  .phone-mockup {
+    display: none;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .nav-btn {
+    display: none; /* Hide wide nav buttons on mobile if needed, or replace with icon */
+  }
+  
+  .container {
+    padding: 0 1.5rem;
+  }
+
+  .image-card {
+    height: 300px;
+  }
+
+  .pricing-card {
+    padding: 3rem 1.5rem;
+  }
+
+  .price {
+    font-size: 3.5rem;
+  }
 }
