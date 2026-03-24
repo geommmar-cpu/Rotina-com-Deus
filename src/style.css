@@ -445,7 +445,7 @@ header.scrolled {
 }
 
 .logo img {
-  height: 45px;
+  height: 80px;
   width: auto;
   object-fit: contain;
   transition: var(--transition);
@@ -610,7 +610,7 @@ header.scrolled {
   }
 
   .logo img {
-    height: 35px;
+    height: 60px;
   }
 
   .nav-container .btn {
