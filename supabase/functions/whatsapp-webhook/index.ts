@@ -9,17 +9,35 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-simulator',
+};
+
 serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
+    const isSimulator = req.headers.get("x-simulator") === "true";
+    if (isSimulator) {
+      whatsappService.isSimulator = true;
+      whatsappService.simulatorMessages = [];
+    }
+
     const payload = await req.json();
     console.log("Payload recebido:", JSON.stringify(payload, null, 2));
 
     const remoteJid = payload.data?.key?.remoteJid || "";
-    const phone = remoteJid.split("@")[0];
+    const phone = remoteJid.split("@")[0] || "5511999999999";
     const messageText = payload.data?.message?.conversation || payload.data?.message?.extendedTextMessage?.text || payload.data?.message?.buttonsResponseMessage?.selectedButtonId || "";
     const isAudio = !!payload.data?.message?.audioMessage;
 
-    if (!phone) return new Response("Ok", { status: 200 });
+    if (!phone) {
+      if (isSimulator) return new Response(JSON.stringify({ messages: [] }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response("Ok", { status: 200 });
+    }
 
     let { data: waUser } = await supabase
       .from("whatsapp_users")
@@ -34,6 +52,7 @@ serve(async (req) => {
         text: welcome!.text,
         buttons: welcome!.options.map(opt => ({ displayText: opt }))
       });
+      if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Onboarding iniciado", { status: 200 });
     }
 
@@ -53,6 +72,8 @@ serve(async (req) => {
       } else {
         await whatsappService.sendText({ number: phone, text: "Desculpe, não consegui processar seu áudio agora. Pode escrever sua intenção?" });
       }
+      
+      if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Áudio processado", { status: 200 });
     }
 
@@ -74,6 +95,7 @@ serve(async (req) => {
           updated_at: new Date().toISOString()
         }, { onConflict: 'whatsapp_user_id' });
 
+        if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response("Passo do terço enviado", { status: 200 });
       }
     }
@@ -85,6 +107,7 @@ serve(async (req) => {
           number: phone, 
           text: `📖 *Liturgia do Dia*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n🙏 *Santo do Dia: ${liturgy.saint}*` 
         });
+        if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response("Liturgia enviada", { status: 200 });
       }
     }
@@ -105,6 +128,7 @@ serve(async (req) => {
         updated_at: new Date().toISOString()
       }, { onConflict: 'whatsapp_user_id' });
 
+      if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Terço iniciado", { status: 200 });
     }
 
@@ -121,6 +145,7 @@ serve(async (req) => {
       intent: "general"
     });
 
+    if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     return new Response("Ok", { status: 200 });
   } catch (err) {
     console.error("Erro no processamento:", err);

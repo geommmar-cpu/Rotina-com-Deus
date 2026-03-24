@@ -18,6 +18,9 @@ export class WhatsAppService {
   private apiKey: string;
   private instanceName: string;
 
+  public simulatorMessages: string[] = [];
+  public isSimulator: boolean = false;
+
   constructor() {
     this.apiUrl = Deno.env.get("EVOLUTION_API_URL") || "";
     this.apiKey = Deno.env.get("EVOLUTION_API_KEY") || "";
@@ -25,11 +28,20 @@ export class WhatsAppService {
   }
 
   async sendText(options: SendTextOptions) {
+    if (this.isSimulator) {
+      this.simulatorMessages.push(options.text);
+      return { success: true };
+    }
     const url = `${this.apiUrl}/message/sendText/${this.instanceName}`;
     return this.postRequest(url, options);
   }
 
   async sendButtons(options: SendButtonOptions) {
+    if (this.isSimulator) {
+      this.simulatorMessages.push(`[Botões do Simulador]\n\n${options.text}\n\n${options.buttons.map(b => `- ${b.displayText}`).join('\n')}`);
+      return { success: true };
+    }
+
     const url = `${this.apiUrl}/message/sendButtons/${this.instanceName}`;
     
     // Formato específico para Evolution API v2/v1 conforme configurado
