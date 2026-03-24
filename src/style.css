@@ -51,6 +51,7 @@ h1, h2, h3 {
 .gradient-text {
   background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
