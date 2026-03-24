@@ -444,6 +444,7 @@ header.scrolled {
   font-size: 1.5rem;
   color: #fff;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 /* Testimonials */
@@ -594,6 +595,20 @@ header.scrolled {
   
   .container {
     padding: 0 1.5rem;
+  }
+
+  .nav-container {
+    gap: 0.5rem;
+  }
+
+  .logo {
+    font-size: 1.15rem;
+  }
+
+  .nav-container .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap;
   }
 
   .image-card {
