@@ -1,33 +1,51 @@
-import './style.css'
+// Premium Animations for Rotina com Deus
 
-// Scroll Reveal Logic
-const revealElements = document.querySelectorAll('.reveal');
-
-const revealOnScroll = () => {
-  for (let i = 0; i < revealElements.length; i++) {
-    const windowHeight = window.innerHeight;
-    const elementTop = revealElements[i].getBoundingClientRect().top;
-    const elementVisible = 150;
-
-    if (elementTop < windowHeight - elementVisible) {
-      revealElements[i].classList.add('active');
-    } else {
-      revealElements[i].classList.remove('active');
-    }
-  }
+const observerOptions = {
+  threshold: 0.15,
+  rootMargin: '0px 0px -50px 0px'
 };
 
-window.addEventListener('scroll', revealOnScroll);
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('active');
+      // If it's a grid, stagger its children
+      if (entry.target.classList.contains('features-grid')) {
+        const cards = entry.target.querySelectorAll('.glass-card');
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0) scale(1)';
+          }, index * 150);
+        });
+      }
+    }
+  });
+}, observerOptions);
 
-// Initial check
-revealOnScroll();
+document.addEventListener('DOMContentLoaded', () => {
+  const revealElements = document.querySelectorAll('.reveal');
+  revealElements.forEach((el) => observer.observe(el));
 
-// Smooth scroll for nav links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    document.querySelector(this.getAttribute('href')).scrollIntoView({
-      behavior: 'smooth'
+  // Add parallax effect to hero background on scroll
+  window.addEventListener('scroll', () => {
+    const hero = document.querySelector('.hero');
+    const scroll = window.pageYOffset;
+    if (hero) {
+      hero.style.backgroundPositionY = `${scroll * 0.5}px`;
+    }
+  });
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
     });
   });
 });
