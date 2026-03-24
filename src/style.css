@@ -179,7 +179,7 @@ h1, h2, h3 {
 
 /* Sections Overhaul */
 section {
-  padding: 10rem 0;
+  padding: 5rem 0;
 }
 
 .section-title h2 {
@@ -566,7 +566,7 @@ header.scrolled {
   .final-cta { padding: 6rem 1.5rem; }
 
   :root {
-    --section-padding: 6rem;
+    --section-padding: 3.5rem;
   }
   
   section {
