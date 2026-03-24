@@ -296,6 +296,22 @@ section {
   transform: scale(1.2) rotate(10deg);
 }
 
+/* SVG Icons Styling */
+.premium-icon {
+  width: 48px;
+  height: 48px;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  transition: var(--transition);
+  margin-bottom: 2rem;
+}
+
+.feature-card:hover .premium-icon {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 15px var(--accent));
+}
+
 /* Mobile Adjustments */
 @media (max-width: 768px) {
   .hero h1 { font-size: 3.2rem; }
