@@ -1,3 +1,5 @@
+import './style.css';
+
 // Premium Animations for Rotina com Deus
 
 const observerOptions = {
