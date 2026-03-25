@@ -13,6 +13,11 @@ export interface SendButtonOptions {
   title?: string;
 }
 
+export interface SendAudioOptions {
+  number: string;
+  audioUrl: string;
+}
+
 export class WhatsAppService {
   private apiUrl: string;
   private apiKey: string;
@@ -36,6 +41,19 @@ export class WhatsAppService {
     return this.postRequest(url, options);
   }
 
+  async sendAudio(options: SendAudioOptions) {
+    if (this.isSimulator) {
+      this.simulatorMessages.push(`🎧 [Áudio Enviado: ${options.audioUrl}]`);
+      return { success: true };
+    }
+    const url = `${this.apiUrl}/message/sendWhatsAppAudio/${this.instanceName}`;
+    const body = {
+      number: options.number,
+      audio: options.audioUrl
+    };
+    return this.postRequest(url, body);
+  }
+
   async sendButtons(options: SendButtonOptions) {
     if (this.isSimulator) {
       this.simulatorMessages.push(`[Botões do Simulador]\n\n${options.text}\n\n${options.buttons.map(b => `- ${b.displayText}`).join('\n')}`);
@@ -57,6 +75,23 @@ export class WhatsAppService {
       }))
     };
 
+    return this.postRequest(url, body);
+  }
+
+  async sendList(options: { number: string; title?: string; text: string; buttonText: string; sections: { title: string; rows: { title: string; description?: string }[] }[] }) {
+    if (this.isSimulator) {
+      const rowsText = options.sections.flatMap(s => s.rows).map(r => `  🔹 ${r.title}`).join('\n');
+      this.simulatorMessages.push(`[Menu Interativo] ${options.text}\n\n[Botão: ${options.buttonText}]\nOpções:\n${rowsText}\n\n(Digite o nome da opção)`);
+      return { success: true };
+    }
+    const url = `${this.apiUrl}/message/sendList/${this.instanceName}`;
+    const body = {
+      number: options.number,
+      title: options.title || "",
+      description: options.text,
+      buttonText: options.buttonText,
+      sections: options.sections
+    };
     return this.postRequest(url, body);
   }
 

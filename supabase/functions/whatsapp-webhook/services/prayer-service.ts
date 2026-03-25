@@ -5,23 +5,34 @@ export const MYSTERIES = {
   Luminosos: ["O Batismo de Jesus", "As Bodas de Caná", "O Anúncio do Reino", "A Transfiguração", "A Instituição da Eucaristia"]
 };
 
+export const AUDIO_BASE_URL = "http://localhost:5173/audios/";
+
 export function getMysteryOfDay(date: Date) {
   const day = date.getDay();
-  if (day === 1 || day === 6) return { name: "Gozosos", mysteries: MYSTERIES.Gozosos };
-  if (day === 2 || day === 5) return { name: "Dolorosos", mysteries: MYSTERIES.Dolorosos };
-  if (day === 4) return { name: "Luminosos", mysteries: MYSTERIES.Luminosos };
-  return { name: "Gloriosos", mysteries: MYSTERIES.Gloriosos };
+  if (day === 1 || day === 6) return { name: "Gozosos", mysteries: MYSTERIES.Gozosos, audio: "terco_misterios_gozosos.mp3" };
+  if (day === 2 || day === 5) return { name: "Dolorosos", mysteries: MYSTERIES.Dolorosos, audio: "terco_misterios_doloroso.mp3" };
+  if (day === 4) return { name: "Luminosos", mysteries: MYSTERIES.Luminosos, audio: "terco_misterios_luminosos.mp3" };
+  return { name: "Gloriosos", mysteries: MYSTERIES.Gloriosos, audio: "terco_misterios_gloriosos.mp3" };
 }
 
-export function getNextRosaryStep(currentStep: number) {
+export function getNextRosaryStep(currentStep: number, date: Date = new Date()) {
+  const mystery = getMysteryOfDay(date);
+  
   const steps = [
-    { id: 0, name: "Início", text: "🙏 Vamos começar o Santo Terço. Pelo sinal da Santa Cruz...", buttons: ["Próximo"] },
-    { id: 1, name: "1º Mistério", text: "📿 Primeiro Mistério: Contemplamos...", buttons: ["Próximo", "Pausar"] },
-    { id: 2, name: "2º Mistério", text: "📿 Segundo Mistério: Contemplamos...", buttons: ["Próximo", "Pausar"] },
-    { id: 3, name: "3º Mistério", text: "📿 Terceiro Mistério: Contemplamos...", buttons: ["Próximo", "Pausar"] },
-    { id: 4, name: "4º Mistério", text: "📿 Quarto Mistério: Contemplamos...", buttons: ["Próximo", "Pausar"] },
-    { id: 5, name: "5º Mistério", text: "📿 Quinto Mistério: Contemplamos...", buttons: ["Próximo", "Pausar"] },
-    { id: 6, name: "Salve Rainha", text: "🙏 Salve Rainha, Mãe de misericórdia...", buttons: ["Finalizar"] }
+    { 
+      id: 0, 
+      name: "Início", 
+      text: `👉 *Vou te guiar pelo áudio 🙏*\n\nOuça reverentemente o Santo Terço. O áudio a seguir contém todo o Terço dos Mistérios ${mystery.name}. Reservaremos este momento para falar com Deus e com Nossa Mãe.`, 
+      audioUrl: `${AUDIO_BASE_URL}${mystery.audio}`, 
+      buttons: ["Concluir Terço", "Pausar"] 
+    },
+    {
+      id: 1,
+      name: "Encerramento",
+      text: "🙏 *Agradecimento e Salve Rainha*\n\nEncerre este momento sagrado em paz. Que Deus te abençoe poderosamente através da intercessão da Virgem Maria!",
+      audioUrl: `${AUDIO_BASE_URL}ave_maria.mp3`,
+      buttons: ["Menu Principal"]
+    }
   ];
 
   if (currentStep >= steps.length - 1) return null;
