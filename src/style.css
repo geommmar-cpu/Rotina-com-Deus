@@ -177,6 +177,20 @@ h1, h2, h3 {
   box-shadow: 0 20px 40px var(--accent-glow);
 }
 
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  color: var(--accent);
+}
+
 /* Sections Overhaul */
 section {
   padding: 5rem 0;
