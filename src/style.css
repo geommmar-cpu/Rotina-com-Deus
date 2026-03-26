@@ -219,7 +219,7 @@ section {
   padding: 5rem 3rem;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .pricing-card::before {
