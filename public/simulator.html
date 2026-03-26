@@ -48,6 +48,11 @@
     
     const scrollToBottom = () => { msgsPane.scrollTop = msgsPane.scrollHeight; }
 
+    window.sendOption = (text) => {
+      inputMsg.value = text;
+      sendMessage();
+    }
+
     const addMessage = (text, type) => {
       const msgDiv = document.createElement('div');
       msgDiv.className = `msg ${type}`;
@@ -90,6 +95,7 @@
         
         if (result.messages && result.messages.length > 0) {
           result.messages.forEach(m => {
+            // Renderização de Áudio
             if (m.includes('🎧 [Áudio Enviado:')) {
               const match = m.match(/\[Áudio Enviado: (.*?)\]/);
               if (match && match[1]) {
@@ -98,6 +104,37 @@
                 return;
               }
             }
+            
+            // Renderização de Botões (Simulador)
+            if (m.includes('[Botões do Simulador]')) {
+              const lines = m.split('\n');
+              const text = lines[1] || "";
+              const buttons = lines.filter(l => l.startsWith('- ')).map(l => l.replace('- ', ''));
+              
+              let btnHtml = `<div>${text}</div><div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px;">`;
+              buttons.forEach(b => {
+                btnHtml += `<button onclick="sendOption('${b}')" style="width:auto; height:auto; padding: 6px 12px; border-radius: 15px; font-size: 12px; background: #fff; color: #075e54; border: 1px solid #075e54; cursor: pointer;">${b}</button>`;
+              });
+              btnHtml += `</div>`;
+              addMessage(btnHtml, 'rcvd');
+              return;
+            }
+
+            // Renderização de Menu Interativo (Lista)
+            if (m.includes('[Menu Interativo]')) {
+              const lines = m.split('\n');
+              const text = lines[0].replace('[Menu Interativo] ', '');
+              const options = lines.filter(l => l.includes('🔹 ')).map(l => l.replace('  🔹 ', ''));
+              
+              let listHtml = `<div><b>${text}</b></div><div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">`;
+              options.forEach(opt => {
+                listHtml += `<div onclick="sendOption('${opt}')" style="padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; cursor: pointer; hover: background: #eee;">${opt}</div>`;
+              });
+              listHtml += `</div>`;
+              addMessage(listHtml, 'rcvd');
+              return;
+            }
+
             addMessage(m, 'rcvd');
           });
         } else if (result.error) {

@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { generateSpiritualResponse, generatePersonalizedPrayer, generateSpecialPeriodDay } from "./services/ai-service.ts";
 import { getOnboardingFlow, getNextRosaryStep, getMysteryOfDay, PRAYERS } from "./services/prayer-service.ts";
 import { getDailyLiturgy } from "./services/liturgy-service.ts";
+import { getBible365Content } from "./services/bible-service.ts";
 import { whatsappService } from "./services/whatsapp-service.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -13,6 +14,22 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-simulator',
 };
+
+// Helper: salva progresso com UPDATE se existe, INSERT se não
+async function saveProgress(userId: string, data: Record<string, any>) {
+  const { data: existing } = await supabase
+    .from("user_progress")
+    .select("id")
+    .eq("whatsapp_user_id", userId)
+    .limit(1)
+    .single();
+
+  if (existing) {
+    await supabase.from("user_progress").update({ ...data, updated_at: new Date().toISOString() }).eq("whatsapp_user_id", userId);
+  } else {
+    await supabase.from("user_progress").insert({ whatsapp_user_id: userId, ...data, updated_at: new Date().toISOString() });
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -153,13 +170,11 @@ serve(async (req) => {
       currentStreak = 1; // Primeiríssima vez
     }
 
-    // Atualiza o progresso silenciosamente (Não trava o fluxo por await)
-    await supabase.from("user_progress").upsert({
-      whatsapp_user_id: waUser.id,
+    // Atualiza o progresso silenciosamente
+    await saveProgress(waUser.id, {
       dias_consecutivos: currentStreak,
-      last_interaction_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'whatsapp_user_id' });
+      last_interaction_at: new Date().toISOString()
+    });
 
     if (showStreakMessage) {
       await whatsappService.sendText({ number: phone, text: `🙏 Você está no seu ${currentStreak}º dia seguido de oração. Continue assim!` });
@@ -195,24 +210,31 @@ serve(async (req) => {
 
     // 🧭 MENU PRINCIPAL E NAVEGAÇÕES COMPLETAS
     
-    // 📖 Palavra da Bíblia
+    // 📖 Bíblia em 365 Dias
     if (normalizedMsg.includes("biblia") || normalizedMsg.includes("palavra")) {
-      await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/mensagem_biblica.mp3" });
+      const currentDay = (userProgress?.bible_365_day || 0) + 1;
+      const bibleContent = await getBible365Content(currentDay);
+      
       await whatsappService.sendButtons({
         number: phone,
-        text: "📖 *A Palavra de Deus para hoje*\n\nConfie no Senhor de todo o seu coração... E Ele guiará os seus passos.\n\nLeve essa palavra com você hoje. Amém. 🙏",
-        buttons: [{displayText: "Amém"}, {displayText: "Menu Principal"}]
+        text: bibleContent,
+        buttons: [{displayText: "Amém 🙏"}, {displayText: "Menu Principal"}]
       });
+
+      // Salva o progresso para o próximo dia
+      await saveProgress(waUser.id, { bible_365_day: currentDay });
+
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Bíblia enviada", { status: 200 });
     }
 
     // ✝️ Comunhão
     if (normalizedMsg.includes("comunhao") || normalizedMsg.includes("eucaristia")) {
+      await whatsappService.sendText({ number: phone, text: "✝️ *Oração após a Comunhão*\n\nSenhor Jesus... Eu creio que estás presente em mim. Obrigado por este momento de comunhão.\n\nFica comigo, Senhor... E fortalece minha fé. Que eu leve a tua presença para todos ao meu redor. Amém. 🙏" });
       await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/pos_comunhao.mp3" });
       await whatsappService.sendButtons({
         number: phone,
-        text: "✝️ *Oração após a Comunhão*\n\nSenhor Jesus... Eu creio que estás presente em mim. Obrigado por este momento de comunhão.\n\nFica comigo, Senhor... E fortalece minha fé. Que eu leve a tua presença para todos ao meu redor. Amém. 🙏",
+        text: "Escolha uma opção:",
         buttons: [{displayText: "Amém"}, {displayText: "Menu Principal"}]
       });
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -221,10 +243,11 @@ serve(async (req) => {
 
     // 🙏 São José
     if (normalizedMsg.includes("sao jose") || normalizedMsg.includes("jose")) {
+      await whatsappService.sendText({ number: phone, text: "🙏 *Oração de São José*\n\nÓ glorioso São José... A quem foi dado o poder de tornar possíveis as coisas humanamente impossíveis... Vinde em nosso auxílio nas dificuldades em que nos achamos...\n\nTomai sob vossa proteção a causa importante que vos confiamos... Para que tenha uma solução favorável. Ó São José muito amado... Em vós depositamos toda a nossa confiança. Amém. ✨" });
       await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/oracao_sao_jose.mp3" });
       await whatsappService.sendButtons({
         number: phone,
-        text: "🙏 *Oração de São José*\n\nÓ glorioso São José... A quem foi dado o poder de tornar possíveis as coisas humanamente impossíveis... Vinde em nosso auxílio nas dificuldades em que nos achamos...\n\nTomai sob vossa proteção a causa importante que vos confiamos... Para que tenha uma solução favorável. Ó São José muito amado... Em vós depositamos toda a nossa confiança. Amém. ✨",
+        text: "Escolha uma opção:",
         buttons: [{displayText: "Amém"}, {displayText: "Menu Principal"}]
       });
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -289,7 +312,7 @@ serve(async (req) => {
 
       if (currentDay > 40) {
         await whatsappService.sendText({ number: phone, text: `🎉 Parabéns! Você concluiu com sucesso os 40 dias de oração da jornada de *${novenaName}*! Que Deus te recompense grandemente.`});
-        await supabase.from("user_progress").upsert({ whatsapp_user_id: waUser.id, current_novena: null, novena_day: 0, updated_at: new Date().toISOString() }, { onConflict: 'whatsapp_user_id' });
+        await saveProgress(waUser.id, { current_novena: null, novena_day: 0 });
         if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response("Novena concluída", { status: 200 });
       }
@@ -305,12 +328,10 @@ serve(async (req) => {
         buttons: [{displayText: "Amém 🙏"}, {displayText: "Menu"}]
       });
 
-      await supabase.from("user_progress").upsert({
-        whatsapp_user_id: waUser.id,
+      await saveProgress(waUser.id, {
         current_novena: dbNovenaName,
-        novena_day: currentDay,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'whatsapp_user_id' });
+        novena_day: currentDay
+      });
 
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Novena enviada", { status: 200 });
@@ -318,18 +339,20 @@ serve(async (req) => {
 
     // 🌙 Início do Exame de Consciência
     if (normalizedMsg.includes("exame") && userProgress?.last_prayer_type !== "exame") {
-      await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/oracao_noite.mp3" });
       await whatsappService.sendText({ 
         number: phone, 
-        text: `🌙 *Boa noite*\n\nVamos encerrar o seu dia com Deus.\nRespire fundo...\nAgora pense no seu dia...\n\nComo foi o seu dia hoje? (Pode desabafar)` 
+        text: `🌙 *Boa noite*\n\nVamos encerrar o seu dia com Deus.\nRespire fundo...\nAgora pense no seu dia...` 
+      });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/exame_consciencia.mp3" });
+      await whatsappService.sendText({ 
+        number: phone, 
+        text: `Como foi o seu dia hoje? (Pode desabafar)` 
       });
 
-      await supabase.from("user_progress").upsert({
-        whatsapp_user_id: waUser.id,
+      await saveProgress(waUser.id, {
         last_prayer_type: "exame",
-        last_prayer_step: 1,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'whatsapp_user_id' });
+        last_prayer_step: 1
+      });
 
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Exame iniciado", { status: 200 });
@@ -352,49 +375,66 @@ serve(async (req) => {
 
       await whatsappService.sendText({ number: phone, text: nextText });
 
-      await supabase.from("user_progress").upsert({
-        whatsapp_user_id: waUser.id,
+      await saveProgress(waUser.id, {
         last_prayer_type: nextStep === 0 ? null : "exame",
-        last_prayer_step: nextStep,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'whatsapp_user_id' });
+        last_prayer_step: nextStep
+      });
 
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Exame passo " + step, { status: 200 });
     }
 
-    // Lógica de Botões do Terço
-    if (messageText.includes("btn_") || normalizedMsg.includes("proximo")) {
-      const currentStep = userProgress?.last_prayer_step || 0;
+    // Lógica de Botões do Terço (avançar passos)
+    const isInTerco = userProgress?.last_prayer_type === "terco";
+    if (isInTerco && (messageText.includes("btn_") || normalizedMsg.includes("proximo") || normalizedMsg.includes("intencao") || normalizedMsg.includes("concluir") || normalizedMsg.includes("iniciar"))) {
+      const currentStep = userProgress?.last_prayer_step ?? 0;
       const nextStep = getNextRosaryStep(currentStep);
 
       if (nextStep) {
         if (nextStep.audioUrl) {
+          await whatsappService.sendText({ number: phone, text: nextStep.text });
           await whatsappService.sendAudio({ number: phone, audioUrl: nextStep.audioUrl });
+          await whatsappService.sendButtons({
+            number: phone,
+            text: "Quando você terminar, escolha a opção abaixo:",
+            buttons: nextStep.buttons.map(b => ({ displayText: b }))
+          });
+        } else {
+          await whatsappService.sendButtons({
+            number: phone,
+            text: nextStep.text,
+            buttons: nextStep.buttons.map(b => ({ displayText: b }))
+          });
         }
-        await whatsappService.sendButtons({
-          number: phone,
-          text: nextStep.text,
-          buttons: nextStep.buttons.map(b => ({ displayText: b }))
-        });
 
-        await supabase.from("user_progress").upsert({
-          whatsapp_user_id: waUser.id,
-          last_prayer_step: nextStep.id,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'whatsapp_user_id' });
+        await saveProgress(waUser.id, {
+          last_prayer_type: "terco",
+          last_prayer_step: nextStep.id
+        });
 
         if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response("Passo do terço enviado", { status: 200 });
+      } else {
+        // Terço concluído, limpa o estado
+        await saveProgress(waUser.id, {
+          last_prayer_type: null,
+          last_prayer_step: 0
+        });
       }
     }
 
-    if (normalizedMsg.includes("liturgia")) {
+    if (normalizedMsg.includes("liturgia") || normalizedMsg.includes("santo do dia")) {
       const liturgy = await getDailyLiturgy();
       if (liturgy) {
-        await whatsappService.sendText({ 
+        let text = `📖 *Liturgia do Dia*\n\n`;
+        if (liturgy.title) text += `*${liturgy.title}*\n\n`;
+        text += `${liturgy.reflection}\n\n`;
+        text += `😇 *Santo do Dia:*\n${liturgy.saint}`;
+
+        await whatsappService.sendButtons({ 
           number: phone, 
-          text: `📖 *Liturgia do Dia*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n🙏 *Santo do Dia: ${liturgy.saint}*` 
+          text: text,
+          buttons: [{displayText: "Amém 🙏"}, {displayText: "Menu"}]
         });
         if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         return new Response("Liturgia enviada", { status: 200 });
@@ -403,23 +443,18 @@ serve(async (req) => {
 
     if (normalizedMsg.includes("terco") || normalizedMsg.includes("rosario")) {
       const mystery = getMysteryOfDay(new Date());
-      const firstStep = getNextRosaryStep(-1); // Início
+      const firstStep = getNextRosaryStep(-1); // Retorna step 0
       
-      if (firstStep?.audioUrl) {
-        await whatsappService.sendAudio({ number: phone, audioUrl: firstStep.audioUrl });
-      }
-
       await whatsappService.sendButtons({
         number: phone,
         text: `📿 *Terço Guiado*\n\nHoje contemplamos os *Mistérios ${mystery.name}*.\n\n${firstStep!.text}`,
         buttons: firstStep!.buttons.map(b => ({ displayText: b }))
       });
 
-      await supabase.from("user_progress").upsert({
-        whatsapp_user_id: waUser.id,
-        last_prayer_step: 0,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'whatsapp_user_id' });
+      await saveProgress(waUser.id, {
+        last_prayer_type: "terco",
+        last_prayer_step: firstStep!.id
+      });
 
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Terço iniciado", { status: 200 });

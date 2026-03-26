@@ -19,11 +19,14 @@ export async function getDailyLiturgy() {
     const summary = `Título: ${data.primeiraLeitura.titulo}. Salmo: ${data.salmo.refrao}. Evangelho: ${data.evangelho.titulo}.`;
     const reflection = await generateLiturgyReflection(summary);
 
+    // Limpar o nome do santo se vier com tags HTML ou lixo
+    const saintName = data.santoDoDia ? data.santoDoDia.replace(/<[^>]*>?/gm, '').trim() : "Santo do Dia";
+
     return {
       title: data.primeiraLeitura.titulo,
       readings: data,
       reflection: reflection,
-      saint: data.santoDoDia || "Santo do Dia"
+      saint: saintName
     };
   } catch (error) {
     console.warn("Aviso: API de Liturgia falhou, ativando fallback de IA:", error);
@@ -37,7 +40,7 @@ export async function getDailyLiturgy() {
     return {
       title: "📖 A Palavra de Hoje",
       reflection: reflection,
-      saint: "Reflexão guiada"
+      saint: "São José (Protetor das Famílias)"
     };
   }
 }

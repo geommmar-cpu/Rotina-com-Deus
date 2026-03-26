@@ -21,13 +21,27 @@ export function getNextRosaryStep(currentStep: number, date: Date = new Date()) 
   const steps = [
     { 
       id: 0, 
-      name: "Início", 
-      text: `👉 *Vou te guiar pelo áudio 🙏*\n\nOuça reverentemente o Santo Terço. O áudio a seguir contém todo o Terço dos Mistérios ${mystery.name}. Reservaremos este momento para falar com Deus e com Nossa Mãe.`, 
+      name: "Intenções", 
+      text: `📿 *Terço Guiado - Mistérios ${mystery.name}*\n\nAntes de iniciarmos, vamos fazer nosso oferecimento...\n\nFeche os olhos por um momento. Entregue a Deus suas causas, sua família e sua gratidão.\n\n_Faça sua intenção em silêncio no coração..._`, 
+      audioUrl: null, 
+      buttons: ["Fiz minha intenção 🙏"] 
+    },
+    { 
+      id: 1, 
+      name: "Oferecimento", 
+      text: `🙏 *Oferecimento do Terço*\n\nAgora ouça esta oração de oferecimento antes de iniciarmos nas contas:`, 
+      audioUrl: `${AUDIO_BASE_URL}oracao_intencoes.mp3`, 
+      buttons: ["Iniciar o Terço"] 
+    },
+    { 
+      id: 2, 
+      name: "Mistérios", 
+      text: `📿 *Iniciando os Mistérios ${mystery.name}*\n\nO áudio a seguir contém todo o Terço. Mantenha-se em espírito de oração.`, 
       audioUrl: `${AUDIO_BASE_URL}${mystery.audio}`, 
-      buttons: ["Concluir Terço", "Pausar"] 
+      buttons: ["Concluir Terço"] 
     },
     {
-      id: 1,
+      id: 3,
       name: "Encerramento",
       text: "🙏 *Agradecimento e Salve Rainha*\n\nEncerre este momento sagrado em paz. Que Deus te abençoe poderosamente através da intercessão da Virgem Maria!",
       audioUrl: `${AUDIO_BASE_URL}ave_maria.mp3`,
