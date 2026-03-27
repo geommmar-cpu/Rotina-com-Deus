@@ -31,6 +31,8 @@ async function saveProgress(userId: string, data: Record<string, any>) {
   }
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -231,7 +233,9 @@ serve(async (req) => {
     // ✝️ Comunhão
     if (normalizedMsg.includes("comunhao") || normalizedMsg.includes("eucaristia")) {
       await whatsappService.sendText({ number: phone, text: "✝️ *Oração após a Comunhão*\n\nSenhor Jesus... Eu creio que estás presente em mim. Obrigado por este momento de comunhão.\n\nFica comigo, Senhor... E fortalece minha fé. Que eu leve a tua presença para todos ao meu redor. Amém. 🙏" });
-      await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/pos_comunhao.mp3" });
+      await sleep(1000);
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/pos_comunhao.mp3" });
+      await sleep(1000);
       await whatsappService.sendButtons({
         number: phone,
         text: "Escolha uma opção:",
@@ -244,7 +248,9 @@ serve(async (req) => {
     // 🙏 São José
     if (normalizedMsg.includes("sao jose") || normalizedMsg.includes("jose")) {
       await whatsappService.sendText({ number: phone, text: "🙏 *Oração de São José*\n\nÓ glorioso São José... A quem foi dado o poder de tornar possíveis as coisas humanamente impossíveis... Vinde em nosso auxílio nas dificuldades em que nos achamos...\n\nTomai sob vossa proteção a causa importante que vos confiamos... Para que tenha uma solução favorável. Ó São José muito amado... Em vós depositamos toda a nossa confiança. Amém. ✨" });
-      await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/oracao_sao_jose.mp3" });
+      await sleep(1000);
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_sao_jose.mp3" });
+      await sleep(1000);
       await whatsappService.sendButtons({
         number: phone,
         text: "Escolha uma opção:",
@@ -343,7 +349,9 @@ serve(async (req) => {
         number: phone, 
         text: `🌙 *Boa noite*\n\nVamos encerrar o seu dia com Deus.\nRespire fundo...\nAgora pense no seu dia...` 
       });
-      await whatsappService.sendAudio({ number: phone, audioUrl: "http://localhost:5173/audios/exame_consciencia.mp3" });
+      await sleep(1000);
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/exame_consciencia.mp3" });
+      await sleep(1000);
       await whatsappService.sendText({ 
         number: phone, 
         text: `Como foi o seu dia hoje? (Pode desabafar)` 
@@ -393,7 +401,9 @@ serve(async (req) => {
       if (nextStep) {
         if (nextStep.audioUrl) {
           await whatsappService.sendText({ number: phone, text: nextStep.text });
+          await sleep(1000);
           await whatsappService.sendAudio({ number: phone, audioUrl: nextStep.audioUrl });
+          await sleep(1000);
           await whatsappService.sendButtons({
             number: phone,
             text: "Quando você terminar, escolha a opção abaixo:",

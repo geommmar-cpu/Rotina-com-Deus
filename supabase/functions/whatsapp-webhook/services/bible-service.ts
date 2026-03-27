@@ -9,9 +9,17 @@ export async function getBible365Content(day: number) {
     O usuário está na jornada "Bíblia em 365 Dias" e hoje é o DIA ${day} de 365.
 
     Sua missão:
-    1. Selecione um trecho bíblico (1 a 3 versículos) que seja inspirador e faça parte de uma sequência lógica de leitura da Bíblia (começando do Gênesis e percorrendo os grandes marcos da história da salvação ao longo dos 365 dias).
-    2. No dia ${day}, em que ponto da história estaríamos? (Ex: Dia 1: Criação, Dia 50: Êxodo, Dia 200: Profetas, etc). Selecione um trecho condizente.
-    3. Crie o conteúdo neste formato exato:
+    1. Selecione um trecho bíblico (1 a 3 versículos) que seja inspirador e faça parte de uma sequência lógica de leitura da Bíblia, percorrendo toda a história da salvação em 365 dias.
+    2. Use este cronograma como referência para o Dia ${day}:
+       - Dias 1-50: Gênesis e Êxodo (A Criação, Patriarcas e a Saída do Egito)
+       - Dias 51-100: Deserto, Leis e Conquista (Levítico a Josué)
+       - Dias 101-150: Juízes e o Reino Unido (Saul, Davi e Salomão)
+       - Dias 151-200: Reino Dividido e Profetas Pré-Exílio
+       - Dias 201-250: Exílio, Retorno e Sabedoria (Salmos, Provérbios, Eclesiastes)
+       - Dias 251-300: Vida de Jesus (Evangelhos)
+       - Dias 301-330: Atos dos Apóstolos e Início da Igreja
+       - Dias 331-365: Epístolas e Apocalipse
+    3. Crie o conteúdo neste formato exato (usando emojis):
 
     📖 *Bíblia em 365 Dias - Dia ${day}*
     

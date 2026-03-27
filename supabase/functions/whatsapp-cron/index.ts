@@ -14,17 +14,17 @@ const corsHeaders = {
 const ROUTINES: any = {
   morning: {
     text: "Bom dia 🙏\n\nQue Deus abençoe o seu dia.\nAntes de começar suas atividades, vamos entregar este dia nas mãos de Deus.\nRespire fundo... E diga no seu coração:\n\n*Senhor, guia meus passos hoje. Me dá sabedoria, paciência e paz. Que tudo o que eu fizer hoje seja para o bem.*\n\nAmém.",
-    audioUrl: "http://localhost:5173/audios/bom_dia.mp3",
+    audioUrl: "https://rotinacomdeus.vercel.app/audios/bom_dia.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   noon: {
     text: "🕛 O Anjo do Senhor anunciou a Maria... E ela concebeu do Espírito Santo.\n\nAve Maria, cheia de graça...\n\n(Acompanhe o Ângelus completo no áudio guiado abaixo) 🙏",
-    audioUrl: "http://localhost:5173/audios/Ângelus.mp3",
+    audioUrl: "https://rotinacomdeus.vercel.app/audios/Ângelus.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   night: {
     text: "Boa noite 🌙\n\nVamos encerrar o seu dia com Deus.\nRespire fundo... Agora pense no seu dia...\n\nVocê foi paciente? Ajudou alguém? Teve momentos de irritação? Peça perdão a Deus pelas suas falhas... E agradeça pelas coisas boas.\n\n*Senhor, obrigado por este dia. Perdoa minhas falhas e me ajuda a ser melhor amanhã. Amém.*",
-    audioUrl: "http://localhost:5173/audios/oracao_noite.mp3",
+    audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_noite.mp3",
     buttons: ["Amém 🙏", "Exame Guiado Passo a Passo"]
   }
 };
@@ -61,6 +61,8 @@ serve(async (req) => {
     let sentCount = 0;
     const intentName = `routine_${routineType}`;
     const today = new Date().toISOString().split("T")[0]; // Data atual YYYY-MM-DD
+    const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotinacomdeus.vercel.app/audios/";
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     for (const user of (users || [])) {
       // Regra 1: O usuário precisa estar ativo (se preferência existir, verifica se quer notificação)
@@ -85,14 +87,17 @@ serve(async (req) => {
 
       // 3. Preparar a mensagem
       const routineMsg = ROUTINES[routineType];
+      const prodAudioUrl = routineMsg.audioUrl.replace("http://localhost:5173/audios/", AUDIO_BASE_URL);
       
       await whatsappService.sendText({
         number: user.phone_number,
         text: routineMsg.text
       });
+      await sleep(1000);
 
       if (routineMsg.audioUrl) {
-        await whatsappService.sendAudio({ number: user.phone_number, audioUrl: routineMsg.audioUrl });
+        await whatsappService.sendAudio({ number: user.phone_number, audioUrl: prodAudioUrl });
+        await sleep(1000);
       }
 
       await whatsappService.sendButtons({
