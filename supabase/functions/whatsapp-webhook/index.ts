@@ -258,7 +258,7 @@ serve(async (req) => {
         console.log("🧬 Processando áudio com Gemini...");
         
         const genStartTime = Date.now();
-        const prayer = await generatePersonalizedPrayer(audioBase64, "audio/ogg; codecs=opus");
+        const prayer = await generatePersonalizedPrayer(audioBase64, "audio/ogg");
         console.log(`✨ Gemini processou em ${Date.now() - genStartTime}ms`);
         
         await whatsappService.sendText({ number: phone, text: prayer });

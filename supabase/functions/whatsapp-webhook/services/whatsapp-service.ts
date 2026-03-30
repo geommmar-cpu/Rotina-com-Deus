@@ -1,5 +1,3 @@
-import { encode as base64Encode } from "https://deno.land/std@0.177.0/encoding/base64.ts";
-
 export interface SendTextOptions {
   number: string;
   text: string;
@@ -146,6 +144,7 @@ export class WhatsAppService {
       }
 
       const { url } = await resInfo.json();
+      console.log(`📡 URL de mídia recebida: ${url.substring(0, 50)}...`);
 
       // 2. Baixar o arquivo binário
       const resFile = await fetch(url, {
@@ -157,11 +156,22 @@ export class WhatsAppService {
         return null;
       }
 
-      // Otimizado: Usar biblioteca padrão do Deno para Base64 (mais rápido e seguro)
       const arrayBuffer = await resFile.arrayBuffer();
-      return base64Encode(new Uint8Array(arrayBuffer));
-    } catch (err) {
-      console.error("Falha crítica no downloadMedia:", err);
+      const uint8 = new Uint8Array(arrayBuffer);
+      console.log(`📦 Tamanho do arquivo baixado: ${uint8.byteLength} bytes`);
+
+      if (uint8.byteLength === 0) return null;
+
+      // Conversão Base64 Nativa (Mais estável que loops manuais ou imports externos)
+      let binary = "";
+      const CHUNK_SIZE = 0x8000; // 32KB
+      for (let i = 0; i < uint8.length; i += CHUNK_SIZE) {
+        // @ts-ignore: CHUNK de Uint8Array para String
+        binary += String.fromCharCode.apply(null, uint8.subarray(i, i + CHUNK_SIZE) as unknown as number[]);
+      }
+      return btoa(binary);
+    } catch (err: any) {
+      console.error("Falha crítica no downloadMedia (Log Detalhado):", err.message || err);
       return null;
     }
   }
