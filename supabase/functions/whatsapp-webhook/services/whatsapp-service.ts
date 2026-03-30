@@ -146,17 +146,21 @@ export class WhatsAppService {
       const { url } = await resInfo.json();
       console.log(`📡 URL de mídia recebida: ${url.substring(0, 50)}...`);
 
-      // 2. Baixar o arquivo binário
-      const resFile = await fetch(url, {
-        headers: { "Authorization": `Bearer ${this.accessToken}` }
-      });
+      // 2. Baixar o arquivo binário (Nota: URLs assinadas do Meta CDN geralmente não precisam/querem o header de Auth)
+      console.log("📥 Iniciando fetch do binário...");
+      const resFile = await fetch(url); 
+
+      console.log(`📡 Status do download binário: ${resFile.status} ${resFile.statusText}`);
 
       if (!resFile.ok) {
-        console.error("Erro ao baixar binário da mídia:", await resFile.text());
+        console.error("❌ Erro ao baixar binário da mídia:", await resFile.text());
         return null;
       }
 
+      console.log("📚 Lendo buffer do arquivo...");
       const arrayBuffer = await resFile.arrayBuffer();
+      console.log("✅ Buffer lido com sucesso.");
+
       const uint8 = new Uint8Array(arrayBuffer);
       console.log(`📦 Tamanho do arquivo baixado: ${uint8.byteLength} bytes`);
 
