@@ -1,0 +1,149 @@
+(Transcrito por TurboScribe. Atualize para Ilimitado para remover esta mensagem.)
+
+Fala pessoal, boa noite, sejam bem-vindos a mais uma aula dessa nossa minissérie, onde a gente está falando especificamente sobre vendas, tudo o que envolve vendas ali onde a gente não bota a mão na massa em desenvolver um sistema, mas a gente coloca a mão na massa em todo o processo de vender um sistema, tá? Então essa aqui já é a nossa quarta aula, se não me falha a memória e eu vou recapitular rapidamente aqui o que a gente já viu até agora. Tem alguém mandando mensagem? Ah não, tá transcrevendo, boa, mas vamos lá A gente passou ali basicamente pelos primeiros passos, né? Entender sobre idos, sobre oportunidades, sobre a cliente ideal a parte de geração de demanda, identificação de oportunidades no geral que o ideal de você fazer ali, pelo menos nas suas primeiras ofertas, seja está inserido em um mercado que você conhece, você vai desenvolver algo a respeito de um mercado que você conhece você pode pegar sistemas maiores, mais complexos, extrair funcionalidades específicas pegar coisas que já funcionam em sofisticar, pesquisar conteúdo eu aconselho que você volte nessa primeira aula que a gente falou sobre bastante coisa e foi muito produtiva essa aula, tá? Deixa eu aumentar aqui um pouquinho o tamanho da letra Boa, foi muito produtiva essa primeira aula, assim como todas as outras aulas, né? Aqui a gente falou um pouco mais sobre construção de oferta, falando sobre engenharia de oferta aqui a gente falou sobre funil de vendas, na aula passada a gente explicou o que é um funil de vendas, que é basicamente a junção de aquisição com conversão aquisição é como você captura o lead, como você chama a atenção daquele potencial cliente e conversão é como você transforma aquela pessoa em um cliente de fato, né? Como é que faz ele pra ele fazer o pix, passar o cartão então o funil de vendas é a junção de aquisição com conversão onde a gente pode ter a aquisição inbound e outbound, né? Tráfego pago, social selling, ligação, whatsapp, e-mail e a conversão, a gente pode ter conversão de taxa grátis, de venda direta com landing page e checkout, com VSL, com quiz, type bot venda assistida, que é aquele funil de sdr com closer para a venda de produtos mais caros Também aconselho que você, se você não assistiu as aulas passadas eu aconselho que você volte e assista as três aulas passadas, né? A gravação das três aulas passadas, tá? Mas você não precisa sair dessa aula, você pode assistir essa aula toda, depois volta e assiste as outras porque não necessariamente o conteúdo de hoje é dependente do conteúdo anterior, tá? Na verdade eu acho que essa é a nossa quinta aula porque a gente falou sobre construção de oferta, não tô me recordando se foi na mesma aula de funil de vendas, tá? Mas tanto faz A gente começou a pensar a respeito de construir uma oferta, né? Identificou um mercado, inclusive a gente iria fazer uma oferta de um sistema para lava jato barra estética automotiva Foi muito bom esse exemplo para a gente entender sobre identificação de oportunidade, mas eu decidi não fazer essa oferta, a gente vai fazer uma outra oferta, já já explico melhor Por questão de logística minha mesmo, organização minha, já tem um outro sistema que já está na fila para ser lançado aí se eu pegasse, colocasse esse sistema aqui na frente, né? Iria bagunçar aqui um pouco o meu processo, então tem um outro sistema que campeão que a gente já queria lançar e a gente enxergou, seria muito mais produtivo, seria uma oportunidade muito melhor se a gente já fizesse junto aqui com vocês, tá? Então eu vou explicar Vou explicar isso mais para o final da aula, esse outro sistema que a gente vai fazer mas nessa aula especificamente a gente vai falar sobre páginas de vendas, né? O que compõe uma página de vendas campeão Qual é a minha ideia aqui? A minha ideia é a gente falar, ver toda a teoria, ver exemplos práticos, tirar dúvidas e etc e na próxima aula eu já vou vir com a página pronta do sistema que a gente vai vender, do sistema que a gente vai vender na prática, né? Que eu já vou adiantar para vocês, o sistema é o Fiscali, tá? Deixa eu... Sistema que vamos vender aqui nas aulas, certo? Então, o Fiscali, eu não tenho uma página de vendas dele pronta, não tenho nada dele pronta, mas ele segue a ideia, a estrutura das outras páginas de vendas que a gente desenvolve, que já vendem muito, que eu vou trazer aqui dois exemplos para mostrar para vocês, tá? Exemplos bons que funcionam Alguns já conhecem aqui do Geogito Chef, e esse aqui, o Conti, é uma novidade, é um sistema que a gente também vai lançar vocês podem ver que a gente tem uma esteira de lançamento bem grande aqui de produtos, a gente sempre está lançando produtos novos inclusive o Conti em primeira mão, eu não mostrei em nenhum outro lugar esse sistema, eu vou mostrar aqui para vocês, é um sistema de controle financeiro, tá? Vou pedir só para não vazarem a ideia e não me clonarem, né? Não tentarem me copiar, não tentem disputar comigo, mas vamos lá Cara, a gente vai lançar o Fiscali, tá? Esse é o sistema que de fato a gente vai fazer, é basicamente um sistema de cálculo tributário um sistema de... um sistema muito utilizado para contadores, advogados, empresários, a gente tem um sistema parecido só que a gente está vindo com um sistema novo, uma ideia nova, com novas funcionalidades melhorado e etc, como ele já estava na fila de lançamento, a gente não poderia pegar uma outra ideia de sistema que a gente teve na aula passada e colocar na frente, então decidi para a gente manter essas essas aulas aqui com uma frequência melhor, já ir para esse sistema que também vai ser um sistema campeão, muito bom e próxima aula eu já vou vim com a página de vendas dele pronta, então nessa aula a gente vai ver sobre uma estrutura de páginas de vendas campeã, tá? E na próxima aula eu venho com a página do Fiscali pronta para a gente analisar junto, ver potenciais melhorias e fazer tudo isso junto aqui, tá? Mas vamos lá. Paulo, então todo o funil de vendas depende de uma página de vendas campeã? Não, nem todo funil de vendas vai ser uma página de vendas desse modelo que eu vou mostrar para vocês mas é porque para esse produto, o primeiro funil que a gente vai aplicar é o funil de Direct Response, que é basicamente voltando aqui para funil de vendas, né? É tráfego pago para a aquisição e venda direta para a conversão aí eu poderia fazer uma página de VSL, um quiz, um typebot, mas a gente vai fazer uma LP essa primeira opção aqui, então a gente vai usar a conversão aqui de LP para checkout, né? LP campeã para checkout e tráfego pago, esse aqui é o exemplo que a gente vai usar, esse é o funil que a gente vai construir juntos aqui, então tráfego pago, bons criativos jogando para uma boa LP campeã e vendas no automático, né? Aquelas notificaçõezinhas de vendas no automático que, modéstia a parte, a nossa especialidade é venda no automático, tá? A gente tem funil de SDR com Close, a gente tem funil de Quiz, a gente tem funil de typebot, funil de isca digital, tem, mas nossa especialidade é LP e Quiz, mais especificamente, tá? Mas LP aqui vem sendo a nossa principal especialidade aqui para para a venda direta, tá? Então, descendo aqui um pouco mais, né? A gente já entendeu que a gente vai fazer uma página de vendas para Direct Response, né? Que o objetivo é a pessoa ouvir o nosso criativo, teve o primeiro contato ali, né? Então ela foi adquirida, a gente fez a aquisição daquele lead por meio do criativo, por meio do tráfego pago, ele caiu na nossa LP teve todo o processo de convencimento na LP sem precisar falar com ninguém, clicou, foi para o checkout, comprou, tá? Essa vai ser a ideia.
+
+Então, a gente vai falar aqui sobre todos os elementos de uma boa LP. Paulo, todos os elementos possíveis estão aqui? Claro que não, senão a gente iria usar 20 páginas aqui para descrever todos os elementos possíveis que a gente possa ter dentro de uma LP, mas eu destaquei aqui os principais e os que eu mais uso, tá? Os que eu de fato uso no meu dia a dia, uso nas minhas páginas que vendem. Paulo, a minha LP precisa ter todas essas opções? Precisa ter tudo isso daqui? Não, sua LP não precisa ter tudo isso, é, alguns são obrigatórios, alguns são opcionais, tá? E a gente vai falar melhor a respeito quando a gente for descrevendo cada item.
+
+Antes de eu dar continuidade, alguém quer tirar alguma dúvida, quer falar algo a respeito, fazer alguma pontuação, eu vou dar espaço para no máximo duas pessoas falarem aqui. Quem tiver interesse, levanta a mão, é só clicar no no íconezinho, o da mãozinha ali na parte de baixo. Se quiser tirar alguma dúvida, esse vai ser o único momento que a gente vai ter para dúvidas, eu acredito que esse vai ser o único momento, tá? Porque hoje vai ser bem corrido. 
+
+Ao final eu vou tentar liberar algum momento para para dúvida, mas não posso prometer, por isso que eu tô abrindo esse momento agora. Uma pessoa levantou a mão, pode desmutar e falar. Boa noite, Paulo. 
+
+Tudo bem? Opa, tudo bom, Petros? Eu tenho uma dúvida, quando você faz o funil em quiz, você termina o quiz e vai para a Lending Page ou já vai direto para o Checkout? Checkout. O funil de quiz, ele já tem o objetivo de quebrar a objeção, converter, fazer todo o processo de vendas e jogar para o Checkout. Tem funil... Quiz long? É, normalmente de 20 etapas, nossos quiz costumam ter esse tamanho, tá? Quiz ali de 20 etapas funciona legal para a gente.
+
+E o que a gente não abre mão é de dentro do quiz sempre ter uma mini VSL, tá? Dentro dos nossos quiz sempre tem VSL dentro. Então a gente... No meio do quiz, né? Com passagem já o cara pode pular a mini VSL, tá? A gente libera o botão da mini VSL ali com 10 segundos, normalmente. O cara começou a assistir, 10 segundos já libera, independente se a VSL tem 5 minutos.
+
+Mas muita gente assiste, tá? Então, normalmente no nosso quiz a gente não joga para uma outra página de vendas, mas a gente usa uma VSL para ajudar no processo de convencimento, beleza? Com depoimentos também ou não? VSL padrão, né? Depoimento, ancoragem, tudo mais. Beleza. Beleza? Obrigado.
+
+VSL de no máximo 5 minutos, tá? Com a opção de pular também. Com a opção de pular, depois dos primeiros 10 segundos ali é o ideal. Beleza.
+
+Mas pode tentar também sem a opção de pular, fica a teu critério aí. Fechou? Obrigado. Boa.
+
+Alguém tem alguma dúvida sobre landing page, sobre processo de direct response para a gente tirar logo antes de começar a explicar? Boa, então bora lá. Pessoal, como eu falei, aqui não tem todos os elementos possíveis de uma landing page, mas tem os principais, o que a gente usa e já é coisa para caramba, tá? Eu não uso tudo isso em todas as minhas páginas, tá? Tem coisa que fica de fora, tem coisa que tem, tem coisa que não tem. Mas vamos lá.
+
+Primeiro elemento e, assim, muitos consideram mais importante, uma boa headline. Headline é basicamente o título da tua página, a promessa que tu vai fazer, o que tu vai utilizar para chamar a atenção e fazer o cara continuar olhando o restante da página, tá? Normalmente, eu faço headlines com o objetivo de chamar a atenção, bater na dor e mostrar a dor resolvida com o benefício imediato, tá? Existem alguns outros modelos que a gente vai já olhar. Um exemplo claro, por isso que eu trouxe a página do gestor-chefe, é a headline do gestor-chefe, que é elimine o desperdício, então vamos lá, bater na dor.
+
+A dor do cara é o quê? É desperdício, ele tá perdendo dinheiro, tá perdendo tempo. Elimine o desperdício, mantenha tudo organizado, então vamos lá, a gente traz aqui a dor resolvida, o benefício, manter tudo organizado e aumente o lucro da sua cozinha, né? Então aqui o benefício rápido e imediato. Então essa é uma boa headline que aguça a curiosidade, chama a atenção, bate na dor, mostra a dor resolvida, mostra o benefício imediato, isso em poucas palavras.
+
+Então esse é o objetivo da headline, ser breve, ser pontual, usar poucas palavras, mas trazer todo esse pensamento, trazer toda essa reflexão por parte do nosso lead. Então ele bate o olho aqui. Não tá apresentando a tela, cara.
+
+Não tá apresentando? Opa, pessoal, obrigado aí por avisar, tá? Desculpa aí, pessoal. Cês tão vendo minha tela agora? Ah, então tava esse tempo todo mostrando aqui sem... Boa, mas na gravação tá mostrando a tela, tá? Depois cês podem ver a gravação pra ver esses minutos iniciais. Beleza, mais uma headline.
+
+Ela chama a atenção, bate na dor, mostra a dor resolvida e o benefício imediato, barra, rápido. Aqui no gesto chefe, elimine o desperdício, mantenha tudo organizado e aumente o lucro da sua cozinha. Vejam que em poucas palavras a gente consegue deixar o cara curioso, o cara interessado, ele no mínimo vai continuar scrollando a nossa página.
+
+O que a gente precisa entender é que a coisa mais valiosa que a gente precisa ter é a atenção do cara. Então se o cara entra na página de cara, vê uma headline fraca, que não chama atenção, que não desperta interesse, ou não vê nada, muito provavelmente ele vai sair. Ele tem que ver algo que chame a atenção dele, que ele tem interesse de continuar vendo, que ele tem interesse de clicar e etc.
+
+E uma boa headline, principalmente pra uma página de vendas aberta, uma landing page, é o elemento que vai trazer isso pra gente, tá? Então, headline, majoritariamente eu utilizo esse modelo, tá? De chamar atenção, bater na dor, mostrar a dor resolvida e o benefício imediato, barra, rápido. Mas, como aqui no caso do Conti, essa VSL aqui não é dessa página, que a VSL do Conti ainda não tá pronta, eu botei só essa de marcação, tá? O Conti é uma ferramenta de gestão financeira pessoal, pra você controlar suas finanças da sua casa e etc. O Conti utiliza uma outra estratégia de headline, tá? Que é a headline do benefício claro, tá? Conquiste isso, alcance isso sem tal coisa.
+
+Benefício claro, a headline mais simples possível. Então, sua vida financeira no controle total, sem esforço. Então, é o benefício claro, o cara vai ter total controle da vida financeira dele sem determinado esforço, sem determinado problema, sem determinada coisa que poderia ser uma objeção.
+
+Então, o que é a coisa chata aqui é o esforço que o cara tem que ter com planilha, com caderno, com outras ferramentas mais complexas, e aqui ele vai ter sem esforço, tá? Uma outra headline que funciona muito, não utilizo tanto, mas funciona muito, é de alerta, barra, perda. Você tá perdendo isso daqui por não estar fazendo isso, por conta disso, certo? Também é uma headline ali muito poderosa. Lógico que ela não precisa seguir exatamente essa estrutura, né? De começar com você, estar perdendo.
+
+Ela pode ter vários formatos, mas isso aqui é a ideia principal, certo? E também tem a headline de transformação, que é saia da situação tal e vá para a situação tal de tal maneira. Pode ter, pode acrescentar ao final isso, tá? Então, você mostra simplesmente a transformação. Você não mostra exatamente o benefício, você mostra a transformação mais especificamente, tá? Benefício e transformação muitas vezes também são a mesma coisa.
+
+Resumo, tá? Paulo, a gente tem só esses formatos de headline, esse aqui que você mostrou, mas esses outros três aqui, cara, deve ter aí centenas de formatos de headline. Esses aqui são os que eu uso, tá? Mas um resumo, sempre que você for escrever a sua headline independente do formato, é que uma boa headline tem que entregar transformação de maneira direta ou indireta. No mínimo, você tem que fazer o cara pensar na transformação dele.
+
+Você pode não mostrar o benefício de maneira clara, você pode não falar abertamente sobre a transformação, mas o texto que você vai colocar, as palavras que você vai utilizar, minimamente você tem que fazer ele pensar na transformação que ele pode alcançar de forma indireta, tá? Minimamente isso. Ter um problema resolvido e mostrar que dá pra ter um resultado melhor. O cara tá tendo aquele problema? Cara, tu não precisa estar tendo esse problema, tu pode chegar nesse resultado e que pode ser mais simples do que parece, tá? Então uma boa headline comumente vai ter esses elementos aqui de forma direta ou indireta, tá? Isso aqui é o que eu gosto de pensar sempre que eu vou escrever uma headline.
+
+Isso daqui são variações de headline do gestor-chefe, pra vocês entenderem que ela não precisa seguir um scriptzinho exatamente do jeito que tá aqui. Então uma outra variação daquela mesma headline, aqui a gente tem elimine o desperdício, mantenha tudo organizado e aumente o lucro da sua cozinha, né? Então aqui a gente fala, sua cozinha está jogando dinheiro fora, organize agora e aumente o lucro. A gente tá falando a mesma coisa só que de um jeito diferente.
+
+É muito bom pra teste AB. Mais organização, menos desperdício e muito mais lucro na sua cozinha. Isso aqui também é um outro teste.
+
+Eu perdi um pouco mais de tempo na headline, porque se você começa com uma boa headline, fica muito mais fácil dar continuidade na página, tá? E a subheadline é um texto complementar e explicativo. Então imagina que o cara leu a tua headline, mas ele ainda não entendeu a sua solução. Então, elimine o desperdício, mantenha tudo organizado e aumente o lucro da sua cozinha.
+
+Pô, fiquei curioso, mas ainda tenho dúvida. O sistema que dá controle total da sua operação. Do estoque à precificação, de um jeito simples, rápido e 100% online.
+
+Então veja aqui, a gente despertou a curiosidade, o interesse, o cara tá empolgado, mas ele ainda tem dúvidas, ainda tem lacunas abertas. E depois, com um texto simples e direto ao ponto, a gente fecha essas lacunas e ele segue pro restante da página muito mais empolgado, entendendo exatamente o que a gente tá vendendo, tá? É muito comum existirem páginas de vendas que a pessoa entra e não consegue entender o que tá sendo vendido. É muito comum.
+
+E esse é o maior erro de todos. Então, deixe claro o que você tá vendendo, o que você entrega e a transformação que o seu cliente vai ter. Então, a gente tá vendendo aqui um sistema, claro, direto ao ponto.
+
+Um sistema que dá controle total da operação dele. Do estoque à precificação, de um jeito simples, rápido e 100% online. Certo? Complementar e explicativo.
+
+Depois vem a VSL, que eu considero ser uma das etapas não obrigatórias, mas, pra mim, é a etapa não obrigatória mais obrigatória possível. Não sei se ficou claro o que eu quis dizer, tá? Não é obrigatória. Você pode ter uma boa página de vendas sem uma VSL.
+
+Você pode ter uma excelente LP sem uma VSL. Mas eu acredito que uma boa página de vendas, com o incremento da VSL, ela fica 200% melhor. Então, aqui no Gesto Chefe, se eu pegasse e tirasse essa VSL daqui, que é basicamente um vídeo explicando um pouco mais sobre a ferramenta, quebrando objeções, tirando dúvidas comuns, tá? Se eu tirar esse vídeo aqui, eu ainda vou ter uma boa página de vendas aqui pra vender o meu produto, tá? Mas, com a VSL, a minha conversão é muito maior.
+
+Porque imagine que o cara entrou... Não é todo mundo que vai dar play na VSL, mas os usuários mais empolgados e os mais interessados vão dar play na VSL. Eles vão querer assistir o vídeo. Então, imagina que o cara entrou, ele viu a tua página, porra, tá mega empolgado e tal.
+
+Ele pensa, cara, isso aqui é pra mim, mas eu tenho dúvida tal, vou deixar pra depois. Mas ele vê que tem um vídeo. Ele clica no vídeo, assiste o vídeo, e nesse vídeo a dúvida dele é sanada.
+
+A dúvida dele é tirada. Ele entende um ponto que estava em aberto e decide comprar naquele momento, tá? Então, a VSL é o elemento não obrigatório, mas obrigatório possível. Depois, um outro elemento não obrigatório, mas também que é muito bom, é você explicar qual o problema.
+
+Cara, qual o problema que tu tá passando? Explicar pro cara qual o problema que ele tá enfrentando. No caso aqui do gestor-chefe, eu não coloquei porque tudo isso é explicado na mini VSL, tá? E um pouco também na headline, que fala sobre desperdício e falta de organização, tá? Mas aqui no caso, se você não tem essa apresentação de maneira clara na sua headline, na sua sub-headline, na sua VSL, você tem que explicar pro cara qual o problema dele. Porque muitas vezes nem ele entende direito qual o problema dele, tá? Então explica pro cara qual o problema dele.
+
+E depois vem as sessões de quebra de objeção. As sessões de quebra de objeção não é uma sessão só, não são duas sessões só. Podem ser 10 sessões, 15 sessões, 2 sessões, 3 sessões.
+
+Vai depender da quantidade de objeções comuns que os seus clientes têm. Vou pegar a página aqui do Conti como exemplo. Essa página aqui, ó. É uma página que eu foco muito em quebra de objeção.
+
+Porque é o tipo de ferramenta que muita gente já conhece, muita gente já teve acesso, mas que tem dúvidas, tem problemas, tem questionamentos que ela já encontrou anteriormente, tá? Então veja aqui, ó. Eu tenho a headline, eu tenho a sub-headline, eu tenho um botão aqui, tenho a minha mini VSL, beleza. Mas logo de cara, ó, logo de cara, eu não explico qual o problema. Eu vou logo pra sessões de quebra de objeções.
+
+O problema, todo mundo já tá ligado, todo mundo sabe que é descontrolado financeiramente, que é descontrolado com cartão de crédito, que não tem controle, que tá endividado e etc. Então a gente vai pras quebras de objeções. Identifica quais são as quebras de objeções.
+
+No caso aqui, 5 minutos por dia e uma vida financeira completamente organizada. Qual a objeção que eu tô quebrando aqui? Alguém quer dar um palpite? Vamo lá, quem tiver um palpite pode desmutar e falar. Uma das objeções mais comuns do mercado.
+
+Bem fácil. Oi? Algo bem fácil de fazer, mas difícil. Boa, bom palpite.
+
+Mas é a objeção mais comum do mercado, que é a não tenho tempo. Essa é uma das objeções que mais vocês vão encontrar. Não tenho tempo.
+
+É uma objeção que sempre tem que ser quebrada, tá? Não tenho tempo. 5 minutos por dia e uma vida financeira completamente organizada. O Conti foi feito pra quem não tem tempo.
+
+Lance seu gastos em segundos e a inteligência artificial cuida do resto. Analisa, planeja e te avisa, tá? Vamo lá. Qual outra objeção barra benefício, né? O cara vai deixar tudo anotado lá, mas vai esquecer.
+
+Foi algo que eu vi muito claro nos usuários de planilhas. O cara, ô cara, eu uso aqui a planilha, né? Na pesquisa de mercado que eu fiz, eu uso aqui a planilha. Anoto tudo lá e esqueço de usar.
+
+Fica lá, esqueço. Então aqui o cara não esquece mais, porque ele cadastra uma única vez as contas fixas dele. A parcela do carro, o aluguel, a conta de energia.
+
+E bota as datas de vencimento. E a partir daí, a ferramenta vai sempre lembrar ele por WhatsApp e por e-mail. Quando tá perto de um vencimento.
+
+Pra ele acompanhar um histórico de pagamentos mês a mês e etc. Logo em seguida, a gente vem pro lance gastos do dia-a-dia em 5 minutos. Aí, isso é uma junção de não tenho tempo com, acho difícil.
+
+Certo? São duas objeções extremamente comuns aí pra quase todo tipo de produto. Então aqui, não tenho tempo, acho difícil. Não vou usar.
+
+Também é uma objeção aqui que a gente quebra. Aí a gente vem aqui, mais pra baixo. Aqui a gente já começa a falar um pouco mais sobre as funcionalidades barra explicação da ferramenta.
+
+Veja que aqui, ao mesmo tempo que eu quebro a objeção. Eu já vou explicando a ferramenta de forma sutil também. Então aqui eu uni essas duas seções aqui.
+
+Elas ficaram basicamente quase que juntas em mesmas seções. As quebras de objeções com a explicação da ferramenta, explicação das funcionalidades. Aqui eu já expliquei que o cara vai cadastrar os gastos fixos dele.
+
+Aqui eu já expliquei que ele vai lançar os gastos de maneira facilitada. Aqui abaixo eu explico que ele pode ver as faturas do cartão de crédito dele. Ver as assinaturas que ele tem.
+
+Ver os parcelamentos que ele tem. Então aqui é Netflix, Spotify, Bodytech. Aqui são assinaturas que ele tem no cartão de crédito ativo.
+
+Aí aqui ele tem o parcelamento, quantas parcelas restam. Então ele tem um controle das assinaturas, do parcelamento e de compras avulsas. Então compras avulsas que ele faz no cartão.
+
+Tudo isso, as assinaturas, os parcelamentos e as compras avulsas do dia a dia vai compor a fatura total dele. Então aqui a gente está explicando as funcionalidades. Aí vem aqui uma outra explicação de funcionalidade.
+
+A IAC que cria o seu plano de quitação. Então veja aqui, o sistema já tem acesso a todas as suas informações financeiras. Quanto você ganha, quanto você paga de conta, qual é a fatura do seu cartão, o que você tem de parcelamento.
+
+E agora você vai cadastrar as suas dívidas, ela vai fazer uma análise completa da sua situação financeira. E vai te dar a melhor solução possível para quitar as suas dívidas. Aí aqui eu estou dando continuidade na página, mas o recado já foi dado.
+
+Que é, sessão de quebra de objeção e sessão de funcionalidades. Aqui no gesto chefe eu fiz a sessão de funcionalidades dessa forma aqui e funciona muito bem, direto ao ponto. Porque eu entendi que o público queria entender mais na prática de fato o que faz na ponta do lápis, o que o sistema faz ali na ponta do lápis.
+
+Então aqui eu peguei todas as sessões e expliquei cada uma de forma detalhada de fato. Então funcionalidades, quebra de objeções, não vou pintar aqui, vou voltar essa daqui. Essas duas aqui pessoal, não é opcional, isso aqui tem que ter, não tem pra onde correr.
+
+Você tem que quebrar a objeção, pelo menos com uma ou duas sessões, e você tem que falar das funcionalidades mesmo que de forma sutil. Sessão pra quem é. Se não for muito claro pra quem é o sistema, tem que ter essa sessão. Então eu vou deixar como sessão obrigatória.
+
+A gente desce um pouco aqui, pra quem é o gesto chefe. A gente tem que entender que muitas vezes quem tá comprando o produto, nem entende o que aquele produto é pra ele. Quantos de vocês já não viram um anúncio no Instagram, clicaram, nem entendiam o que que era ali, não entendiam o que era pra você, o que não era pra você, e depois saiu da página.
+
+Então se o cara entende de forma clara que aquele produto é pra ele, é muito mais fácil dele converter, dele comprar. Então pra quem é o gesto chefe? Cara, o gesto chefe é pra restaurantes, lanchonetes, delivery, dark kitchens, padarias e cafeterias, é pra quem trabalha com comida. Se você trabalha com comida, tem um estabelecimento que trabalha com comida, o gesto chefe é pra você.
+
+Então pra quem é, é uma sessão que eu vou deixar como obrigatória. Depoimentos! É algo que a gente comenta. Cara, depoimentos não é obrigatório, porque principalmente no começo, a maioria não tem depoimentos.
+
+O que a gente sempre faz? Cara, a gente libera ferramenta pra todo mundo no começo, tá? A gente libera pra amigos, pra conhecidos, pra parentes, pra pessoas que a gente acredita que possam criar aquela ferramenta. Por isso que eu sempre falo, atue em uma área que você conhece, certo? Que você vai saber pra quem liberar a ferramenta, a pessoa vai poder opinar, vai poder te dar um depoimento. Então, eu aconselho ter depoimentos, mas não vou colocar como obrigatório.
+
+Mas, se esforce ao máximo pra sua página ter depoimentos nesse início, tá? É importante. Libera a ferramenta, várias licenças gratuitas aí pro pessoal, faz o modo pessoal pra testar. Pra eles te mandarem só uma... Não precisa ser um vídeo de depoimento.
+
+Às vezes, uma mensagem no WhatsApp que ele te manda. Cara, curti muita ferramenta, por isso isso e isso. Já vira um card de depoimento, tá? Muitos elementos visuais, tá? Muitos elementos visuais.
+
+Cara, muita gente erra nisso aqui. Sua página tem que ter elementos visuais. A pessoa tem que olhar a imagem do sistema por dentro, ficar encantada, achar bonito.
+
+Perca tempo com elementos visuais. Inclusive, todos esses elementos visuais eu fiz com E.A. 100% com E.A. Eu não sou um designer, tá? Isso aqui foi tudo 100% feito com E.A., esses elementos visuais. E eu ensino todo o meu processo de criar bons elementos visuais no treinamento do meu sistema lucrativo, tá? Então, não vou ensinar aqui, tá? Mas, cara, capricho nos elementos visuais.
+
+Perca tempo com isso aqui, tá? Perca tempo em fazer boas imagens que chamam a atenção, que são explicativas, que são bonitas, que brilham os olhos do seu cliente. Perca tempo fazendo bons elementos visuais, tá? Obrigatório. Não tem pra onde correr.
+
+Obrigatório. Bônus. Obrigatório também.
+
+Nesse aqui eu ainda não coloquei os nossos bônus, mas bônus é obrigatório. Cara, um bônus ou outro, uma funcionalidade extra. E já já eu vou explicar também porque o bônus é importante, tá? O bônus é importante.
+
+Primeiro, convencimento. O cara, às vezes ele tá convencido, ele tá interessado, mas o que faz é ele bater o martelo e falar cara, vou fechar.
+
+(Este arquivo tem mais de 30 minutos. Atualize para Ilimitado em https://turboscribe.ai/pt/ para transcrever arquivos de até 10 horas.)

@@ -656,3 +656,56 @@ header.scrolled {
     font-size: 3.5rem;
   }
 }
+
+/* 
+   ==========================================================================
+   FINAL POLISH & REVEAL OVERRIDES
+   ==========================================================================
+*/
+
+/* Grain Texture Overlay */
+.hero::before, #bonus::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+/* Specific Section Polish */
+#para-quem {
+  position: relative;
+  overflow: hidden;
+}
+
+#para-quem::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+#objecoes h4 {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+}
+
+/* Sharp Geometry override for trust elements */
+#objecoes .glass-card, #para-quem .glass-card {
+  border-radius: 4px; /* Sharp for trust/accuracy */
+}
+
+#bonus h2 {
+    margin-top: 1rem;
+}
