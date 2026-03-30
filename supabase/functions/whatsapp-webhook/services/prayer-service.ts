@@ -5,7 +5,7 @@ export const MYSTERIES = {
   Luminosos: ["O Batismo de Jesus", "As Bodas de Caná", "O Anúncio do Reino", "A Transfiguração", "A Instituição da Eucaristia"]
 };
 
-export const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotinacomdeus.vercel.app/audios/";
+export const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://www.rotinacomdeus.online/audios/";
 
 export function getMysteryOfDay(date: Date) {
   const day = date.getDay();

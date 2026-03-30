@@ -33,7 +33,19 @@ export async function getDailyLiturgy() {
     
     // Fallback: IA seleciona uma leitura do dia e cria a reflexão baseada nela dinamicamente
     const today = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
-    const fallbackPrompt = `Hoje é ${today}. Escolha uma leitura bíblica curta (1 a 2 versículos) inspiradora e adequada para hoje. Formato esperado: "[Livro Capítulo:Versículo] - [Texto]". O usuário quer ler a Palavra do dia.`;
+    const fallbackPrompt = `
+      Hoje é ${today}. A API de liturgia oficial está fora do ar.
+      Como "Rotina com Deus", escolha uma leitura bíblica curta (1 a 2 versículos) que seja tradicionalmente lida no tempo litúrgico atual ou que seja muito inspiradora para hoje.
+      
+      Retorne no formato:
+      📖 *A Palavra de Hoje*
+      
+      "[Texto do Versículo]"
+      — [Livro Capítulo:Versículo]
+      
+      ✨ *Reflexão*
+      [Sua reflexão espiritual de 2 a 3 frases]
+    `;
     
     const reflection = await generateLiturgyReflection(fallbackPrompt);
 

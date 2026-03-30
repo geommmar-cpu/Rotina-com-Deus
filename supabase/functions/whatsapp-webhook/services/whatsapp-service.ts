@@ -20,16 +20,16 @@ export interface SendAudioOptions {
 
 export class WhatsAppService {
   private apiUrl: string;
-  private apiKey: string;
-  private instanceName: string;
+  private accessToken: string;
+  private phoneNumberId: string;
 
   public simulatorMessages: string[] = [];
   public isSimulator: boolean = false;
 
   constructor() {
-    this.apiUrl = Deno.env.get("EVOLUTION_API_URL") || "";
-    this.apiKey = Deno.env.get("EVOLUTION_API_KEY") || "";
-    this.instanceName = Deno.env.get("EVOLUTION_INSTANCE_NAME") || "saldin";
+    this.apiUrl = "https://graph.facebook.com/v22.0";
+    this.accessToken = Deno.env.get("META_ACCESS_TOKEN") || "";
+    this.phoneNumberId = Deno.env.get("META_PHONE_NUMBER_ID") || "";
   }
 
   async sendText(options: SendTextOptions) {
@@ -37,8 +37,16 @@ export class WhatsAppService {
       this.simulatorMessages.push(options.text);
       return { success: true };
     }
-    const url = `${this.apiUrl}/message/sendText/${this.instanceName}`;
-    return this.postRequest(url, options);
+
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: this.formatNumber(options.number),
+      type: "text",
+      text: { body: options.text }
+    };
+
+    return this.postRequest(body);
   }
 
   async sendAudio(options: SendAudioOptions) {
@@ -46,12 +54,16 @@ export class WhatsAppService {
       this.simulatorMessages.push(`🎧 [Áudio Enviado: ${options.audioUrl}]`);
       return { success: true };
     }
-    const url = `${this.apiUrl}/message/sendWhatsAppAudio/${this.instanceName}`;
+
     const body = {
-      number: options.number,
-      audio: options.audioUrl
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: this.formatNumber(options.number),
+      type: "audio",
+      audio: { link: options.audioUrl }
     };
-    return this.postRequest(url, body);
+
+    return this.postRequest(body);
   }
 
   async sendButtons(options: SendButtonOptions) {
@@ -60,22 +72,28 @@ export class WhatsAppService {
       return { success: true };
     }
 
-    const url = `${this.apiUrl}/message/sendButtons/${this.instanceName}`;
-    
-    // Formato específico para Evolution API v2/v1 conforme configurado
     const body = {
-      number: options.number,
-      title: options.title || "Rotina com Deus",
-      description: options.text,
-      footer: options.footer || "Escolha uma opção abaixo",
-      buttons: options.buttons.map((b, index) => ({
-        buttonId: `btn_${index}_${Date.now()}`,
-        buttonText: { displayText: b.displayText },
-        type: 1
-      }))
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: this.formatNumber(options.number),
+      type: "interactive",
+      interactive: {
+        type: "button",
+        body: { text: options.text },
+        footer: { text: options.footer || "Escolha uma opção" },
+        action: {
+          buttons: options.buttons.slice(0, 3).map((b, index) => ({
+            type: "reply",
+            reply: {
+              id: `btn_${index}_${Date.now()}`.substring(0, 256),
+              title: b.displayText.substring(0, 20)
+            }
+          }))
+        }
+      }
     };
 
-    return this.postRequest(url, body);
+    return this.postRequest(body);
   }
 
   async sendList(options: { number: string; title?: string; text: string; buttonText: string; sections: { title: string; rows: { title: string; description?: string }[] }[] }) {
@@ -84,40 +102,115 @@ export class WhatsAppService {
       this.simulatorMessages.push(`[Menu Interativo] ${options.text}\n\n[Botão: ${options.buttonText}]\nOpções:\n${rowsText}\n\n(Digite o nome da opção)`);
       return { success: true };
     }
-    const url = `${this.apiUrl}/message/sendList/${this.instanceName}`;
+
     const body = {
-      number: options.number,
-      title: options.title || "",
-      description: options.text,
-      buttonText: options.buttonText,
-      sections: options.sections
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: this.formatNumber(options.number),
+      type: "interactive",
+      interactive: {
+        type: "list",
+        header: { type: "text", text: options.title || "Rotina com Deus" },
+        body: { text: options.text },
+        footer: { text: "Toque abaixo para ver as opções" },
+        action: {
+          button: options.buttonText.substring(0, 20),
+          sections: options.sections.map(s => ({
+            title: s.title.substring(0, 24),
+            rows: s.rows.map((r, idx) => ({
+              id: `row_${idx}_${Date.now()}`.substring(0, 200),
+              title: r.title.substring(0, 24),
+              description: r.description?.substring(0, 72) || ""
+            }))
+          }))
+        }
+      }
     };
-    return this.postRequest(url, body);
+
+    return this.postRequest(body);
   }
 
-  private async postRequest(url: string, body: any) {
+  async downloadMedia(mediaId: string): Promise<string | null> {
+    try {
+      // 1. Obter a URL da mídia
+      const urlInfo = `${this.apiUrl}/${mediaId}`;
+      const resInfo = await fetch(urlInfo, {
+        headers: { "Authorization": `Bearer ${this.accessToken}` }
+      });
+
+      if (!resInfo.ok) {
+        console.error("Erro ao obter info da mídia:", await resInfo.text());
+        return null;
+      }
+
+      const { url } = await resInfo.json();
+
+      // 2. Baixar o arquivo binário
+      const resFile = await fetch(url, {
+        headers: { "Authorization": `Bearer ${this.accessToken}` }
+      });
+
+      if (!resFile.ok) {
+        console.error("Erro ao baixar binário da mídia:", await resFile.text());
+        return null;
+      }
+
+      // Converter para Base64 para que o Gemini possa processar
+      const arrayBuffer = await resFile.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binary = "";
+      for (let i = 0; i < uint8Array.byteLength; i++) {
+        binary += String.fromCharCode(uint8Array[i]);
+      }
+      return btoa(binary);
+    } catch (err) {
+      console.error("Falha no downloadMedia:", err);
+      return null;
+    }
+  }
+
+  private formatNumber(number: string) {
+    let cleaned = number.replace(/\D/g, "");
+    if (!cleaned.startsWith("55") && cleaned.length >= 10) {
+      cleaned = "55" + cleaned;
+    }
+    
+    // Tratamento especial para o 9 extra no Brasil (Somente se tiver 13 dígitos e começar com 55)
+    // Exemplo: 55 61 9 8458-5912 -> 55 61 8458-5912 (Como o Meta geralmente usa internamente)
+    if (cleaned.startsWith("55") && cleaned.length === 13) {
+      // Remove o nono dígito (o quinto caractere: 55XX9...)
+      cleaned = cleaned.slice(0, 4) + cleaned.slice(5);
+    }
+    
+    return cleaned;
+  }
+
+  private async postRequest(body: any) {
+    const url = `${this.apiUrl}/${this.phoneNumberId}/messages`;
+    
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": this.apiKey
+          "Authorization": `Bearer ${this.accessToken}`
         },
         body: JSON.stringify(body)
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Erro WhatsApp API (${url}):`, errorText);
+        console.error(`Erro Meta API (${url}):`, errorText);
         return { success: false, error: errorText };
       }
 
       return { success: true, data: await response.json() };
     } catch (err) {
-      console.error(`Falha na requisição WhatsApp (${url}):`, err);
+      console.error(`Falha na requisição Meta WhatsApp (${url}):`, err);
       return { success: false, error: err.message };
     }
   }
 }
 
 export const whatsappService = new WhatsAppService();
+

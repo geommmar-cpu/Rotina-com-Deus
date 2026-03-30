@@ -34,7 +34,25 @@ async function saveProgress(userId: string, data: Record<string, any>) {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  const { method } = req;
+  const url = new URL(req.url);
+
+  // ====== 🛠️ VERIFICAÇÃO DO WEBHOOK (GET) ======
+  if (method === "GET") {
+    const mode = url.searchParams.get("hub.mode");
+    const token = url.searchParams.get("hub.verify_token");
+    const challenge = url.searchParams.get("hub.challenge");
+
+    const VERIFY_TOKEN = Deno.env.get("META_VERIFY_TOKEN") || "rotina_com_deus_webhook_2024";
+
+    if (mode === "subscribe" && token === VERIFY_TOKEN) {
+      console.log("Webhook verificado com sucesso!");
+      return new Response(challenge, { status: 200 });
+    }
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  if (method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
@@ -48,40 +66,85 @@ serve(async (req) => {
     const payload = await req.json();
     console.log("Payload recebido:", JSON.stringify(payload, null, 2));
 
-    const remoteJid = payload.data?.key?.remoteJid || "";
-    const phone = remoteJid.split("@")[0] || "5511999999999";
-    const messageText = payload.data?.message?.conversation || payload.data?.message?.extendedTextMessage?.text || payload.data?.message?.buttonsResponseMessage?.selectedButtonId || "";
-    const isAudio = !!payload.data?.message?.audioMessage;
-
-    if (!phone) {
-      if (isSimulator) return new Response(JSON.stringify({ messages: [] }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      return new Response("Ok", { status: 200 });
+    // Ignorar notificações de status (lido, entregue, etc)
+    if (payload.entry?.[0]?.changes?.[0]?.value?.statuses) {
+      return new Response("Status ignored", { status: 200 });
     }
 
-    let { data: waUser } = await supabase
+    // EXTRAÇÃO DE DADOS (Formato Meta Cloud API)
+    const value = payload.entry?.[0]?.changes?.[0]?.value;
+    const message = value?.messages?.[0];
+    
+    if (!message && !isSimulator) {
+      return new Response("No message", { status: 200 });
+    }
+
+    // NORMALIZAÇÃO DO NÚMERO (Remover 9 extra do Brasil se necessário para bater com o DB/Meta)
+    let phone = message?.from || "5511999999999";
+    if (phone.startsWith("55") && phone.length === 13) {
+      phone = phone.slice(0, 4) + phone.slice(5);
+    }
+    console.log(`📱 Processando mensagem de: ${phone}`);
+
+    let messageText = "";
+    let buttonId = "";
+    let isAudio = false;
+    let audioId = "";
+
+    if (message?.type === "text") {
+      messageText = message.text?.body || "";
+      console.log(`💬 Texto: "${messageText}"`);
+    } else if (message?.type === "interactive") {
+      const interactive = message.interactive;
+      if (interactive.type === "button_reply") {
+        messageText = interactive.button_reply?.title || "";
+        buttonId = interactive.button_reply?.id || "";
+        console.log(`🔘 Botão: "${messageText}" (ID: ${buttonId})`);
+      } else if (interactive.type === "list_reply") {
+        messageText = interactive.list_reply?.title || "";
+        buttonId = interactive.list_reply?.id || "";
+        console.log(`📜 Lista: "${messageText}" (ID: ${buttonId})`);
+      }
+    } else if (message?.type === "audio") {
+      isAudio = true;
+      audioId = message.audio?.id || "";
+      console.log(`🎤 Áudio recebido (Media ID: ${audioId})`);
+    }
+
+    let { data: waUser, error: queryError } = await supabase
       .from("whatsapp_users")
       .select("*, user_preferences(*), user_progress(*)")
       .eq("phone_number", phone)
       .single();
 
+    if (queryError && queryError.code !== 'PGRST116') {
+      console.error("❌ Erro na busca de usuário:", queryError);
+    }
+
     if (!waUser) {
-      // Registra o usuário no banco para sair do loop de boas-vindas
+      console.log(`🆕 Novo usuário detectado (${phone}). Criando registro...`);
       const { data: newUser, error: insertError } = await supabase
         .from("whatsapp_users")
         .insert({ phone_number: phone })
         .select()
         .single();
         
-      if (!insertError) {
-        waUser = newUser;
+      if (insertError) {
+        console.error("❌ Falha crítica ao criar usuário:", insertError);
+        throw insertError;
       }
+      
+      waUser = newUser;
+      console.log(`✅ Usuário criado (ID: ${waUser.id}). Enviando boas-vindas...`);
 
       const welcome = getOnboardingFlow(0);
-      await whatsappService.sendButtons({
+      const res = await whatsappService.sendButtons({
         number: phone,
         text: welcome!.text,
         buttons: welcome!.options.map(opt => ({ displayText: opt }))
       });
+      console.log("📤 Resultado Onboarding:", JSON.stringify(res));
+      
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       return new Response("Onboarding iniciado", { status: 200 });
     }
@@ -183,27 +246,27 @@ serve(async (req) => {
     }
     // ==============================================
 
-    if (isAudio) {
-      await whatsappService.sendText({ number: phone, text: "🙏 Recebi sua intenção... Um momento enquanto preparo nossa oração." });
+    if (isAudio && audioId) {
+      await whatsappService.sendText({ number: phone, text: "🙏 Recebi sua intenção... Um momento enquanto ouço com atenção." });
       
-      const audioMessage = payload.data.message.audioMessage;
-      const audioBase64 = audioMessage.base64 || ""; 
-      const mimeType = audioMessage.mimetype || "audio/webm";
+      const audioBase64 = await whatsappService.downloadMedia(audioId);
       
       if (audioBase64) {
-        const prayer = await generatePersonalizedPrayer(audioBase64, mimeType);
+        console.log("🧬 Processando áudio com Gemini...");
+        const prayer = await generatePersonalizedPrayer(audioBase64, "audio/ogg; codecs=opus");
         await whatsappService.sendText({ number: phone, text: prayer });
 
         await supabase.from("interaction_logs").insert({
           whatsapp_user_id: waUser.id,
           phone_number: phone,
           message_type: "audio",
-          raw_message: "[ÁUDIO MULTIMODAL GEMINI]",
+          raw_message: "[ÁUDIO MULTIMODAL]",
           ai_response: prayer,
           intent: "prayer_audio"
         });
       } else {
-        await whatsappService.sendText({ number: phone, text: "Desculpe, não consegui processar seu áudio agora. Pode escrever sua intenção?" });
+        console.error("❌ Falha ao baixar mídia do Meta.");
+        await whatsappService.sendText({ number: phone, text: "Desculpe, não consegui processar seu áudio agora. Pode escrever sua intenção para que eu possa rezar com você?" });
       }
       
       if (isSimulator) return new Response(JSON.stringify({ messages: whatsappService.simulatorMessages }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -234,7 +297,7 @@ serve(async (req) => {
     if (normalizedMsg.includes("comunhao") || normalizedMsg.includes("eucaristia")) {
       await whatsappService.sendText({ number: phone, text: "✝️ *Oração após a Comunhão*\n\nSenhor Jesus... Eu creio que estás presente em mim. Obrigado por este momento de comunhão.\n\nFica comigo, Senhor... E fortalece minha fé. Que eu leve a tua presença para todos ao meu redor. Amém. 🙏" });
       await sleep(1000);
-      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/pos_comunhao.mp3" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://www.rotinacomdeus.online/audios/pos_comunhao.mp3" });
       await sleep(1000);
       await whatsappService.sendButtons({
         number: phone,
@@ -249,7 +312,7 @@ serve(async (req) => {
     if (normalizedMsg.includes("sao jose") || normalizedMsg.includes("jose")) {
       await whatsappService.sendText({ number: phone, text: "🙏 *Oração de São José*\n\nÓ glorioso São José... A quem foi dado o poder de tornar possíveis as coisas humanamente impossíveis... Vinde em nosso auxílio nas dificuldades em que nos achamos...\n\nTomai sob vossa proteção a causa importante que vos confiamos... Para que tenha uma solução favorável. Ó São José muito amado... Em vós depositamos toda a nossa confiança. Amém. ✨" });
       await sleep(1000);
-      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_sao_jose.mp3" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://www.rotinacomdeus.online/audios/oracao_sao_jose.mp3" });
       await sleep(1000);
       await whatsappService.sendButtons({
         number: phone,
@@ -350,7 +413,7 @@ serve(async (req) => {
         text: `🌙 *Boa noite*\n\nVamos encerrar o seu dia com Deus.\nRespire fundo...\nAgora pense no seu dia...` 
       });
       await sleep(1000);
-      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/exame_consciencia.mp3" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://www.rotinacomdeus.online/audios/exame_consciencia.mp3" });
       await sleep(1000);
       await whatsappService.sendText({ 
         number: phone, 
@@ -394,7 +457,9 @@ serve(async (req) => {
 
     // Lógica de Botões do Terço (avançar passos)
     const isInTerco = userProgress?.last_prayer_type === "terco";
-    if (isInTerco && (messageText.includes("btn_") || normalizedMsg.includes("proximo") || normalizedMsg.includes("intencao") || normalizedMsg.includes("concluir") || normalizedMsg.includes("iniciar"))) {
+    const isTercoAction = buttonId.includes("btn_") || normalizedMsg.includes("proximo") || normalizedMsg.includes("intencao") || normalizedMsg.includes("concluir") || normalizedMsg.includes("iniciar");
+    
+    if (isInTerco && isTercoAction) {
       const currentStep = userProgress?.last_prayer_step ?? 0;
       const nextStep = getNextRosaryStep(currentStep);
 
