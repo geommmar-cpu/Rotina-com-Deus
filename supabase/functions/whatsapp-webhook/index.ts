@@ -247,13 +247,20 @@ serve(async (req) => {
     // ==============================================
 
     if (isAudio && audioId) {
+      const startTime = Date.now();
       await whatsappService.sendText({ number: phone, text: "🙏 Recebi sua intenção... Um momento enquanto ouço com atenção." });
       
+      console.log(`⏳ Iniciando download de áudio (Media ID: ${audioId})`);
       const audioBase64 = await whatsappService.downloadMedia(audioId);
       
       if (audioBase64) {
+        console.log(`✅ Download concluído em ${Date.now() - startTime}ms. Tamanho Base64: ${Math.round(audioBase64.length / 1024)} KB`);
         console.log("🧬 Processando áudio com Gemini...");
+        
+        const genStartTime = Date.now();
         const prayer = await generatePersonalizedPrayer(audioBase64, "audio/ogg; codecs=opus");
+        console.log(`✨ Gemini processou em ${Date.now() - genStartTime}ms`);
+        
         await whatsappService.sendText({ number: phone, text: prayer });
 
         await supabase.from("interaction_logs").insert({

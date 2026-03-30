@@ -131,7 +131,7 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
     ]);
     return result.response.text().trim();
   } catch (error: any) {
-    console.error("Erro no Gemini Multimodal Audio:", error);
+    console.error("❌ Erro no Gemini Multimodal Audio:", error.message || error);
     return "🙏 Recebi sua intenção... mas algo deu errado ao ouvir seu áudio. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
   }
 }

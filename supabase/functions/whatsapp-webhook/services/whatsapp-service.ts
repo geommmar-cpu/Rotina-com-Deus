@@ -1,3 +1,5 @@
+import { encode as base64Encode } from "https://deno.land/std@0.177.0/encoding/base64.ts";
+
 export interface SendTextOptions {
   number: string;
   text: string;
@@ -155,16 +157,11 @@ export class WhatsAppService {
         return null;
       }
 
-      // Converter para Base64 para que o Gemini possa processar
+      // Otimizado: Usar biblioteca padrão do Deno para Base64 (mais rápido e seguro)
       const arrayBuffer = await resFile.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      let binary = "";
-      for (let i = 0; i < uint8Array.byteLength; i++) {
-        binary += String.fromCharCode(uint8Array[i]);
-      }
-      return btoa(binary);
+      return base64Encode(new Uint8Array(arrayBuffer));
     } catch (err) {
-      console.error("Falha no downloadMedia:", err);
+      console.error("Falha crítica no downloadMedia:", err);
       return null;
     }
   }
