@@ -146,9 +146,14 @@ export class WhatsAppService {
       const { url } = await resInfo.json();
       console.log(`📡 URL de mídia recebida: ${url.substring(0, 50)}...`);
 
-      // 2. Baixar o arquivo binário (Nota: URLs assinadas do Meta CDN geralmente não precisam/querem o header de Auth)
-      console.log("📥 Iniciando fetch do binário...");
-      const resFile = await fetch(url); 
+      // 2. Baixar o arquivo binário (Com Header de Auth e User-Agent para evitar 401/Bloqueio)
+      console.log("📥 Iniciando fetch do binário (com Auth)...");
+      const resFile = await fetch(url, {
+        headers: { 
+          "Authorization": `Bearer ${this.accessToken}`,
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+      }); 
 
       console.log(`📡 Status do download binário: ${resFile.status} ${resFile.statusText}`);
 
@@ -159,23 +164,20 @@ export class WhatsAppService {
 
       console.log("📚 Lendo buffer do arquivo...");
       const arrayBuffer = await resFile.arrayBuffer();
-      console.log("✅ Buffer lido com sucesso.");
-
       const uint8 = new Uint8Array(arrayBuffer);
-      console.log(`📦 Tamanho do arquivo baixado: ${uint8.byteLength} bytes`);
+      console.log(`✅ Buffer lido: ${uint8.byteLength} bytes.`);
 
       if (uint8.byteLength === 0) return null;
 
-      // Conversão Base64 Nativa (Mais estável que loops manuais ou imports externos)
+      // Conversão Base64 Segura e Nativa para Deno
       let binary = "";
-      const CHUNK_SIZE = 0x8000; // 32KB
-      for (let i = 0; i < uint8.length; i += CHUNK_SIZE) {
-        // @ts-ignore: CHUNK de Uint8Array para String
-        binary += String.fromCharCode.apply(null, uint8.subarray(i, i + CHUNK_SIZE) as unknown as number[]);
+      const len = uint8.byteLength;
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(uint8[i]);
       }
       return btoa(binary);
     } catch (err: any) {
-      console.error("Falha crítica no downloadMedia (Log Detalhado):", err.message || err);
+      console.error("Falha crítica no downloadMedia (Log Final):", err.message || err);
       return null;
     }
   }
