@@ -19,34 +19,27 @@ export async function getDailyLiturgy() {
     if (response.ok) {
       const html = await response.text();
       
-        // Se detectarmos Cloudflare ou bloqueio, pulamos para a API 2
-        if (html.includes("Cloudflare") || html.includes("challenge-running") || html.length < 500) {
-           console.warn("⚠️ Bloqueio ou página vazia detectada na Canção Nova, pulando...");
-        } else {
-          // Limpeza ultrabrutal: remove tudo que não for texto visível
-          const cleanText = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gm, "")
-                              .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gm, "")
-                              .replace(/<footer\b[^>]*>([\s\S]*?)<\/footer>/gm, "")
-                              .replace(/<nav\b[^>]*>([\s\S]*?)<\/nav>/gm, "")
-                              .replace(/<[^>]*>?/gm, " ")
-                              .replace(/\s\s+/g, ' ') // Remove espaços duplicados
-                              .substring(0, 12000);
-          
-          console.log("🧬 Processando texto limpo via IA...");
-          const structuredData = await generateStructuredLiturgy(cleanText);
+      if (html.includes("challenge-running") || html.length < 500) {
+         console.warn("⚠️ Bloqueio detectado na Canção Nova.");
+      } else {
+        // Agora pegamos um pedaço muito maior e menos filtrado
+        const mainContent = html.split('<div id="content"')[1]?.split('<footer')[0] || html.substring(0, 30000);
+        
+        console.log("🧬 Extraindo dados com GPT-4o-mini...");
+        const structuredData = await generateStructuredLiturgy(mainContent);
 
-          if (structuredData && (structuredData.evangelho || structuredData.primeiraLeitura)) {
-            const summary = `Leitura: ${structuredData.primeiraLeitura?.substring(0,100)}. Evangelho: ${structuredData.evangelho?.substring(0,100)}.`;
-            const reflection = await generateLiturgyReflection(summary);
+        if (structuredData && (structuredData.evangelho || structuredData.primeiraLeitura)) {
+          const summary = `Título: ${structuredData.title}. Leituras: ${structuredData.primeiraLeitura?.substring(0,100)}. Evangelho: ${structuredData.evangelho?.substring(0,100)}.`;
+          const reflection = await generateLiturgyReflection(summary);
 
-            return {
-              title: structuredData.title || "Liturgia do Dia",
-              readings: structuredData,
-              reflection: reflection,
-              saint: structuredData.saint || "Santo do Dia"
-            };
-          }
+          return {
+            title: structuredData.title || "Liturgia do Dia",
+            readings: structuredData,
+            reflection: reflection,
+            saint: structuredData.saint || "Santo do Dia"
+          };
         }
+      }
     }
 
     // TENTATIVA 2: API SECUNDÁRIA (Se a 1 falhar)
