@@ -41,9 +41,9 @@ NUNCA retorne texto fora da estrutura JSON.
 
 export async function generateSpiritualResponse(userInput: string, context: string) {
   try {
-    console.log("🚀 Groq: Gerando resposta espiritual...");
+    console.log("🚀 Usando Groq (Llama-3.3-70b) para resposta espiritual...");
     const response = await groq.chat.completions.create({
-      model: "llama3-70b-8192",
+      model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: PERSONALITY_PROMPT },
         { role: "system", content: `CONTEXTO ATUAL:\n${context}` },
@@ -108,7 +108,7 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
 
   try {
     const response = await groq.chat.completions.create({
-      model: "llama3-70b-8192",
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
     });
@@ -126,7 +126,7 @@ export async function generateLiturgyReflection(liturgySummary: string) {
 
   try {
     const response = await groq.chat.completions.create({
-      model: "llama3-70b-8192",
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
@@ -145,7 +145,7 @@ export async function generateStructuredLiturgy(rawText: string) {
 
   try {
     const response = await groq.chat.completions.create({
-      model: "llama3-8b-8192",
+      model: "llama-3.1-8b-instant",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
       temperature: 0,
@@ -162,7 +162,7 @@ export async function generateSpecialPeriodDay(periodName: string, day: number) 
 
   try {
     const response = await groq.chat.completions.create({
-      model: "llama3-70b-8192",
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
     });
