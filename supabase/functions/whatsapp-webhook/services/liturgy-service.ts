@@ -22,8 +22,10 @@ export async function getDailyLiturgy() {
       if (html.includes("challenge-running") || html.length < 500) {
          console.warn("⚠️ Bloqueio detectado na Canção Nova.");
       } else {
-        // Agora pegamos um pedaço muito maior e menos filtrado
-        const mainContent = html.split('<div id="content"')[1]?.split('<footer')[0] || html.substring(0, 30000);
+        // Reduzimos o tamanho para caber no limite de tokens da Groq (Flat Rate/Free Tier)
+        const mainContent = html.split('<div class="entry-content">')[1]?.split('<div class="share-links">')[0] || 
+                           html.split('<div id="content"')[1]?.split('<footer')[0] || 
+                           html.substring(0, 12000);
         
         console.log("🧬 Extraindo dados via Camada de IA (Tripla)...");
         const structuredData = await generateStructuredLiturgy(mainContent);
