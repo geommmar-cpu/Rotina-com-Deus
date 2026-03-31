@@ -610,12 +610,12 @@ section {
   align-items: center;
   background: radial-gradient(circle at 20% 30%, rgba(26, 31, 60, 0.5), transparent);
   position: relative;
-  padding: 4rem 0; /* Adjusted now that header is gone */
+  padding: 2rem 0; /* Reduced from 4rem/120px for better vertical flow */
   overflow: hidden;
 }
 
 .hero-logo {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem; /* Reduced from 3rem */
   text-align: left; /* Keep left alignment to match text flow */
 }
 
@@ -952,7 +952,7 @@ section {
   .hero {
     flex-direction: column;
     text-align: center;
-    padding-top: 80px;
+    padding-top: 2.5rem; /* Further reduced for mobile */
     padding-bottom: 4rem;
   }
 
@@ -971,7 +971,7 @@ section {
 
   .hero-logo {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem; /* Reduced from 2rem */
   }
 
   .hero h1 {
