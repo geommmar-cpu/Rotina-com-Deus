@@ -1413,8 +1413,10 @@ section {
 
 .mockup-base {
   width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   display: block;
-  border-radius: 0;
+  border-radius: 40px;
 }
 
 /* The Magic: Logo Overlay */
