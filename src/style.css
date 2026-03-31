@@ -620,7 +620,7 @@ section {
 }
 
 .hero-logo img {
-  height: clamp(80px, 15vw, 120px);
+  height: clamp(120px, 25vw, 180px); /* Increased from 80px-120px for greater impact */
   width: auto;
   object-fit: contain;
 }
