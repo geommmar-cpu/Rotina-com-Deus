@@ -601,30 +601,28 @@ section {
   letter-spacing: 0.1em;
 }
 
-/* Sticky Header */
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 1.5rem 0;
-  z-index: 100;
-  background: rgba(10, 10, 26, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--glass-border);
-  transition: var(--transition);
-}
+/* Sticky Header removed - unified focal point approach */
 
-header.scrolled {
-  padding: 1rem 0;
-  background: rgba(10, 10, 26, 0.95);
-}
-
-.nav-container {
+/* Hero Section Overhaul */
+.hero {
+  min-height: 100vh;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  background: radial-gradient(circle at 20% 30%, rgba(26, 31, 60, 0.5), transparent);
+  position: relative;
+  padding: 4rem 0; /* Adjusted now that header is gone */
+  overflow: hidden;
+}
+
+.hero-logo {
+  margin-bottom: 3rem;
+  text-align: left; /* Keep left alignment to match text flow */
+}
+
+.hero-logo img {
+  height: clamp(80px, 15vw, 120px);
+  width: auto;
+  object-fit: contain;
 }
 
 .logo {
@@ -634,14 +632,7 @@ header.scrolled {
 }
 
 .logo img {
-  height: clamp(80px, 12vw, 120px);
-  width: auto;
-  object-fit: contain;
-  transition: var(--transition);
-}
-
-.logo:hover img {
-  transform: scale(1.05);
+  display: none; /* Logo now handled by hero-logo */
 }
 
 /* Testimonials */
