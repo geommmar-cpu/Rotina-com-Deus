@@ -19,21 +19,33 @@ export async function getDailyLiturgy() {
     if (response.ok) {
       const html = await response.text();
       
-      // Captura baseada nos IDs liturgia-1 (1ª Leitura), liturgia-2 (Salmo), liturgia-4 (Evangelho)
+      // Captura o Santo do Dia (Refinado: procura o rótulo e o título subsequente)
+      let saintSearch = html.split('Santo do Dia:')[1]?.split('<')[0]?.trim();
+      if (!saintSearch || saintSearch.length < 3) {
+         saintSearch = html.split('<h1 class="entry-title">')[1]?.split('</h1>')[0]?.replace('Santo do dia:', '').trim() || "Santo do Dia";
+      }
+
+      // Captura as leituras (liturgia-1, 2, 4)
       const mainContent = html.split('id="liturgia-1"')[1]?.split('<footer')[0] || 
                          html.split('class="liturgia')[1]?.split('<footer')[0] ||
                          html.substring(0, 10000);
       
-      // Limpeza profunda para economizar tokens e remover ruído
-      const cleanContent = mainContent.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gmi, "")
+      // Limpeza profunda para economizar tokens
+      const cleanContent = `SANTO: ${saintSearch}\n\n` + 
+                           mainContent.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gmi, "")
                                       .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gmi, "")
-                                      .replace(/<iframe\b[^>]*>([\s\S]*?)<\/iframe>/gmi, "") // Remove vídeos
+                                      .replace(/<iframe\b[^>]*>([\s\S]*?)<\/iframe>/gmi, "")
                                       .substring(0, 8000);
       
       console.log("🧬 Extraindo dados via Camada de IA (Tripla)...");
       const structuredData = await generateStructuredLiturgy(cleanContent);
 
       if (structuredData && (structuredData.evangelho || structuredData.primeiraLeitura)) {
+        // Se a IA não encontrou o santo ou deu erro, usamos o nosso saintSearch manual
+        if (!structuredData.saint || structuredData.saint.toLowerCase().includes("conferência")) {
+            structuredData.saint = saintSearch;
+        }
+
         const summary = `Título: ${structuredData.title}. Leituras: ${structuredData.primeiraLeitura?.substring(0,100)}. Evangelho: ${structuredData.evangelho?.substring(0,100)}.`;
         const reflection = await generateLiturgyReflection(summary);
 
@@ -41,10 +53,9 @@ export async function getDailyLiturgy() {
           title: structuredData.title || "Liturgia do Dia",
           readings: structuredData,
           reflection: reflection,
-          saint: structuredData.saint || "Santo do Dia"
+          saint: structuredData.saint || saintSearch
         };
       }
-      console.warn("⚠️ Dados estruturados incompletos na TENTATIVA 1.");
     }
 
     // TENTATIVA 2: API SECUNDÁRIA
@@ -72,20 +83,12 @@ export async function getDailyLiturgy() {
     const days = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
     const todayName = days[new Date().getDay()];
     
-    const fallbackPrompt = `
-      Hoje é ${todayName}. O sistema de liturgia está temporariamente indisponível.
-      Traga uma pequena palavra de conforto e uma oração curta (2 frases) para este dia.
-      Formato:
-      📖 *Um Momento com Deus*
-      [Sua palavra]
-    `;
-    
-    const reflection = await generateLiturgyReflection(fallbackPrompt);
+    const reflection = await generateLiturgyReflection(`Hoje é ${todayName}. O sistema está em manutenção, traga calma e fé.`);
 
     return {
-      title: "📖 Momento de Paz (Diagnóstico)",
-      reflection: `${reflection}\n\n⚠️ Status do Sistema: Em manutenção preventiva.`,
-      saint: "São José (Protetor das Famílias)"
+      title: "📖 Momento de Paz",
+      reflection: `${reflection}`,
+      saint: "São José"
     };
   }
 }

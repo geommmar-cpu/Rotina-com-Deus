@@ -1,11 +1,14 @@
-import { GoogleGenerativeAI } from "npm:@google/generative-ai";
+import Groq from "npm:groq-sdk";
 
-const genAI = new GoogleGenerativeAI(Deno.env.get("GEMINI_API_KEY") || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const groq = new Groq({
+  apiKey: Deno.env.get("GROQ_API_KEY") || "",
+});
+
+const PERSONALITY_PROMPT = `Você é o "Rotina com Deus", um companheiro espiritual de WhatsApp calmo e acolhedor.`;
 
 export async function getBible365Content(day: number) {
   const prompt = `
-    Você é o "Rotina com Deus", um companheiro espiritual de WhatsApp calmo e acolhedor.
+    ${PERSONALITY_PROMPT}
     O usuário está na jornada "Bíblia em 365 Dias" e hoje é o DIA ${day} de 365.
 
     Sua missão:
@@ -33,10 +36,49 @@ export async function getBible365Content(day: number) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    console.error(`Erro no Gemini (Bíblia 365 - Dia ${day}):`, error);
+    console.error(`❌ Erro no Groq (Bíblia 365 - Dia ${day}):`, error.message);
     return `📖 *Bíblia em 365 Dias - Dia ${day}*\n\n"O Senhor é meu pastor, nada me faltará."\n— Salmo 23:1\n\n✨ *Reflexão de hoje*\nConfie no cuidado de Deus para o seu dia. Ele guia seus passos com amor. 🙏`;
+  }
+}
+
+export async function searchBible(query: string) {
+  const prompt = `
+    ${PERSONALITY_PROMPT}
+    O usuário quer buscar algo na Bíblia relacionado a: "${query}"
+
+    Sua missão:
+    1. Encontre um versículo Bíblico real que se encaixe perfeitamente no tema ou na passagem solicitada.
+    2. Explique brevemente (1 frase) o contexto desse versículo.
+    3. Traga uma pequena palavra de conforto baseada nele.
+
+    Formato exato:
+    🔍 *Busca Bíblica: ${query}*
+    
+    "[Texto do Versículo]"
+    — [Livro Capítulo:Versículo]
+
+    💡 *Palavra de hoje*
+    [Explicação e conforto]
+  `;
+
+  try {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    return response.choices[0].message.content?.trim() || "";
+  } catch (error: any) {
+    console.error(`❌ Erro no Groq (Busca Bíblica):`, error.message);
+    return "🙏 Sinto muito, tive um erro ao buscar na Bíblia agora. Pode tentar de novo com outras palavras?";
   }
 }

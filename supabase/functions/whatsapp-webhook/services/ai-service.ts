@@ -29,7 +29,8 @@ REGRAS:
 MUITO IMPORTANTE:
 Responda OBRIGATORIAMENTE com um objeto JSON válido. Use o campo "text" para a sua mensagem.
 ATENÇÃO: Nunca dê um "Enter" ou quebra de linha literal dentro da mensagem! Para quebrar linhas, escreva obrigatoriamente "\\n" (duas barras mais n) no texto.
-O campo "buttons" deve conter até 3 opções curtas e convidativas.
+O campo "buttons" deve conter até 3 opções curtas e convidativas (MÁXIMO DE 20 CARACTERES POR BOTÃO).
+    - Se um botão for maior que 20 caracteres, ele será cortado. Seja extremamente conciso.
 
 Exemplo Exato:
 {
