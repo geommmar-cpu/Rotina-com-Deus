@@ -1199,3 +1199,98 @@ section {
 #bonus h2 {
     margin-top: 1rem;
 }
+
+/* 
+   ==========================================================================
+   DIRECT RESPONSE (DR) ENHANCEMENTS
+   ==========================================================================
+*/
+
+/* Urgency & Scarcity Banner */
+.urgency-banner {
+  background: var(--accent);
+  color: #1a1f3c; /* Specific high contrast dark */
+  padding: 0.8rem;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(220, 170, 70, 0.4);
+}
+
+.urgency-banner .highlight {
+  background: #1a1f3c;
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin: 0 5px;
+}
+
+/* Bonus Stack Styles */
+.bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.bonus-card {
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.bonus-card:hover {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-5px);
+}
+
+.bonus-card .bonus-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.bonus-card h4 {
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.bonus-card p {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.bonus-value {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 1rem;
+  color: var(--accent);
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+/* Section Reordering Adjustments */
+#objecoes {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 3rem;
+  border-radius: 20px;
+  margin: 4rem 0;
+}
+
+@media (max-width: 768px) {
+  .urgency-banner {
+    font-size: 0.75rem;
+    padding: 10px;
+  }
+}
