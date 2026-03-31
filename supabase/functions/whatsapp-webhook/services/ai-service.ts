@@ -1,7 +1,8 @@
-import { GoogleGenerativeAI } from "npm:@google/generative-ai";
+import OpenAI from "npm:openai";
 
-const genAI = new GoogleGenerativeAI(Deno.env.get("GEMINI_API_KEY") || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const openai = new OpenAI({
+  apiKey: Deno.env.get("OPENAI_API_KEY") || "",
+});
 
 const PERSONALITY_PROMPT = `
 Você é o "Rotina com Deus", um companheiro espiritual de WhatsApp.
@@ -39,77 +40,49 @@ NUNCA retorne texto fora da estrutura JSON.
 `;
 
 export async function generateSpiritualResponse(userInput: string, context: string) {
-  const prompt = `
-    ${PERSONALITY_PROMPT}
-    
-    CONTEXTO ATUAL:
-    ${context}
-    
-    MENSAGEM DO USUÁRIO:
-    "${userInput}"
-    
-    Responda seguindo exatamente a personalidade e o tom de voz descritos.
-  `;
-
   try {
-    const result = await model.generateContent(prompt);
-    let output = result.response.text();
-    
-    // Garantir que é um JSON parseável
-    output = output.replace(/```json/gi, '').replace(/```/g, '').trim();
-    
-    try {
-      const parsed = JSON.parse(output);
-      return parsed; // { text: string, buttons?: string[] }
-    } catch (parseError) {
-      // Fallback de segurança avançado com Regex se o JSON quebrar por causa de quebras de linha
-      const textMatch = output.match(/"text"\s*:\s*"([\s\S]*?)"\s*(,|})/);
-      const buttonsMatch = output.match(/"buttons"\s*:\s*\[(.*?)\]/);
-      
-      let fallbackText = "Aqui estou para guiar suas orações.";
-      let fallbackButtons = ["Sim", "Não"];
-      
-      if (textMatch && textMatch[1]) {
-        fallbackText = textMatch[1].replace(/\\n/g, '\n');
-      }
-      if (buttonsMatch && buttonsMatch[1]) {
-        const btnTexts = buttonsMatch[1].split(',').map(b => b.trim().replace(/"/g, ''));
-        if (btnTexts.length > 0 && btnTexts[0] !== '') fallbackButtons = btnTexts;
-      }
-      
-      return { text: fallbackText, buttons: fallbackButtons };
-    }
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: PERSONALITY_PROMPT },
+        { role: "system", content: `CONTEXTO ATUAL:\n${context}` },
+        { role: "user", content: userInput }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    });
+
+    const output = response.choices[0].message.content || "{}";
+    return JSON.parse(output);
   } catch (error: any) {
-    // Diagnóstico: Se o modelo falhar, vamos listar quais modelos esta chave EXATAMENTE permite.
-    const apiKey = Deno.env.get("GEMINI_API_KEY") || "";
-    if (!apiKey) throw new Error("A chave GEMINI_API_KEY está vazia na nuvem.");
-    
-    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    const listData = await listRes.json();
-    
-    if (listData.models) {
-      const availableModels = listData.models.map((m: any) => m.name).filter((m: string) => m.includes("gemini")).join(", ");
-      throw new Error(`Erro: ${error.message}\nModelos liberados na sua chave do Google: ${availableModels}`);
-    } else {
-      throw new Error(`Erro: ${error.message}\n(Não foi possível listar, erro da API: ${JSON.stringify(listData)})`);
-    }
+    console.error("❌ Erro OpenAI (SpiritualResponse):", error.message || error);
+    return { 
+      text: "🙏 Sinto muito, tive uma pequena dificuldade para processar sua mensagem. Mas saiba que Deus está com você. Como posso te ajudar agora?",
+      buttons: ["Menu Principal"]
+    };
   }
 }
 
 export async function transcribeAudio(audioData: string, mimeType: string) {
-  const prompt = `Transcreva exatamente o que foi dito neste áudio em Português do Brasil.
-  Retorne apenas o texto da transcrição, sem comentários ou explicações extras.
-  Se não houver fala ou apenas ruído, retorne "[SEM_FALA]".`;
-
   try {
-    console.log(`🎤 Transcrevendo áudio com Gemini 1.5 (${audioData.length} chars)...`);
-    const result = await model.generateContent([
-      { inlineData: { data: audioData, mimeType: "audio/ogg" } },
-      { text: prompt },
-    ]);
-    return result.response.text().trim();
+    console.log(`🎤 Transcrevendo áudio com Whisper-1 (${audioData.length} chars)...`);
+    
+    // Converter Base64 para Blob para o OpenAI Whisper
+    const binary = atob(audioData);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+    const blob = new Blob([array], { type: mimeType });
+    const file = new File([blob], "audio.ogg", { type: mimeType });
+
+    const transcription = await openai.audio.transcriptions.create({
+      file: file,
+      model: "whisper-1",
+      language: "pt",
+    });
+
+    return transcription.text.trim() || "[SEM_FALA]";
   } catch (error: any) {
-    console.error("❌ Erro na transcrição:", error.message || error);
+    console.error("❌ Erro na transcrição (Whisper):", error.message || error);
     return null;
   }
 }
@@ -151,15 +124,14 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
 
   try {
     console.log(`✨ Gerando prece baseada na transcrição: "${transcription.substring(0, 50)}..."`);
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+    });
+    return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    console.error("❌ ERRO ao gerar prece baseada em texto:", error.message || error);
-    
-    if (error.message?.includes("429") || error.message?.includes("Too Many Requests")) {
-      return "🙏 Recebi seu áudio com carinho, mas meu fôlego espiritual (cota da API) está um pouco curto neste momento. Poderia escrever sua intenção para que eu possa rezar com você agora?";
-    }
-
+    console.error("❌ ERRO OpenAI (Gerando prece):", error.message || error);
     return "🙏 Recebi sua intenção... mas tive uma pequena dificuldade para processar a oração agora. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
   }
 }
@@ -177,20 +149,24 @@ export async function generateLiturgyReflection(liturgySummary: string) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+    return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    console.error("Erro ao gerar reflexão de liturgia:", error);
+    console.error("❌ Erro OpenAI (LiturgyReflection):", error.message || error);
     return "🙏 Receba a palavra de hoje em seu coração. Que Deus te dê discernimento e paz para caminhar com sabedoria.";
   }
 }
 
 export async function generateStructuredLiturgy(rawText: string) {
   const prompt = `
-    Abaixo está o texto bruto extraído de um site de liturgia Católica (Canção Nova).
+    Abaixo está o texto bruto extraído de um site de liturgia Católica.
     Extraia as partes principais e retorne APENAS um JSON válido.
     
-    Campos solicitados (se não encontrar algum, deixe vazio ou use o que estiver disponível):
+    Campos solicitados:
     - title: Título ou data (ex: "Terça-feira da Semana Santa")
     - primeiraLeitura: O texto da primeira leitura
     - salmo: O refrão e os versos do salmo
@@ -211,11 +187,17 @@ export async function generateStructuredLiturgy(rawText: string) {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    let output = result.response.text().replace(/```json/gi, '').replace(/```/g, '').trim();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 0,
+    });
+    
+    const output = response.choices[0].message.content || "{}";
     return JSON.parse(output);
-  } catch (error) {
-    console.warn("Falha ao estruturar liturgia via IA, usando texto bruto:", error);
+  } catch (error: any) {
+    console.warn("❌ Erro OpenAI (StructuredLiturgy):", error.message || error);
     return null;
   }
 }
@@ -237,10 +219,14 @@ export async function generateSpecialPeriodDay(periodName: string, day: number) 
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+    });
+    return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    console.error(`Erro no Gemini (Periodo Especial - ${periodName}):`, error);
+    console.error(`❌ Erro OpenAI (Periodo Especial - ${periodName}):`, error.message || error);
     return `✝️ *${periodName} - Dia ${day}*\n\nDeus abençoe sua jornada. Reserve um momento hoje para fazer uma oração silenciosa e praticar um pequeno ato de caridade. 🙏`;
   }
 }
