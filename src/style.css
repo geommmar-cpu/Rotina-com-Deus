@@ -1414,7 +1414,7 @@ section {
 .mockup-base {
   width: 100%;
   display: block;
-  border-radius: 40px;
+  border-radius: 0;
 }
 
 /* The Magic: Logo Overlay */
