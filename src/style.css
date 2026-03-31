@@ -605,17 +605,17 @@ section {
 
 /* Hero Section Overhaul */
 .hero {
-  min-height: 100vh;
+  min-height: 80vh; /* Reduced from 100vh to avoid excessive empty space */
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to push content to top */
   background: radial-gradient(circle at 20% 30%, rgba(26, 31, 60, 0.5), transparent);
   position: relative;
-  padding: 2rem 0; /* Reduced from 4rem/120px for better vertical flow */
+  padding: 3rem 0; /* Balanced padding */
   overflow: hidden;
 }
 
 .hero-logo {
-  margin-bottom: 2rem; /* Reduced from 3rem */
+  margin-bottom: 1.5rem; /* Further reduced from 2rem */
   text-align: left; /* Keep left alignment to match text flow */
 }
 
@@ -952,8 +952,11 @@ section {
   .hero {
     flex-direction: column;
     text-align: center;
-    padding-top: 2.5rem; /* Further reduced for mobile */
-    padding-bottom: 4rem;
+    align-items: center; /* Center horizontally in mobile */
+    justify-content: flex-start; /* Ensure it starts at the top */
+    padding-top: 1.5rem; /* Minimal top spacing */
+    padding-bottom: 3rem;
+    min-height: auto; /* Let content define height on mobile */
   }
 
   .hero .container {
@@ -971,7 +974,7 @@ section {
 
   .hero-logo {
     text-align: center;
-    margin-bottom: 1.5rem; /* Reduced from 2rem */
+    margin-bottom: 1rem; /* Minimum possible gap */
   }
 
   .hero h1 {
