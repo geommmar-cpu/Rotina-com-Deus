@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "npm:@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(Deno.env.get("GEMINI_API_KEY") || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const PERSONALITY_PROMPT = `
 Você é o "Rotina com Deus", um companheiro espiritual de WhatsApp.
@@ -96,23 +96,48 @@ export async function generateSpiritualResponse(userInput: string, context: stri
   }
 }
 
+export async function transcribeAudio(audioData: string, mimeType: string) {
+  const prompt = `Transcreva exatamente o que foi dito neste áudio em Português do Brasil.
+  Retorne apenas o texto da transcrição, sem comentários ou explicações extras.
+  Se não houver fala ou apenas ruído, retorne "[SEM_FALA]".`;
+
+  try {
+    console.log(`🎤 Transcrevendo áudio com Gemini 1.5 (${audioData.length} chars)...`);
+    const result = await model.generateContent([
+      { inlineData: { data: audioData, mimeType: "audio/ogg" } },
+      { text: prompt },
+    ]);
+    return result.response.text().trim();
+  } catch (error: any) {
+    console.error("❌ Erro na transcrição:", error.message || error);
+    return null;
+  }
+}
+
 export async function generatePersonalizedPrayer(audioData: string, mimeType: string) {
+  const transcription = await transcribeAudio(audioData, mimeType);
+  
+  if (!transcription || transcription === "[SEM_FALA]") {
+    return "🙏 Recebi sua intenção... mas tive uma pequena dificuldade para ouvir o áudio por completo. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
+  }
+
   const prompt = `
     Você é o "Rotina com Deus", um companheiro espiritual calmo e profundamente empático.
-    O usuário enviou uma mensagem de voz/áudio. Ouça a transcrição nativa da voz e do coração dele.
+    O usuário enviou uma mensagem de voz que foi transcrita como:
+    "${transcription}"
 
     Sua Tarefa EXCLUSIVA:
-    1. Sinta a intenção, a dor, o agradecimento ou o pedido do usuário.
-    2. Responda ESTRITAMENTE com um texto de oração espontânea e acolhedora neste formato exato (substituindo os colchetes com amor e fé):
+    1. Sinta a intenção, a dor, o agradecimento ou o pedido do usuário baseado nessa transcrição.
+    2. Responda ESTRITAMENTE com um texto de oração espontânea e acolhedora neste formato exato (sem colchetes):
 
-    "Recebi sua intenção com muito carinho 🙏
+    "Entendi perfeitamente sua intenção sobre [Resumo curtíssimo do que foi dito] 🙏
     
     Feche seus olhos por um instante... Vamos levar isso ao Senhor juntos.
     
     Pai Querido, olha para este filho(a) que Te busca agora...
     Tu conheces as profundezas da sua alma e as lutas que enfrenta.
     
-    [Escreva 1 parágrafo profundo, poético e super empático orando especificamente pelo que a pessoa compartilhou. Peça especificamente por paz, luz e a intervenção da Tua graça na situação citada.]
+    [Escreva 1 parágrafo profundo, poético e super empático orando especificamente pelo que a pessoa compartilhou na transcrição. Peça especificamente por paz, luz e a intervenção da Tua graça na situação citada.]
     
     Que a Tua presença envolva este coração e traga a quietude que ele tanto busca.
     
@@ -125,31 +150,17 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
   `;
 
   try {
-    // Tweak: WhatsApp OGG is usually Opus. Gemini supports both audio/ogg and audio/opus.
-    // Sometimes explicit audio/ogg works better for multimodal.
-    console.log(`🤖 Chamando Gemini 2.0 Flash com áudio (${audioData.length} chars, ${mimeType})...`);
-    
-    const result = await model.generateContent([
-      { inlineData: { data: audioData, mimeType: "audio/ogg" } },
-      { text: prompt },
-    ]);
-
-    const text = result.response.text().trim();
-    console.log("✅ Resposta do Gemini gerada com sucesso.");
-    return text;
+    console.log(`✨ Gerando prece baseada na transcrição: "${transcription.substring(0, 50)}..."`);
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
   } catch (error: any) {
-    console.error("❌ ERRO CRÍTICO no Gemini Multimodal Audio:");
-    console.error("- Mensagem:", error.message || error);
+    console.error("❌ ERRO ao gerar prece baseada em texto:", error.message || error);
     
     if (error.message?.includes("429") || error.message?.includes("Too Many Requests")) {
       return "🙏 Recebi seu áudio com carinho, mas meu fôlego espiritual (cota da API) está um pouco curto neste momento. Poderia escrever sua intenção para que eu possa rezar com você agora?";
     }
 
-    if (error.message?.includes("User location is not supported")) {
-      return "🙏 Desculpe, estou com uma limitação de região no meu serviço de áudio. Pode escrever sua intenção?";
-    }
-
-    return "🙏 Recebi sua intenção... mas tive uma pequena dificuldade para ouvir o áudio por completo. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
+    return "🙏 Recebi sua intenção... mas tive uma pequena dificuldade para processar a oração agora. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
   }
 }
 
