@@ -333,7 +333,9 @@ serve(async (req) => {
     }
 
     const greetings = ["menu", "oi", "ola", "olá", "inicio", "início", "ajuda", "opcoes", "opções"];
-    if (greetings.includes(normalizedMsg) && waUser) {
+    const isGreeting = greetings.some(g => normalizedMsg.includes(g)) || buttonId.includes("menu");
+
+    if (isGreeting && waUser) {
       await whatsappService.sendList({
         number: phone,
         title: "Rotina com Deus",
@@ -383,10 +385,20 @@ serve(async (req) => {
       const novenaName = isQuaresma ? "Quaresma" : "Quaresma de São Miguel";
       const dbNovenaName = isQuaresma ? "quaresma" : "sao_miguel";
       
-      let currentDay = 1;
-      if (userProgress?.current_novena === dbNovenaName) {
-        currentDay = (userProgress?.novena_day || 0) + 1;
-      }
+      // Lógica de Sincronização Global
+      const getGlobalNovenaDay = (novena: string) => {
+        const today = new Date();
+        // Datas de Início Configurações (exemplo para 2024, ajustar conforme ano vigente)
+        const starts: Record<string, string> = {
+          "quaresma": "2024-02-14",
+          "sao_miguel": "2024-08-15"
+        };
+        const start = new Date(starts[novena]);
+        const diffDays = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        return Math.max(1, Math.min(40, diffDays)); // Trava entre 1 e 40
+      };
+
+      const currentDay = getGlobalNovenaDay(dbNovenaName);
 
       if (currentDay > 40) {
         await whatsappService.sendText({ number: phone, text: `🎉 Parabéns! Você concluiu com sucesso os 40 dias de oração da jornada de *${novenaName}*! Que Deus te recompense grandemente.`});
@@ -422,7 +434,7 @@ serve(async (req) => {
         text: `🌙 *Boa noite*\n\nVamos encerrar o seu dia com Deus.\nRespire fundo...\nAgora pense no seu dia...` 
       });
       await sleep(1000);
-      await whatsappService.sendAudio({ number: phone, audioUrl: "https://www.rotinacomdeus.online/audios/exame_consciencia.mp3" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/exame_consciencia.mp3" });
       await sleep(1000);
       await whatsappService.sendText({ 
         number: phone, 

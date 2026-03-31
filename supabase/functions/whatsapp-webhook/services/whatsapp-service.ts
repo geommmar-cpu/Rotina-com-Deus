@@ -1,3 +1,5 @@
+import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+
 export interface SendTextOptions {
   number: string;
   text: string;
@@ -170,7 +172,7 @@ export class WhatsAppService {
       if (uint8.byteLength === 0) return null;
 
       // Conversão Base64 Segura e Moderna para Deno/Edge Functions
-      const base64 = btoa(Array.from(uint8).map(b => String.fromCharCode(b)).join(''));
+      const base64 = encode(uint8);
       return base64;
     } catch (err: any) {
       console.error("Falha crítica no downloadMedia (Log Final):", err.message || err);

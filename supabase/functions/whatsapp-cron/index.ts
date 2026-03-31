@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { whatsappService } from "../whatsapp-webhook/services/whatsapp-service.ts";
+import { getBible365Content } from "../whatsapp-webhook/services/bible-service.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -19,7 +20,7 @@ const ROUTINES: any = {
   },
   noon: {
     text: "🕛 O Anjo do Senhor anunciou a Maria... E ela concebeu do Espírito Santo.\n\nAve Maria, cheia de graça...\n\n(Acompanhe o Ângelus completo no áudio guiado abaixo) 🙏",
-    audioUrl: "https://rotinacomdeus.vercel.app/audios/Ângelus.mp3",
+    audioUrl: "https://rotinacomdeus.vercel.app/audios/angelus.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   night: {
@@ -51,10 +52,10 @@ serve(async (req) => {
       whatsappService.simulatorMessages = [];
     }
 
-    // 1. Obter todos os usuários ativos
+    // 1. Obter todos os usuários ativos com progresso
     const { data: users, error: userError } = await supabase
       .from("whatsapp_users")
-      .select("*, user_preferences(*)");
+      .select("*, user_preferences(*), user_progress(*)");
 
     if (userError) throw userError;
 
@@ -81,28 +82,53 @@ serve(async (req) => {
         .limit(1);
 
       if (logs && logs.length > 0) {
-        // Já recebeu esta rotina hoje, pula pro próximo usuário
         continue;
       }
 
       // 3. Preparar a mensagem
       const routineMsg = ROUTINES[routineType];
-      const prodAudioUrl = routineMsg.audioUrl.replace("http://localhost:5173/audios/", AUDIO_BASE_URL);
+      const prodAudioUrl = routineMsg.audioUrl;
       
+      // Enviar Texto Inicial
       await whatsappService.sendText({
         number: user.phone_number,
         text: routineMsg.text
       });
       await sleep(1000);
 
+      // Enviar Áudio se houver
       if (routineMsg.audioUrl) {
         await whatsappService.sendAudio({ number: user.phone_number, audioUrl: prodAudioUrl });
-        await sleep(1000);
+        await sleep(1500);
       }
 
+      // SE FOR DE MANHÃ -> Enviar Bíblia 365 Diária
+      if (routineType === "morning") {
+        const userProg = user.user_progress?.[0];
+        const nextBibleDay = (userProg?.bible_365_day || 0) + 1;
+        const bibleContent = await getBible365Content(nextBibleDay);
+
+        if (bibleContent) {
+          await whatsappService.sendText({
+            number: user.phone_number,
+            text: `📖 *Sua Bíblia em 365 Dias (Dia ${nextBibleDay})*\n\n${bibleContent}`
+          });
+          await sleep(1000);
+
+          // Atualiza progresso da Bíblia
+          const progId = userProg?.id;
+          if (progId) {
+            await supabase.from("user_progress").update({ bible_365_day: nextBibleDay }).eq("id", progId);
+          } else {
+            await supabase.from("user_progress").insert({ whatsapp_user_id: user.id, bible_365_day: nextBibleDay });
+          }
+        }
+      }
+
+      // Enviar Botões de Navegação
       await whatsappService.sendButtons({
         number: user.phone_number,
-        text: "Escolha uma opção:",
+        text: "Como posso te ajudar agora? 🙏",
         buttons: routineMsg.buttons.map((b: string) => ({ displayText: b }))
       });
 
