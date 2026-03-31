@@ -176,8 +176,48 @@ export async function generateLiturgyReflection(liturgySummary: string) {
     Linguagem muito simples e direta.
   `;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (error: any) {
+    console.error("Erro ao gerar reflexão de liturgia:", error);
+    return "🙏 Receba a palavra de hoje em seu coração. Que Deus te dê discernimento e paz para caminhar com sabedoria.";
+  }
+}
+
+export async function generateStructuredLiturgy(rawText: string) {
+  const prompt = `
+    Abaixo está o texto bruto extraído de um site de liturgia Católica (Canção Nova).
+    Extraia as partes principais e retorne APENAS um JSON válido.
+    
+    Campos solicitados (se não encontrar algum, deixe vazio ou use o que estiver disponível):
+    - title: Título ou data (ex: "Terça-feira da Semana Santa")
+    - primeiraLeitura: O texto da primeira leitura
+    - salmo: O refrão e os versos do salmo
+    - evangelho: O texto do evangelho
+    - saint: Santo do dia (se houver, caso contrário use "Santo do Dia")
+
+    JSON de saída:
+    {
+      "title": "",
+      "primeiraLeitura": "",
+      "salmo": "",
+      "evangelho": "",
+      "saint": ""
+    }
+
+    TEXTO BRUTO:
+    ${rawText}
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let output = result.response.text().replace(/```json/gi, '').replace(/```/g, '').trim();
+    return JSON.parse(output);
+  } catch (error) {
+    console.warn("Falha ao estruturar liturgia via IA, usando texto bruto:", error);
+    return null;
+  }
 }
 
 export async function generateSpecialPeriodDay(periodName: string, day: number) {
