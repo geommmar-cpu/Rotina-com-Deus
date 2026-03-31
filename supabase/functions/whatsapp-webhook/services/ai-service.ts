@@ -125,14 +125,31 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
   `;
 
   try {
+    // Tweak: WhatsApp OGG is usually Opus. Gemini supports both audio/ogg and audio/opus.
+    // Sometimes explicit audio/ogg works better for multimodal.
+    console.log(`🤖 Chamando Gemini 2.0 Flash com áudio (${audioData.length} chars, ${mimeType})...`);
+    
     const result = await model.generateContent([
-      { inlineData: { data: audioData, mimeType: mimeType } },
+      { inlineData: { data: audioData, mimeType: "audio/ogg" } },
       { text: prompt },
     ]);
-    return result.response.text().trim();
+
+    const text = result.response.text().trim();
+    console.log("✅ Resposta do Gemini gerada com sucesso.");
+    return text;
   } catch (error: any) {
-    console.error("❌ Erro no Gemini Multimodal Audio:", error.message || error);
-    return "🙏 Recebi sua intenção... mas algo deu errado ao ouvir seu áudio. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
+    console.error("❌ ERRO CRÍTICO no Gemini Multimodal Audio:");
+    console.error("- Mensagem:", error.message || error);
+    
+    if (error.message?.includes("429") || error.message?.includes("Too Many Requests")) {
+      return "🙏 Recebi seu áudio com carinho, mas meu fôlego espiritual (cota da API) está um pouco curto neste momento. Poderia escrever sua intenção para que eu possa rezar com você agora?";
+    }
+
+    if (error.message?.includes("User location is not supported")) {
+      return "🙏 Desculpe, estou com uma limitação de região no meu serviço de áudio. Pode escrever sua intenção?";
+    }
+
+    return "🙏 Recebi sua intenção... mas tive uma pequena dificuldade para ouvir o áudio por completo. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
   }
 }
 

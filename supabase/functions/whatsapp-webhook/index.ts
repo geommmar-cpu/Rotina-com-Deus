@@ -108,7 +108,9 @@ serve(async (req) => {
     } else if (message?.type === "audio") {
       isAudio = true;
       audioId = message.audio?.id || "";
-      console.log(`🎤 Áudio recebido (Media ID: ${audioId})`);
+      const audioMime = message.audio?.mime_type || "audio/ogg";
+      console.log(`🎤 Áudio recebido (Media ID: ${audioId}, Mime: ${audioMime})`);
+      (message as any).audioMimeType = audioMime; // Temporário para passar abaixo
     }
 
     let { data: waUser, error: queryError } = await supabase
@@ -258,7 +260,7 @@ serve(async (req) => {
         console.log("🧬 Processando áudio com Gemini...");
         
         const genStartTime = Date.now();
-        const prayer = await generatePersonalizedPrayer(audioBase64, "audio/ogg");
+        const prayer = await generatePersonalizedPrayer(audioBase64, (message as any).audioMimeType || "audio/ogg");
         console.log(`✨ Gemini processou em ${Date.now() - genStartTime}ms`);
         
         await whatsappService.sendText({ number: phone, text: prayer });

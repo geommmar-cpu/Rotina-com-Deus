@@ -169,13 +169,9 @@ export class WhatsAppService {
 
       if (uint8.byteLength === 0) return null;
 
-      // Conversão Base64 Segura e Nativa para Deno
-      let binary = "";
-      const len = uint8.byteLength;
-      for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(uint8[i]);
-      }
-      return btoa(binary);
+      // Conversão Base64 Segura e Moderna para Deno/Edge Functions
+      const base64 = btoa(Array.from(uint8).map(b => String.fromCharCode(b)).join(''));
+      return base64;
     } catch (err: any) {
       console.error("Falha crítica no downloadMedia (Log Final):", err.message || err);
       return null;
