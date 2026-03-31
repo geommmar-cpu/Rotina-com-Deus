@@ -139,6 +139,8 @@ export async function generateLiturgyReflection(liturgySummary: string) {
 export async function generateStructuredLiturgy(rawText: string) {
   const prompt = `
     Extraia as partes desta liturgia Católica e retorne APENAS um JSON válido.
+    IMPORTANTE: No campo "saint", ignore nomes de organizações (como CNBB, Conferência Nacional, etc) e foque apenas no nome do Santo/Mártir do dia mencionado no texto. Se não encontrar um nome de santo, deixe vazio.
+    
     Campos: title, primeiraLeitura, salmo, evangelho, saint.
     Texto bruto: ${rawText}
   `;
