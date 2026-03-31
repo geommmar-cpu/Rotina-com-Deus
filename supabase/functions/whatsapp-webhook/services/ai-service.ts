@@ -14,10 +14,10 @@ const genAI = new GoogleGenerativeAI(Deno.env.get("GEMINI_API_KEY") || "");
 const geminiModel = genAI.getGenerativeModel({ 
   model: "gemini-1.5-flash",
   safetySettings: [
-    { category: "HATE_SPEECH", threshold: "BLOCK_NONE" },
-    { category: "HARASSMENT", threshold: "BLOCK_NONE" },
-    { category: "SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-    { category: "DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
   ]
 });
 
@@ -233,7 +233,13 @@ export async function generateLiturgyReflection(liturgySummary: string) {
       });
       return response.choices[0].message.content?.trim() || "";
     } catch (e: any) {
-      const result = await geminiModel.generateContent(prompt);
+      const result = await geminiModel.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+        ]
+      });
       return result.response.text();
     }
   }

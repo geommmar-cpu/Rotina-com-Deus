@@ -25,7 +25,7 @@ export async function getDailyLiturgy() {
         // Agora pegamos um pedaço muito maior e menos filtrado
         const mainContent = html.split('<div id="content"')[1]?.split('<footer')[0] || html.substring(0, 30000);
         
-        console.log("🧬 Extraindo dados com GPT-4o-mini...");
+        console.log("🧬 Extraindo dados via Camada de IA (Tripla)...");
         const structuredData = await generateStructuredLiturgy(mainContent);
 
         if (structuredData && (structuredData.evangelho || structuredData.primeiraLeitura)) {
