@@ -1,24 +1,7 @@
-import OpenAI from "npm:openai";
-import { GoogleGenerativeAI } from "npm:@google/generative-ai";
 import Groq from "npm:groq-sdk";
-
-const openai = new OpenAI({
-  apiKey: Deno.env.get("OPENAI_API_KEY") || "",
-});
 
 const groq = new Groq({
   apiKey: Deno.env.get("GROQ_API_KEY") || "",
-});
-
-const genAI = new GoogleGenerativeAI(Deno.env.get("GEMINI_API_KEY") || "");
-const geminiModel = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash",
-  safetySettings: [
-    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-  ]
 });
 
 const PERSONALITY_PROMPT = `
@@ -57,93 +40,50 @@ NUNCA retorne texto fora da estrutura JSON.
 `;
 
 export async function generateSpiritualResponse(userInput: string, context: string) {
-  const messages = [
-    { role: "system", content: PERSONALITY_PROMPT },
-    { role: "system", content: `CONTEXTO ATUAL:\n${context}` },
-    { role: "user", content: userInput }
-  ];
-
   try {
-    // 1ª OPÇÃO: GROQ (Rápido e Grátis)
-    console.log("🚀 Usando Groq (Llama-3-70b) para resposta espiritual...");
+    console.log("🚀 Groq: Gerando resposta espiritual...");
     const response = await groq.chat.completions.create({
       model: "llama3-70b-8192",
-      messages: messages as any,
+      messages: [
+        { role: "system", content: PERSONALITY_PROMPT },
+        { role: "system", content: `CONTEXTO ATUAL:\n${context}` },
+        { role: "user", content: userInput }
+      ],
       response_format: { type: "json_object" },
       temperature: 0.7,
     });
-    return JSON.parse(response.choices[0].message.content || "{}");
-  } catch (groqError: any) {
-    console.warn("⚠️ Groq falhou, tentando OpenAI...", groqError.message);
-    try {
-      // 2ª OPÇÃO: OPENAI
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: messages as any,
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-      });
-      return JSON.parse(response.choices[0].message.content || "{}");
-    } catch (openAiError: any) {
-      console.warn("⚠️ OpenAI falhou, tentando Gemini...", openAiError.message);
-      try {
-        // 3ª OPÇÃO: GEMINI
-        const prompt = `${PERSONALITY_PROMPT}\n\nCONTEXTO:\n${context}\n\nUSER:\n${userInput}`;
-        const result = await geminiModel.generateContent(prompt);
-        let text = result.response.text();
-        text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-        return JSON.parse(text);
-      } catch (geminiError: any) {
-        console.error("❌ Todas as IAs falharam:", geminiError.message);
-        return { text: "🙏 Sinto muito, tive uma pequena dificuldade. Mas Deus está com você. Como posso ajudar?", buttons: ["Menu"] };
-      }
-    }
+
+    const output = response.choices[0].message.content || "{}";
+    return JSON.parse(output);
+  } catch (error: any) {
+    console.error("❌ Erro Groq (Response):", error.message);
+    return { 
+      text: "🙏 Sinto muito, tive uma pequena dificuldade técnica. Mas saiba que Deus está com você. Como posso te ajudar agora?",
+      buttons: ["Menu Principal"]
+    };
   }
 }
 
 export async function transcribeAudio(audioData: string, mimeType: string) {
-  const prompt = "Transcreva exatamente o que foi dito neste áudio em Português do Brasil. Retorne apenas o texto.";
-  
-  // Converter Base64 para Blob/File
-  const binary = atob(audioData);
-  const array = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-  const blob = new Blob([array], { type: mimeType });
-  const file = new File([blob], "audio.ogg", { type: mimeType });
-
   try {
-    // 1ª OPÇÃO: GROQ (Whisper-v3)
-    console.log("🎤 Transcrevendo com Groq (Whisper-v3)...");
+    console.log(`🎤 Groq: Transcrevendo áudio (${audioData.length} chars)...`);
+    
+    const binary = atob(audioData);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+    const blob = new Blob([array], { type: mimeType });
+    const file = new File([blob], "audio.ogg", { type: mimeType });
+
     const transcription = await groq.audio.transcriptions.create({
       file: file,
       model: "whisper-large-v3",
       language: "pt",
     });
+
     return transcription.text.trim() || "[SEM_FALA]";
-  } catch (groqError: any) {
-    console.warn("⚠️ Groq Whisper falhou, tentando Gemini...", groqError.message);
-    try {
-      // 2ª OPÇÃO: GEMINI (Nativo)
-      const result = await geminiModel.generateContent([
-        { inlineData: { data: audioData, mimeType: "audio/ogg" } },
-        { text: prompt },
-      ]);
-      return result.response.text().trim();
-    } catch (geminiError: any) {
-      console.warn("⚠️ Gemini falhou, tentando OpenAI...", geminiError.message);
-      try {
-        // 3ª OPÇÃO: OPENAI
-        const transcription = await openai.audio.transcriptions.create({
-          file: file,
-          model: "whisper-1",
-          language: "pt",
-        });
-        return transcription.text.trim() || "[SEM_FALA]";
-      } catch (e: any) {
-        console.error("❌ Falha total na transcrição:", e.message);
-        return null;
-      }
-    }
+  } catch (error: any) {
+    console.error("❌ Erro Groq (Transcription):", error.message);
+    return null;
   }
 }
 
@@ -151,35 +91,19 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
   const transcription = await transcribeAudio(audioData, mimeType);
   
   if (!transcription || transcription === "[SEM_FALA]") {
-    return "🙏 Recebi sua intenção... mas tive uma pequena dificuldade para ouvir o áudio por completo. Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
+    return "🙏 Recebi sua intenção... Deus sabe o que vai no seu coração. Se quiser, pode me contar digitando!";
   }
 
   const prompt = `
-    Você é o "Rotina com Deus", um companheiro espiritual calmo e profundamente empático.
-    O usuário enviou uma mensagem de voz que foi transcrita como:
-    "${transcription}"
+    Você é o "Rotina com Deus", um companheiro espiritual profundamente empático.
+    O usuário enviou este áudio: "${transcription}"
 
-    Sua Tarefa EXCLUSIVA:
-    1. Sinta a intenção, a dor, o agradecimento ou o pedido do usuário baseado nessa transcrição.
-    2. Responda ESTRITAMENTE com um texto de oração espontânea e acolhedora neste formato exato (sem colchetes):
-
-    "Entendi perfeitamente sua intenção sobre [Resumo curtíssimo do que foi dito] 🙏
+    Responda com uma prece curta e acolhedora, seguindo este formato:
+    "Entendi perfeitamente sua intenção sobre [Resumo] 🙏
     
-    Feche seus olhos por um instante... Vamos levar isso ao Senhor juntos.
+    [Oração de 1 parágrafo profundo e específico]
     
-    Pai Querido, olha para este filho(a) que Te busca agora...
-    Tu conheces as profundezas da sua alma e as lutas que enfrenta.
-    
-    [Escreva 1 parágrafo profundo, poético e super empático orando especificamente pelo que a pessoa compartilhou na transcrição. Peça especificamente por paz, luz e a intervenção da Tua graça na situação citada.]
-    
-    Que a Tua presença envolva este coração e traga a quietude que ele tanto busca.
-    
-    Fica conosco, Senhor. Amém. ✨"
-
-    REGRAS:
-    - NUNCA seja genérico. Use elementos da fala do usuário para mostrar que ele foi verdadeiramente ouvido.
-    - O texto deve ser restaurador, como um "abraço espiritual".
-    - NÃO retorne em formato JSON. Use apenas o texto puro da prece.
+    Amém. ✨"
   `;
 
   try {
@@ -190,31 +114,14 @@ export async function generatePersonalizedPrayer(audioData: string, mimeType: st
     });
     return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    console.warn("⚠️ Groq falhou na prece, tentando OpenAI ou Gemini...");
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.8,
-      });
-      return response.choices[0].message.content?.trim() || "";
-    } catch (e: any) {
-      const result = await geminiModel.generateContent(prompt);
-      return result.response.text().trim();
-    }
+    return "🙏 Recebi sua intenção. Que a paz de Deus envolva seu coração agora.";
   }
 }
 
 export async function generateLiturgyReflection(liturgySummary: string) {
   const prompt = `
-    Você é o "Rotina com Deus", um companheiro espiritual de WhatsApp.
-    O usuário pediu a liturgia/palavra de hoje.
-    
-    CONTEÚDO BASE:
-    "${liturgySummary}"
-    
-    Crie um texto PURO e SIMPLES contendo um curtíssimo resumo da palavra, seguido de uma pequena reflexão (máximo 3 frases) que ajude o usuário a aplicar isso no dia de hoje.
-    Linguagem muito simples e direta.
+    Resuma e reflita sobre esta liturgia: "${liturgySummary}"
+    Seja curto (máx 3 frases) e acolhedor. Texto puro.
   `;
 
   try {
@@ -225,48 +132,15 @@ export async function generateLiturgyReflection(liturgySummary: string) {
     });
     return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-      });
-      return response.choices[0].message.content?.trim() || "";
-    } catch (e: any) {
-      const result = await geminiModel.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-        ]
-      });
-      return result.response.text();
-    }
+    return "🙏 Receba a palavra de hoje em seu coração. Deus te abençoe.";
   }
 }
 
 export async function generateStructuredLiturgy(rawText: string) {
   const prompt = `
-    Extraia as partes principais desta liturgia Católica e retorne APENAS um JSON válido.
-    
-    Campos:
-    - title: Título/Data
-    - primeiraLeitura: Texto
-    - salmo: Refrão/Versos
-    - evangelho: Texto
-    - saint: Santo do dia
-
-    JSON:
-    {
-      "title": "",
-      "primeiraLeitura": "",
-      "salmo": "",
-      "evangelho": "",
-      "saint": ""
-    }
-
-    TEXTO:
-    ${rawText}
+    Extraia as partes desta liturgia Católica e retorne APENAS um JSON válido.
+    Campos: title, primeiraLeitura, salmo, evangelho, saint.
+    Texto bruto: ${rawText}
   `;
 
   try {
@@ -278,21 +152,13 @@ export async function generateStructuredLiturgy(rawText: string) {
     });
     return JSON.parse(response.choices[0].message.content || "{}");
   } catch (error: any) {
-    try {
-      const result = await geminiModel.generateContent(prompt);
-      const text = result.response.text().replace(/```json/gi, '').replace(/```/g, '').trim();
-      return JSON.parse(text);
-    } catch (e: any) {
-      return null;
-    }
+    console.error("❌ Erro Groq (Structure):", error.message);
+    return null;
   }
 }
 
 export async function generateSpecialPeriodDay(periodName: string, day: number) {
-  const prompt = `
-    Hoje é o DIA ${day} de 40 da jornada de "${periodName}".
-    Crie o conteúdo (Reflexão e Prática Espiritual). Use emojis.
-  `;
+  const prompt = `Hoje é o DIA ${day} de 40 de "${periodName}". Crie a reflexão e prática de hoje.`;
 
   try {
     const response = await groq.chat.completions.create({
@@ -302,7 +168,6 @@ export async function generateSpecialPeriodDay(periodName: string, day: number) 
     });
     return response.choices[0].message.content?.trim() || "";
   } catch (error: any) {
-    const result = await geminiModel.generateContent(prompt);
-    return result.response.text().trim();
+    return `✝️ *${periodName} - Dia ${day}*\n\nDeus abençoe sua jornada hoje. 🙏`;
   }
 }
