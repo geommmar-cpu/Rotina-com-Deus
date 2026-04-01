@@ -1253,9 +1253,19 @@ section {
 }
 
 .bonus-card .bonus-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: block;
+  color: var(--accent);
+}
+
+.premium-sparkle {
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  transition: var(--transition);
+}
+
+.bonus-card:hover .premium-sparkle {
+  transform: scale(1.1) rotate(15deg);
+  filter: drop-shadow(0 0 15px var(--accent));
 }
 
 .bonus-card h4 {

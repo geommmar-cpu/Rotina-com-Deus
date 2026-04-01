@@ -18,21 +18,21 @@ const ROUTINES: any = {
     title: "O PRIMEIRO PENSAMENTO",
     subtitle: "MANHÃ 07:00",
     text: "Bom dia 🙏\n\nQue Deus abençoe o seu dia.\nAntes de começar suas atividades, vamos entregar este dia nas mãos de Deus.\nRespire fundo... E diga no seu coração:\n\n*Senhor, guia meus passos hoje. Me dá sabedoria, paciência e paz. Que tudo o que eu fizer hoje seja para o bem.*\n\nAmém.",
-    audioUrl: "https://rotinacomdeus.vercel.app/audios/bom_dia.mp3",
+    audioUrl: "https://rotina-com-deus.vercel.app/audios/bom_dia.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   noon: {
     title: "PAUSA PARA O CÉU",
     subtitle: "MEIO-DIA 12:00",
     text: "🕛 O Anjo do Senhor anunciou a Maria... E ela concebeu do Espírito Santo.\n\nAve Maria, cheia de graça...\n\n(Acompanhe o Ângelus completo no áudio guiado abaixo) 🙏",
-    audioUrl: "https://rotinacomdeus.vercel.app/audios/angelus.mp3",
+    audioUrl: "https://rotina-com-deus.vercel.app/audios/angelus.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   night: {
     title: "EXAME DE CONSCIÊNCIA",
     subtitle: "NOITE 21:00",
     text: "Boa noite 🌙\n\nVamos encerrar o seu dia com Deus.\nRespire fundo... Agora pense no seu dia...\n\nVocê foi paciente? Ajudou alguém? Teve momentos de irritação? Peça perdão a Deus pelas suas falhas... E agradeça pelas coisas boas.\n\n*Senhor, obrigado por este dia. Perdoa minhas falhas e me ajuda a ser melhor amanhã. Amém.*",
-    audioUrl: "https://rotinacomdeus.vercel.app/audios/exame_consciencia.mp3",
+    audioUrl: "https://rotina-com-deus.vercel.app/audios/exame_consciencia.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   }
 };
@@ -69,7 +69,7 @@ serve(async (req) => {
     let sentCount = 0;
     const intentName = `routine_${routineType}`;
     const today = new Date().toISOString().split("T")[0]; // Data atual YYYY-MM-DD
-    const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotinacomdeus.vercel.app/audios/";
+    const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotina-com-deus.vercel.app/audios/";
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     for (const user of (users || [])) {
@@ -112,7 +112,7 @@ serve(async (req) => {
 
       // Se for de Manhã, enviar Oferecimento do Dia também
       if (routineType === "morning") {
-        await whatsappService.sendAudio({ number: user.phone_number, audioUrl: "https://rotinacomdeus.vercel.app/audios/oferecimento_dia.mp3" });
+        await whatsappService.sendAudio({ number: user.phone_number, audioUrl: "https://rotina-com-deus.vercel.app/audios/oferecimento_dia.mp3" });
         await sleep(1500);
       }
 

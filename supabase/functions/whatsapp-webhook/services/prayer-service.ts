@@ -22,7 +22,7 @@ export function getNextRosaryStep(currentStep: number, date: Date = new Date()) 
     { 
       id: 0, 
       name: "Intenções", 
-      text: `📿 *Terço Guiado - Mistérios ${mystery.name}*\n\nAntes de iniciarmos, vamos colocar nossas intenções nas mãos de Deus e de Nossa Senhora...\n\nFeche os olhos por um momento. Entregue suas lutas, sua família, seus sonhos e sua gratidão.\n\n_Faça sua intenção em silêncio no coração..._`, 
+      text: `✝️ *Terço Guiado - Mistérios ${mystery.name}*\n\nAntes de iniciarmos, vamos colocar nossas intenções nas mãos de Deus e de Nossa Senhora...\n\nFeche os olhos por um momento. Entregue suas lutas, sua família, seus sonhos e sua gratidão.\n\n_Faça sua intenção em silêncio no coração..._`, 
       audioUrl: null, 
       buttons: [{ displayText: "Intenção feita", id: "terco_next" }] 
     },
@@ -36,7 +36,7 @@ export function getNextRosaryStep(currentStep: number, date: Date = new Date()) 
     { 
       id: 2, 
       name: "Mistérios", 
-      text: `📿 *Mistérios ${mystery.name}*\n\nHoje contemplaremos:\n\n${mystery.mysteries.map((m, i) => `${i + 1}º - ${m}`).join("\n")}\n\nO áudio a seguir contém as contas do Terço completo. Mantenha-se em espírito de profunda oração e meditação.`, 
+      text: `✝️ *Mistérios ${mystery.name}*\n\nHoje contemplaremos:\n\n${mystery.mysteries.map((m, i) => `${i + 1}º - ${m}`).join("\n")}\n\nO áudio a seguir contém as contas do Terço completo. Mantenha-se em espírito de profunda oração e meditação.`, 
       audioUrl: `${AUDIO_BASE_URL}${mystery.audio}`, 
       buttons: [{ displayText: "Concluir Terço", id: "terco_next" }] 
     },

@@ -26,7 +26,7 @@ async function sendMainMenu(phone: string, waUser: any) {
       title: "Oração Diária",
       rows: [
         { title: "🚀 Minha Rotina Diária", id: "btn_routine", description: "Liturgia + Bíblia 365" },
-        { title: "📿 Santo Terço", id: "btn_terco", description: "O Rosário completo e guiado" },
+        { title: "✝️ Santo Terço", id: "btn_terco", description: "O Rosário completo e guiado" },
         { title: "🙏 Orações Especiais", id: "btn_special_prayers", description: "S. José, S. Miguel e mais" },
         { title: "🕊️ Quaresma", id: "btn_quaresma", description: "Acompanhe sua jornada" }
       ]
@@ -162,7 +162,7 @@ serve(async (req) => {
       const firstStep = getNextRosaryStep(-1);
       await whatsappService.sendButtons({
         number: phone,
-        text: `📿 *Terço - Mistérios ${mystery.name}*\n\n${firstStep!.text}`,
+        text: `✝️ *Terço - Mistérios ${mystery.name}*\n\n${firstStep!.text}`,
         buttons: firstStep!.buttons.map(b => ({ displayText: b.displayText, id: b.id }))
       });
       await saveProgress(waUser.id, { last_prayer_type: "terco", last_prayer_step: firstStep!.id });
@@ -257,6 +257,15 @@ serve(async (req) => {
       return new Response("OK", { status: 200 });
     }
 
+    if (buttonId === "btn_prefs") {
+      await whatsappService.sendButtons({
+        number: phone,
+        text: "⚙️ *Configurações & Preferências*\n\nSuas orações são entregues automaticamente nos horários sagrados:\n\n🌅 *Manhã:* 07:00h\n☀️ *Meio-dia:* 12:00h\n🌙 *Noite:* 21:00h\n\n_Escolhemos esses horários para que toda a nossa comunidade esteja em oração junta!_ 🙏",
+        buttons: [{ displayText: "Menu Principal", id: "btn_menu" }]
+      });
+      return new Response("OK", { status: 200 });
+    }
+
     if (buttonId === "btn_special_prayers") {
       await whatsappService.sendButtons({
         number: phone,
@@ -271,14 +280,12 @@ serve(async (req) => {
     }
 
     if (buttonId === "btn_sao_jose") {
-      await whatsappService.sendText({ number: phone, text: "🧔‍♂️ *Oração a São José*\n\n_Vinde a nós, S. José, em nossa tribulação..._" });
-      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_sao_jose.mp3" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotina-com-deus.vercel.app/audios/oracao_sao_jose.mp3" });
       return new Response("OK", { status: 200 });
     }
 
     if (buttonId === "btn_sao_miguel") {
-      await whatsappService.sendText({ number: phone, text: "🗡️ *Oração a São Miguel Arcanjo*\n\n_São Miguel Arcanjo, defendei-nos no combate..._" });
-      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_sao_miguel.mp3" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotina-com-deus.vercel.app/audios/oracao_sao_miguel.mp3" });
       return new Response("OK", { status: 200 });
     }
 
