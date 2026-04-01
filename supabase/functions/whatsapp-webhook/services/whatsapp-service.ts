@@ -10,6 +10,7 @@ export interface SendButtonOptions {
   text: string;
   buttons: {
     displayText: string;
+    id?: string;
   }[];
   footer?: string;
   title?: string;
@@ -87,7 +88,7 @@ export class WhatsAppService {
           buttons: options.buttons.slice(0, 3).map((b, index) => ({
             type: "reply",
             reply: {
-              id: `btn_${index}_${Date.now()}`.substring(0, 256),
+              id: b.id || `btn_${index}_${Date.now()}`.substring(0, 256),
               title: b.displayText.substring(0, 20)
             }
           }))
@@ -98,7 +99,7 @@ export class WhatsAppService {
     return this.postRequest(body);
   }
 
-  async sendList(options: { number: string; title?: string; text: string; buttonText: string; sections: { title: string; rows: { title: string; description?: string }[] }[] }) {
+  async sendList(options: { number: string; title?: string; text: string; buttonText: string; sections: { title: string; rows: { title: string; description?: string; id?: string }[] }[] }) {
     if (this.isSimulator) {
       const rowsText = options.sections.flatMap(s => s.rows).map(r => `  🔹 ${r.title}`).join('\n');
       this.simulatorMessages.push(`[Menu Interativo] ${options.text}\n\n[Botão: ${options.buttonText}]\nOpções:\n${rowsText}\n\n(Digite o nome da opção)`);
@@ -120,7 +121,7 @@ export class WhatsAppService {
           sections: options.sections.map(s => ({
             title: s.title.substring(0, 24),
             rows: s.rows.map((r, idx) => ({
-              id: `row_${idx}_${Date.now()}`.substring(0, 200),
+              id: r.id || `row_${idx}_${Date.now()}`.substring(0, 200),
               title: r.title.substring(0, 24),
               description: r.description?.substring(0, 72) || ""
             }))

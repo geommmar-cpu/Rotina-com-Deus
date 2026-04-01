@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { whatsappService } from "../whatsapp-webhook/services/whatsapp-service.ts";
 import { getBible365Content } from "../whatsapp-webhook/services/bible-service.ts";
+import { getDailyLiturgy } from "../whatsapp-webhook/services/liturgy-service.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -102,8 +103,17 @@ serve(async (req) => {
         await sleep(1500);
       }
 
-      // SE FOR DE MANHÃ -> Enviar Bíblia 365 Diária
+      // SE FOR DE MANHÃ -> Enviar Liturgia + Bíblia 365 Diária
       if (routineType === "morning") {
+        // Enviar Liturgia
+        const liturgy = await getDailyLiturgy();
+        if (liturgy) {
+          const liturgyText = `📖 *Liturgia de Hoje*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo do Dia:* ${liturgy.saint}`;
+          await whatsappService.sendText({ number: user.phone_number, text: liturgyText });
+          await sleep(1500);
+        }
+
+        // Enviar Bíblia 365
         const userProg = user.user_progress?.[0];
         const nextBibleDay = (userProg?.bible_365_day || 0) + 1;
         const bibleContent = await getBible365Content(nextBibleDay);
@@ -111,7 +121,7 @@ serve(async (req) => {
         if (bibleContent) {
           await whatsappService.sendText({
             number: user.phone_number,
-            text: `📖 *Sua Bíblia em 365 Dias (Dia ${nextBibleDay})*\n\n${bibleContent}`
+            text: bibleContent // O bibleContent já vem formatado com título e dia
           });
           await sleep(1000);
 

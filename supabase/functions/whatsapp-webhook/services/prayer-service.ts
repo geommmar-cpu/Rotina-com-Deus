@@ -5,7 +5,7 @@ export const MYSTERIES = {
   Luminosos: ["O Batismo de Jesus", "As Bodas de Caná", "O Anúncio do Reino", "A Transfiguração", "A Instituição da Eucaristia"]
 };
 
-export const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotinacomdeus.vercel.app/audios/";
+export const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotina-com-deus.vercel.app/audios/";
 
 export function getMysteryOfDay(date: Date) {
   const day = date.getDay();
@@ -24,28 +24,28 @@ export function getNextRosaryStep(currentStep: number, date: Date = new Date()) 
       name: "Intenções", 
       text: `📿 *Terço Guiado - Mistérios ${mystery.name}*\n\nAntes de iniciarmos, vamos colocar nossas intenções nas mãos de Deus e de Nossa Senhora...\n\nFeche os olhos por um momento. Entregue suas lutas, sua família, seus sonhos e sua gratidão.\n\n_Faça sua intenção em silêncio no coração..._`, 
       audioUrl: null, 
-      buttons: ["Fiz minha intenção 🙏"] 
+      buttons: [{ displayText: "Intenção feita", id: "terco_next" }] 
     },
     { 
       id: 1, 
       name: "Oferecimento", 
       text: `🙏 *Oferecimento do Terço*\n\nVamos rezar juntos este oferecimento, preparando nosso espírito para contemplar a vida de Jesus:`, 
       audioUrl: `${AUDIO_BASE_URL}oracao_intencoes.mp3`, 
-      buttons: ["Iniciar o Terço"] 
+      buttons: [{ displayText: "Iniciar o Terço", id: "terco_next" }] 
     },
     { 
       id: 2, 
       name: "Mistérios", 
       text: `📿 *Mistérios ${mystery.name}*\n\nHoje contemplaremos:\n\n${mystery.mysteries.map((m, i) => `${i + 1}º - ${m}`).join("\n")}\n\nO áudio a seguir contém as contas do Terço completo. Mantenha-se em espírito de profunda oração e meditação.`, 
       audioUrl: `${AUDIO_BASE_URL}${mystery.audio}`, 
-      buttons: ["Concluir Terço"] 
+      buttons: [{ displayText: "Concluir Terço", id: "terco_next" }] 
     },
     {
       id: 3,
       name: "Encerramento",
       text: "🙏 *Agradecimento e Salve Rainha*\n\nConcluímos este momento sagrado entregando nosso dia sob o manto de Maria. Que a paz de Deus te acompanhe sempre!",
       audioUrl: `${AUDIO_BASE_URL}ave_maria.mp3`,
-      buttons: ["Menu Principal"]
+      buttons: [{ displayText: "Menu Principal", id: "btn_menu" }]
     }
   ];
 
