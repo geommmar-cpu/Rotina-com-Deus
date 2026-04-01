@@ -7,21 +7,85 @@
     <title>Rotina com Deus | Sua Jornada Espiritual Diária</title>
     <meta name="description" content="Encontre paz e constância em sua vida de oração com o Rotina com Deus diretamente no seu WhatsApp." />
     
+    <!-- Fonts Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
+    <!-- Performance Preloads -->
+    <link rel="preload" href="/logo2.webp" as="image" type="image/webp">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rotinacomdeus.com.br/" />
     <meta property="og:title" content="Rotina com Deus | Sua Jornada Espiritual Diária" />
     <meta property="og:description" content="Encontre paz e constância em sua vida de oração com o Rotina com Deus diretamente no seu WhatsApp." />
-    <meta property="og:image" content="/logo2.png" />
+    <meta property="og:image" content="/logo2.webp" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://rotinacomdeus.com.br/" />
     <meta property="twitter:title" content="Rotina com Deus | Sua Jornada Espiritual Diária" />
     <meta property="twitter:description" content="Encontre paz e constância em sua vida de oração com o Rotina com Deus diretamente no seu WhatsApp." />
-    <meta property="twitter:image" content="/logo2.png" />
+    <meta property="twitter:image" content="/logo2.webp" />
 
-    <link rel="stylesheet" href="/src/style.css" />  <body>
+    <style>
+      :root {
+        --primary: #12122b;
+        --accent: #f9a826;
+        --accent-glow: rgba(249, 168, 38, 0.4);
+        --premium-accent: #ffae19;
+        --bg-dark: #0a0a1a;
+        --glass: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+        --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Outfit', sans-serif;
+        --fs-h1: clamp(2.5rem, 8vw, 5rem);
+        --fs-h2: clamp(1.8rem, 5vw, 3.5rem);
+        --fs-h3: clamp(1.4rem, 3vw, 2.5rem);
+        --fs-body: clamp(1rem, 1.25vw, 1.15rem);
+        --section-padding: clamp(4rem, 12vw, 8rem);
+        --glow-shadow: 0 0 30px var(--accent-glow);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background-color: var(--bg-dark);
+        line-height: 1.7;
+        font-size: var(--fs-body);
+        font-weight: 300;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: radial-gradient(circle at 20% 30%, rgba(26, 31, 60, 0.5), transparent);
+        position: relative;
+        padding-top: 120px;
+        overflow: hidden;
+      }
+      .hero .container { display: flex; align-items: center; justify-content: space-between; gap: 4rem; width: 100%; }
+      .hero-logo { margin-bottom: 1.5rem; text-align: left; }
+      .hero-logo img { height: clamp(120px, 25vw, 180px); width: auto; object-fit: contain; }
+      .gradient-text {
+        background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .btn { display: inline-block; padding: 1.2rem 3rem; border-radius: 100px; text-decoration: none; font-weight: 600; transition: var(--transition); cursor: pointer; border: none; font-size: 1.1rem; }
+      .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%); color: #000; box-shadow: 0 15px 30px var(--accent-glow); }
+      .urgency-banner { background: var(--primary); color: white; padding: 0.8rem; text-align: center; font-size: 0.9rem; position: relative; z-index: 100; border-bottom: 1px solid var(--glass-border); }
+    </style>
+    <link rel="stylesheet" href="/src/style.css" media="print" onload="this.media='all'" />
+  <body>
     <!-- Urgency Banner -->
     <div class="urgency-banner">
       🕊️ Oferta de Lançamento: Bônus exclusivos liberados <span class="highlight">Apenas para os próximos 50</span> assinantes
@@ -33,7 +97,7 @@
         <div class="container">
           <div class="hero-content">
             <div class="hero-logo">
-              <img src="/logo2.png" alt="Rotina com Deus" />
+              <img src="/logo2.webp" alt="Rotina com Deus" fetchpriority="high" width="180" height="180" />
             </div>
             <h1 class="gradient-text">Mesmo sem tempo ou foco, você pode voltar a falar com Deus todos os dias</h1>
             <h2 class="hero-subtitle">Nós te guiamos direto no WhatsApp</h2>
@@ -93,7 +157,7 @@
               </div>
               <div class="showcase-image">
                 <div class="mockup-wrapper">
-                  <img src="/mockups/mockup-audio-ia.png" class="mockup-base" alt="Oração por Áudio IA" />
+                  <img src="/mockups/mockup-audio-ia.webp" class="mockup-base" alt="Oração por Áudio IA" loading="lazy" width="1024" height="1024" />
                 </div>
               </div>
             </div>
@@ -106,7 +170,7 @@
               </div>
               <div class="showcase-image">
                 <div class="mockup-wrapper">
-                  <img src="/mockups/mockup-terco.png" class="mockup-base" alt="Terço Diário" />
+                  <img src="/mockups/mockup-terco.webp" class="mockup-base" alt="Terço Mariano Guiado" loading="lazy" width="1024" height="1103" />
                 </div>
               </div>
             </div>
@@ -119,7 +183,7 @@
               </div>
               <div class="showcase-image">
                 <div class="mockup-wrapper">
-                  <img src="/mockups/mockup-biblia-365.png" class="mockup-base" alt="Bíblia 365" />
+                  <img src="/mockups/mockup-biblia-365.webp" class="mockup-base" alt="Bíblia 365 no WhatsApp" loading="lazy" width="1024" height="1024" />
                 </div>
               </div>
             </div>

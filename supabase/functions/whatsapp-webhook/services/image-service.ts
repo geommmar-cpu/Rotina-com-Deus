@@ -26,7 +26,7 @@ export function generatePremiumImage(title: string, subtitle: string, readingCon
   );
 
   const transformations = [
-    "w_1080,h_1350,c_fill,q_auto,f_jpg",
+    "w_1080,h_1350,c_fill,q_auto,f_auto",
     "b_black,o_65",
     `l_text:Arial_70_bold:${cleanTitle},co_white,g_north,y_150,w_900,c_fit`,
     `l_text:Arial_45_bold:${cleanSub},co_rgb:ffd700,g_north,y_250`,

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap');
+/* Fontes movidas para o index.html para otimização de performance LCP */
 
 :root {
   --primary: #12122b; /* Deep Indigo */
@@ -260,6 +260,8 @@ h1, h2, h3 {
 /* Sections Overhaul */
 section {
   padding: 5rem 0;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
 }
 
 .section-title h2 {
@@ -622,6 +624,7 @@ section {
   position: relative;
   padding: 3rem 0; /* Balanced padding */
   overflow: hidden;
+  content-visibility: visible; /* Hero must always be visible */
 }
 
 .hero-logo {

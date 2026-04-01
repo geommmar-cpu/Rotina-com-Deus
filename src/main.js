@@ -29,12 +29,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const revealElements = document.querySelectorAll('.reveal');
   revealElements.forEach((el) => observer.observe(el));
 
-  // Add parallax effect to hero background on scroll
+  // Optimized Scroll Listener (Throttled)
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
   window.addEventListener('scroll', () => {
-    const hero = document.querySelector('.hero');
-    const scroll = window.pageYOffset;
-    if (hero) {
-      hero.style.backgroundPositionY = `${scroll * 0.5}px`;
+    lastScrollY = window.scrollY;
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        // Sticky Header
+        const header = document.querySelector('#main-header');
+        if (header) {
+          if (lastScrollY > 50) {
+            header.classList.add('scrolled');
+          } else {
+            header.classList.remove('scrolled');
+          }
+        }
+
+        // Parallax Effect
+        const hero = document.querySelector('.hero');
+        if (hero) {
+          hero.style.backgroundPositionY = `${lastScrollY * 0.5}px`;
+        }
+        
+        ticking = false;
+      });
+      ticking = true;
     }
   });
 
@@ -49,16 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-  });
-
-  // Sticky Header Effect
-  const header = document.querySelector('#main-header');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
   });
 
   // FAQ Accordion Logic
