@@ -116,9 +116,9 @@ serve(async (req) => {
         await sleep(1500);
       }
 
-      // SE FOR DE MANHÃ -> Enviar Liturgia + Bíblia 365 Diária
+      // SE FOR DE MANHÃ -> Enviar Liturgia + Bíblia 365 + Lembretes Especiais
       if (routineType === "morning") {
-        // Enviar Liturgia
+        // 1. Enviar Liturgia
         const liturgy = await getDailyLiturgy();
         if (liturgy) {
           const liturgyText = `📖 *LITURGIA DE HOJE*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo do Dia:* ${liturgy.saint}`;
@@ -126,7 +126,7 @@ serve(async (req) => {
           await sleep(1500);
         }
 
-        // Enviar Bíblia 365
+        // 2. Enviar Bíblia 365
         const userProg = user.user_progress?.[0];
         const nextBibleDay = (userProg?.bible_365_day || 0) + 1;
         const bibleContent = await getBible365Content(nextBibleDay);
@@ -136,7 +136,7 @@ serve(async (req) => {
             number: user.phone_number,
             text: bibleContent
           });
-          await sleep(1000);
+          await sleep(1500);
 
           // Atualiza progresso da Bíblia
           const progId = userProg?.id;
@@ -145,6 +145,26 @@ serve(async (req) => {
           } else {
             await supabase.from("user_progress").insert({ whatsapp_user_id: user.id, bible_365_day: nextBibleDay });
           }
+        }
+
+        // 3. Lembretes de Datas Especiais (Quaresma de São Miguel)
+        const miguelStart = new Date(`${new Date().getFullYear()}-08-15`);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        miguelStart.setHours(0, 0, 0, 0);
+        
+        const diffTime = miguelStart.getTime() - todayDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 7) {
+          await whatsappService.sendText({ number: user.phone_number, text: "🔔 *Lembrete:* A Quaresma de São Miguel começa em uma semana (15 de agosto)! Prepare seu coração. 🙏" });
+          await sleep(1000);
+        } else if (diffDays === 1) {
+          await whatsappService.sendText({ number: user.phone_number, text: "⚔️ *Prepare-se:* É amanhã! A Quaresma de São Miguel começa neste dia 15 de agosto. Esteja pronto para a batalha espiritual! 🙏" });
+          await sleep(1000);
+        } else if (diffDays === 0) {
+          await whatsappService.sendText({ number: user.phone_number, text: "🗡️ *Hoje Começamos!* A Quaresma de São Miguel se inicia hoje. Que o Arcanjo nos proteja em nossa jornada de fé! ✨" });
+          await sleep(1000);
         }
       }
 

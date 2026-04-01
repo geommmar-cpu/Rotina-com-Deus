@@ -28,6 +28,7 @@ async function sendMainMenu(phone: string, waUser: any) {
         { title: "🚀 Minha Rotina Diária", id: "btn_routine", description: "Liturgia + Bíblia 365" },
         { title: "✝️ Santo Terço", id: "btn_terco", description: "O Rosário completo e guiado" },
         { title: "🙏 Orações Especiais", id: "btn_special_prayers", description: "S. José, S. Miguel e mais" },
+        { title: "🗡️ Quaresma de S. Miguel", id: "btn_miguel", description: "Início em 15 de Agosto" },
         { title: "🕊️ Quaresma", id: "btn_quaresma", description: "Acompanhe sua jornada" }
       ]
     }, {
