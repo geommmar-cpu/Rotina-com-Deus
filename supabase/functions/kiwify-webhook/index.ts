@@ -65,7 +65,10 @@ serve(async (req) => {
     if (!waUser) {
        console.log("👤 Usuário não encontrado no WhatsApp:", phone, ". Criando base para ativação posterior...");
        // Criar apenas para ter o registro e ativar depois
-       const { data: newUser } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
+       const { data: newUser, error: insertError } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
+       if (insertError) {
+         console.error("❌ Erro ao criar waUser no Kiwify Webhook:", insertError.message);
+       }
        waUser = newUser;
     }
 

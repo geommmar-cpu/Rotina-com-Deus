@@ -93,18 +93,27 @@ serve(async (req) => {
       .eq("phone_number", phone).single();
 
     if (!waUser) {
-      const { data: newUser } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
+      const { data: newUser, error: insertError } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
+      if (insertError) {
+        console.error("❌ Erro ao criar waUser:", insertError.message);
+      }
       waUser = newUser;
       await whatsappService.sendText({ number: phone, text: "Bem-vindo ao *Rotina com Deus*! 🙏\n\nComo você prefere ser chamado(a)?" });
       return new Response("OK", { status: 200 });
     }
 
     if (!waUser.full_name) {
-      await supabase.from("whatsapp_users").update({ full_name: messageText }).eq("id", waUser.id);
+      const { error: updateError } = await supabase.from("whatsapp_users").update({ full_name: messageText }).eq("id", waUser.id);
+      if (updateError) {
+        console.error("❌ Erro ao atualizar nome do waUser:", updateError.message);
+      }
       await whatsappService.sendText({ number: phone, text: `Prazer em te conhecer, *${messageText}*! ✨` });
       await sleep(500);
       await sendMainMenu(phone, { ...waUser, full_name: messageText });
-      await supabase.from("user_preferences").insert({ whatsapp_user_id: waUser.id });
+      const { error: prefError } = await supabase.from("user_preferences").insert({ whatsapp_user_id: waUser.id });
+      if (prefError && prefError.code !== '23505') { // Ignora se já existir
+        console.error("❌ Erro ao criar user_preferences:", prefError.message);
+      }
       return new Response("OK", { status: 200 });
     }
 
