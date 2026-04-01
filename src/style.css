@@ -1163,7 +1163,7 @@ section {
 */
 
 /* Grain Texture Overlay */
-.hero::before, #bonus::before {
+.hero::before {
   content: "";
   position: absolute;
   top: 0;

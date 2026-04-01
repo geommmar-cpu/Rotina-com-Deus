@@ -15,19 +15,25 @@ const corsHeaders = {
 
 const ROUTINES: any = {
   morning: {
+    title: "O PRIMEIRO PENSAMENTO",
+    subtitle: "MANHÃ 07:00",
     text: "Bom dia 🙏\n\nQue Deus abençoe o seu dia.\nAntes de começar suas atividades, vamos entregar este dia nas mãos de Deus.\nRespire fundo... E diga no seu coração:\n\n*Senhor, guia meus passos hoje. Me dá sabedoria, paciência e paz. Que tudo o que eu fizer hoje seja para o bem.*\n\nAmém.",
     audioUrl: "https://rotinacomdeus.vercel.app/audios/bom_dia.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   noon: {
+    title: "PAUSA PARA O CÉU",
+    subtitle: "MEIO-DIA 12:00",
     text: "🕛 O Anjo do Senhor anunciou a Maria... E ela concebeu do Espírito Santo.\n\nAve Maria, cheia de graça...\n\n(Acompanhe o Ângelus completo no áudio guiado abaixo) 🙏",
     audioUrl: "https://rotinacomdeus.vercel.app/audios/angelus.mp3",
     buttons: ["Amém 🙏", "Menu Principal"]
   },
   night: {
+    title: "EXAME DE CONSCIÊNCIA",
+    subtitle: "NOITE 21:00",
     text: "Boa noite 🌙\n\nVamos encerrar o seu dia com Deus.\nRespire fundo... Agora pense no seu dia...\n\nVocê foi paciente? Ajudou alguém? Teve momentos de irritação? Peça perdão a Deus pelas suas falhas... E agradeça pelas coisas boas.\n\n*Senhor, obrigado por este dia. Perdoa minhas falhas e me ajuda a ser melhor amanhã. Amém.*",
-    audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_noite.mp3",
-    buttons: ["Amém 🙏", "Exame Guiado Passo a Passo"]
+    audioUrl: "https://rotinacomdeus.vercel.app/audios/exame_consciencia.mp3",
+    buttons: ["Amém 🙏", "Menu Principal"]
   }
 };
 
@@ -90,16 +96,23 @@ serve(async (req) => {
       const routineMsg = ROUTINES[routineType];
       const prodAudioUrl = routineMsg.audioUrl;
       
-      // Enviar Texto Inicial
+      // Enviar Cabeçalho e Texto Inicial
+      const headerText = `✨ *${routineMsg.title}*\n_${routineMsg.subtitle}_\n\n${routineMsg.text}`;
       await whatsappService.sendText({
         number: user.phone_number,
-        text: routineMsg.text
+        text: headerText
       });
       await sleep(1000);
 
-      // Enviar Áudio se houver
+      // Enviar Áudio Principal se houver
       if (routineMsg.audioUrl) {
         await whatsappService.sendAudio({ number: user.phone_number, audioUrl: prodAudioUrl });
+        await sleep(1500);
+      }
+
+      // Se for de Manhã, enviar Oferecimento do Dia também
+      if (routineType === "morning") {
+        await whatsappService.sendAudio({ number: user.phone_number, audioUrl: "https://rotinacomdeus.vercel.app/audios/oferecimento_dia.mp3" });
         await sleep(1500);
       }
 
@@ -108,7 +121,7 @@ serve(async (req) => {
         // Enviar Liturgia
         const liturgy = await getDailyLiturgy();
         if (liturgy) {
-          const liturgyText = `📖 *Liturgia de Hoje*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo do Dia:* ${liturgy.saint}`;
+          const liturgyText = `📖 *LITURGIA DE HOJE*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo do Dia:* ${liturgy.saint}`;
           await whatsappService.sendText({ number: user.phone_number, text: liturgyText });
           await sleep(1500);
         }
@@ -121,7 +134,7 @@ serve(async (req) => {
         if (bibleContent) {
           await whatsappService.sendText({
             number: user.phone_number,
-            text: bibleContent // O bibleContent já vem formatado com título e dia
+            text: bibleContent
           });
           await sleep(1000);
 

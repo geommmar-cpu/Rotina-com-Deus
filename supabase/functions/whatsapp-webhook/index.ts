@@ -5,6 +5,7 @@ import { getOnboardingFlow, getNextRosaryStep, getMysteryOfDay } from "./service
 import { getDailyLiturgy } from "./services/liturgy-service.ts";
 import { getBible365Content } from "./services/bible-service.ts";
 import { whatsappService } from "./services/whatsapp-service.ts";
+import { generatePremiumImage } from "./services/image-service.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -25,13 +26,14 @@ async function sendMainMenu(phone: string, waUser: any) {
       title: "Oração Diária",
       rows: [
         { title: "🚀 Minha Rotina Diária", id: "btn_routine", description: "Liturgia + Bíblia 365" },
-        { title: "📿 Santo Terço", id: "btn_terco", description: "O Rosário completo e guiado" }
+        { title: "📿 Santo Terço", id: "btn_terco", description: "O Rosário completo e guiado" },
+        { title: "🙏 Orações Especiais", id: "btn_special_prayers", description: "S. José, S. Miguel e mais" },
+        { title: "🕊️ Quaresma", id: "btn_quaresma", description: "Acompanhe sua jornada" }
       ]
     }, {
-      title: "Jornadas Espirituais",
+      title: "Configurações",
       rows: [
-        { title: "💜 Quaresma", id: "btn_quaresma", description: "Reflexão de 40 dias" },
-        { title: "⚔️ São Miguel", id: "btn_miguel", description: "Quaresma de São Miguel" }
+        { title: "⚙️ Preferências", id: "btn_prefs", description: "Notificações e Horários" }
       ]
     }]
   });
@@ -114,15 +116,33 @@ serve(async (req) => {
     
     if (isRoutineTrigger) {
       await saveProgress(waUser.id, { last_prayer_type: null, last_prayer_step: 0 });
-      await whatsappService.sendText({ number: phone, text: "🚀 Preparando sua rotina... 🙏" });
+      await whatsappService.sendText({ number: phone, text: "🚀 Preparando sua rotina premium... 🙏" });
+      
+      const now = new Date();
+      now.setHours(now.getHours() - 3);
+      const todayStr = now.toISOString().split('T')[0];
+      const todayFormat = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      
       const liturgy = await getDailyLiturgy();
       if (liturgy) {
-        await whatsappService.sendText({ number: phone, text: `📖 *Liturgia Diária*\n\n*${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo:* ${liturgy.saint}` });
-        await sleep(1500);
+        await whatsappService.sendText({ number: phone, text: `📖 *${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo:* ${liturgy.saint}` });
+        await sleep(1000);
       }
-      const currentDay = (userProgress?.bible_365_day || 0) + 1;
+      
+      const lastUpdate = userProgress?.updated_at ? new Date(userProgress.updated_at) : new Date(0);
+      lastUpdate.setHours(lastUpdate.getHours() - 3);
+      const lastUpdateStr = lastUpdate.toISOString().split('T')[0];
+
+      let currentDay = userProgress?.bible_365_day || 0;
+      if (lastUpdateStr !== todayStr) {
+        currentDay += 1;
+      }
+      
       const bibleContent = await getBible365Content(currentDay);
-      const encText = `✨ *Bíblia 365 - Dia ${currentDay}*\n\n${bibleContent}\n\n🙏 Glória a Deus! Você completou mais um passo na sua jornada de fé hoje.`;
+      await whatsappService.sendText({ number: phone, text: `✨ *Leitura do Dia ${currentDay}*\n\n${bibleContent}` });
+      await sleep(1000);
+
+      const encText = `🙏 Glória a Deus! Você completou mais um passo na sua jornada de fé hoje.\n\nComo posso te ajudar agora?`;
       
       await whatsappService.sendButtons({ 
         number: phone, 
@@ -237,11 +257,41 @@ serve(async (req) => {
       return new Response("OK", { status: 200 });
     }
 
+    if (buttonId === "btn_special_prayers") {
+      await whatsappService.sendButtons({
+        number: phone,
+        text: "🙏 *Orações Especiais*\n\nEscolha uma oração para ouvir e acompanhar em silêncio:",
+        buttons: [
+          { displayText: "São José 🧔‍♂️", id: "btn_sao_jose" },
+          { displayText: "São Miguel 🗡️", id: "btn_sao_miguel" },
+          { displayText: "Menu Principal", id: "btn_menu" }
+        ]
+      });
+      return new Response("OK", { status: 200 });
+    }
+
+    if (buttonId === "btn_sao_jose") {
+      await whatsappService.sendText({ number: phone, text: "🧔‍♂️ *Oração a São José*\n\n_Vinde a nós, S. José, em nossa tribulação..._" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_sao_jose.mp3" });
+      return new Response("OK", { status: 200 });
+    }
+
+    if (buttonId === "btn_sao_miguel") {
+      await whatsappService.sendText({ number: phone, text: "🗡️ *Oração a São Miguel Arcanjo*\n\n_São Miguel Arcanjo, defendei-nos no combate..._" });
+      await whatsappService.sendAudio({ number: phone, audioUrl: "https://rotinacomdeus.vercel.app/audios/oracao_sao_miguel.mp3" });
+      return new Response("OK", { status: 200 });
+    }
+
     // ====== 🎤 TRATAMENTO DE ÁUDIO ======
     if (isAudio) {
       const audioId = message.audio?.id;
-      const prayerResult = await generatePersonalizedPrayer(await whatsappService.downloadMedia(audioId), message.audio?.mime_type);
-      await whatsappService.sendButtons({ number: phone, text: prayerResult.text, buttons: prayerResult.buttons.map((b: string) => ({ displayText: b })) });
+      const audioData = await whatsappService.downloadMedia(audioId);
+      if (audioData) {
+        const prayerResult = await generatePersonalizedPrayer(audioData, message.audio?.mime_type);
+        await whatsappService.sendButtons({ number: phone, text: prayerResult.text, buttons: prayerResult.buttons.map((b: string) => ({ displayText: b })) });
+      } else {
+        await whatsappService.sendText({ number: phone, text: "🙏 Perdoe-me, não consegui ouvir seu áudio agora. Pode tentar novamente ou escrever?" });
+      }
       return new Response("OK", { status: 200 });
     }
 

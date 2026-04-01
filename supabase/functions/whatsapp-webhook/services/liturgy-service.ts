@@ -46,7 +46,10 @@ export async function getDailyLiturgy() {
             structuredData.saint = saintSearch;
         }
 
-        const summary = `Título: ${structuredData.title}. Leituras: ${structuredData.primeiraLeitura?.substring(0,100)}. Evangelho: ${structuredData.evangelho?.substring(0,100)}.`;
+        const pLeitura = typeof structuredData.primeiraLeitura === 'string' ? structuredData.primeiraLeitura : (structuredData.primeiraLeitura?.texto || "");
+        const evan = typeof structuredData.evangelho === 'string' ? structuredData.evangelho : (structuredData.evangelho?.texto || "");
+        
+        const summary = `Título: ${structuredData.title}. Leituras: ${pLeitura.substring(0,100)}. Evangelho: ${evan.substring(0,100)}.`;
         const reflection = await generateLiturgyReflection(summary);
 
         return {

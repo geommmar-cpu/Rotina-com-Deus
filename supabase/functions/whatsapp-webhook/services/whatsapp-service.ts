@@ -21,6 +21,12 @@ export interface SendAudioOptions {
   audioUrl: string;
 }
 
+export interface SendImageOptions {
+  number: string;
+  imageUrl: string;
+  caption?: string;
+}
+
 export class WhatsAppService {
   private apiUrl: string;
   private accessToken: string;
@@ -30,7 +36,7 @@ export class WhatsAppService {
   public isSimulator: boolean = false;
 
   constructor() {
-    this.apiUrl = "https://graph.facebook.com/v22.0";
+    this.apiUrl = "https://graph.facebook.com/v19.0";
     this.accessToken = Deno.env.get("META_ACCESS_TOKEN") || "";
     this.phoneNumberId = Deno.env.get("META_PHONE_NUMBER_ID") || "";
   }
@@ -64,6 +70,26 @@ export class WhatsAppService {
       to: this.formatNumber(options.number),
       type: "audio",
       audio: { link: options.audioUrl }
+    };
+
+    return this.postRequest(body);
+  }
+
+  async sendImage(options: SendImageOptions) {
+    if (this.isSimulator) {
+      this.simulatorMessages.push(`🖼️ [Imagem Enviada: ${options.imageUrl}] ${options.caption || ""}`);
+      return { success: true };
+    }
+
+    const body = {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: this.formatNumber(options.number),
+      type: "image",
+      image: { 
+        link: options.imageUrl,
+        caption: options.caption 
+      }
     };
 
     return this.postRequest(body);
@@ -199,6 +225,7 @@ export class WhatsAppService {
 
   private async postRequest(body: any) {
     const url = `${this.apiUrl}/${this.phoneNumberId}/messages`;
+    console.log(`📡 [WhatsApp] Enviando request para: ${url}\nPayload:`, JSON.stringify(body, null, 2));
     
     try {
       const response = await fetch(url, {
@@ -212,13 +239,15 @@ export class WhatsAppService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Erro Meta API (${url}):`, errorText);
+        console.error(`❌ Erro Meta API (${url}) Status: ${response.status}\nResponse:`, errorText);
         return { success: false, error: errorText };
       }
 
-      return { success: true, data: await response.json() };
+      const resJson = await response.json();
+      console.log(`✅ [WhatsApp] Sucesso:`, JSON.stringify(resJson));
+      return { success: true, data: resJson };
     } catch (err) {
-      console.error(`Falha na requisição Meta WhatsApp (${url}):`, err);
+      console.error(`🔥 Falha crítica Meta WhatsApp (${url}):`, err.message);
       return { success: false, error: err.message };
     }
   }
