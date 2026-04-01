@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { generateSpiritualResponse, generatePersonalizedPrayer, generateSpecialPeriodDay } from "./services/ai-service.ts";
+import { generateSpiritualResponse, generatePersonalizedPrayer, generateSpecialPeriodDay, transcribeAudio } from "./services/ai-service.ts";
 import { getOnboardingFlow, getNextRosaryStep, getMysteryOfDay } from "./services/prayer-service.ts";
 import { getDailyLiturgy } from "./services/liturgy-service.ts";
 import { getBible365Content } from "./services/bible-service.ts";
@@ -290,13 +290,38 @@ serve(async (req) => {
       return new Response("OK", { status: 200 });
     }
 
-    // ====== 🎤 TRATAMENTO DE ÁUDIO ======
+    // ====== 🎤 TRATAMENTO DE ÁUDIO (Contextual) ======
     if (isAudio) {
       const audioId = message.audio?.id;
       const audioData = await whatsappService.downloadMedia(audioId);
+      
       if (audioData) {
-        const prayerResult = await generatePersonalizedPrayer(audioData, message.audio?.mime_type);
-        await whatsappService.sendButtons({ number: phone, text: prayerResult.text, buttons: prayerResult.buttons.map((b: string) => ({ displayText: b })) });
+        const transcription = await transcribeAudio(audioData, message.audio?.mime_type);
+        const msg = transcription || "[SEM_FALA]";
+        
+        let aiPrompt = msg;
+        let aiContext = `Usuário: ${waUser.full_name}, Tipo: ÁUDIO`;
+
+        if (userProgress?.last_prayer_type === "reflection" || userProgress?.last_prayer_type === "intention") {
+          // Captura Contexto Diário para a IA
+          const liturgy = await getDailyLiturgy();
+          const bible = await getBible365Content(userProgress?.bible_365_day || 1);
+          const dailyContext = `LITURGIA: ${liturgy?.title} - ${liturgy?.reflection}\nBÍBLIA: ${bible.substring(0, 300)}`;
+          
+          if (userProgress.last_prayer_type === "reflection") {
+            aiPrompt = `O usuário enviou uma REFLEXÃO EM ÁUDIO sobre a leitura de hoje.\nCONTEÚDO DO DIA:\n${dailyContext}\n\nO QUE ELE DISSE (Transcrição): "${msg}".\nResponda como guia espiritual católico, comentando a reflexão dele.`;
+          } else {
+            aiPrompt = `O usuário enviou uma INTENÇÃO EM ÁUDIO: "${msg}".\nReze por ele de forma breve e acolhedora.`;
+          }
+          
+          const aiRes = await generateSpiritualResponse(aiPrompt, aiContext);
+          await whatsappService.sendButtons({ number: phone, text: aiRes.text, buttons: aiRes.buttons.slice(0, 2).map((b: string) => ({ displayText: b })) });
+          await saveProgress(waUser.id, { last_prayer_type: null });
+        } else {
+          // Comportamento original se não for reflexão/intenção
+          const prayerResult = await generatePersonalizedPrayer(audioData, message.audio?.mime_type);
+          await whatsappService.sendButtons({ number: phone, text: prayerResult.text, buttons: prayerResult.buttons.map((b: string) => ({ displayText: b })) });
+        }
       } else {
         await whatsappService.sendText({ number: phone, text: "🙏 Perdoe-me, não consegui ouvir seu áudio agora. Pode tentar novamente ou escrever?" });
       }
@@ -305,13 +330,22 @@ serve(async (req) => {
 
     // ====== 🕊️ IA CONVERSACIONAL (Reflexão / Intenção / Geral) ======
     let aiPrompt = messageText;
-    if (userProgress?.last_prayer_type === "reflection") {
-      aiPrompt = `O usuário está refletindo sobre a leitura do dia: "${messageText}". Responda como guia espiritual católico.`;
-    } else if (userProgress?.last_prayer_type === "intention") {
-      aiPrompt = `O usuário enviou uma intenção de oração: "${messageText}". Reze por ele agora de forma breve.`;
+    let aiContext = `Nome: ${waUser.full_name}, Tipo: ${userProgress?.last_prayer_type || "conversa"}`;
+
+    if (userProgress?.last_prayer_type === "reflection" || userProgress?.last_prayer_type === "intention") {
+      // Captura Contexto Diário para a IA
+      const liturgy = await getDailyLiturgy();
+      const bible = await getBible365Content(userProgress?.bible_365_day || 1);
+      const dailyContext = `LITURGIA: ${liturgy?.title} - ${liturgy?.reflection}\nBÍBLIA: ${bible.substring(0, 300)}`;
+
+      if (userProgress.last_prayer_type === "reflection") {
+        aiPrompt = `O usuário está REFLETINDO sobre a leitura de hoje.\nCONTEÚDO DO DIA:\n${dailyContext}\n\nO QUE ELE ESCREVEU: "${messageText}".\nResponda como guia espiritual católico, conectando o que ele disse com a palavra de hoje.`;
+      } else if (userProgress.last_prayer_type === "intention") {
+        aiPrompt = `O usuário enviou uma INTENÇÃO DE ORAÇÃO: "${messageText}".\nReze por ele agora de forma breve e acolhedora.`;
+      }
     }
 
-    const aiRes = await generateSpiritualResponse(aiPrompt, `Nome: ${waUser.full_name}, Tipo: ${userProgress?.last_prayer_type || "conversa"}`);
+    const aiRes = await generateSpiritualResponse(aiPrompt, aiContext);
     await whatsappService.sendButtons({ 
       number: phone, 
       text: aiRes.text, 
