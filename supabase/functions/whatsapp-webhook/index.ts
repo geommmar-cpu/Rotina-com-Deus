@@ -117,7 +117,7 @@ serve(async (req) => {
     // Ignora se for o comando de menu ou se já estiver ativo
     const isSpecialAdmin = phone === "556198416939" || phone === "556139841693"; // Exemplo de whitelist
     
-    if (!isSubscriptionActive && !isSpecialAdmin) {
+    if (!isSubscriptionActive && !isSpecialAdmin && !isSimulator) {
       if (buttonId === "btn_subscribe") {
         const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Anual (Recomendado)*: 12x de R$ 9,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL\n\n🔹 *Semestral*: 6x de R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_SEMESTRAL\n\n🔹 *Mensal*: R$ 19,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
         await whatsappService.sendText({ number: phone, text: plansText });

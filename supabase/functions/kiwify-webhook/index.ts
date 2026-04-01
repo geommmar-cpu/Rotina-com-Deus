@@ -13,12 +13,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const KIWIFY_SECRET = Deno.env.get("KIWIFY_SECRET") || "";
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const payload = await req.json();
-    console.log("📦 Kiwify Webhook Received:", JSON.stringify(payload));
+    const rawBody = await req.text();
+    const signature = req.headers.get("X-Kiwify-Signature");
+
+    // 🛡️ VERIFICAÇÃO DE ASSINATURA (SG-PRO-MAX)
+    if (KIWIFY_SECRET && signature) {
+      const hmac = crypto.subtle.importKey(
+        "raw", new TextEncoder().encode(KIWIFY_SECRET),
+        { name: "HMAC", hash: "SHA-256" },
+        false, ["sign"]
+      ).then(key => crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody)))
+       .then(signed => Array.from(new Uint8Array(signed)).map(b => b.toString(16).padStart(2, "0")).join(""));
+      
+      const computedSignature = await hmac;
+      if (computedSignature !== signature) {
+        console.error("❌ Assinatura Kiwify Inválida!");
+        return new Response("Invalid signature", { status: 401 });
+      }
+    } else if (KIWIFY_SECRET && !signature) {
+       console.warn("⚠️ Webhook recebido sem assinatura, mas secret está configurada!");
+       return new Response("Missing signature", { status: 401 });
+    }
+
+    const payload = JSON.parse(rawBody);
+    console.log("📦 Kiwify Webhook Approved & Validated:", JSON.stringify(payload));
 
     const { order_status, customer_mobile, customer_email, product_name } = payload;
     
