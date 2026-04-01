@@ -154,7 +154,7 @@ serve(async (req) => {
 
     // ====== 🛑 VERIFICAÇÃO DE ASSINATURA (Paywall) ======
     // Ignora se for o comando de menu ou se já estiver ativo
-    const isSpecialAdmin = phone === "556198416939" || phone === "556139841693"; // Exemplo de whitelist
+    const isSpecialAdmin = phone === "556198416939" || phone === "556139841693" || phone === "556184585912"; // Whitelist de Admins
     
     if (!isSubscriptionActive && !isSpecialAdmin && !isSimulator) {
       if (buttonId === "btn_subscribe") {
