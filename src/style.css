@@ -533,14 +533,15 @@ section {
   height: 48px;
   stroke: var(--accent);
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 8px var(--accent-glow));
+  filter: drop-shadow(0 0 12px var(--accent-glow)) drop-shadow(0 0 4px var(--accent));
   transition: var(--transition);
   margin-bottom: 2rem;
+  display: block;
 }
 
-.feature-card:hover .premium-icon {
-  transform: scale(1.1) rotate(5deg);
-  filter: drop-shadow(0 0 15px var(--accent));
+.bonus-card:hover .premium-icon {
+  transform: scale(1.15) rotate(8deg);
+  filter: drop-shadow(0 0 20px var(--accent));
 }
 
 /* Image Card Styling */
