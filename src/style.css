@@ -1258,6 +1258,16 @@ section {
   color: var(--accent);
 }
 
+.bonus-gift-svg {
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  transition: var(--transition);
+}
+
+.bonus-card:hover .bonus-gift-svg {
+  transform: scale(1.1) rotate(15deg);
+  filter: drop-shadow(0 0 15px var(--accent));
+}
+
 .premium-sparkle {
   filter: drop-shadow(0 0 8px var(--accent-glow));
   transition: var(--transition);
@@ -1459,4 +1469,13 @@ section {
   .mockup-wrapper {
     max-width: 320px;
   }
+}
+
+.bonus-list-item {
+  margin-left: 1.2rem;
+  font-size: 0.82rem;
+  opacity: 0.9;
+  list-style: none;
+  margin-top: 0.35rem;
+  color: var(--text-dim) !important;
 }
