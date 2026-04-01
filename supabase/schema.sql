@@ -81,7 +81,7 @@ DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profiles') THEN
         ALTER TABLE public.profiles 
-        ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'trial' CHECK (subscription_status IN ('active', 'trial', 'expired', 'cancelled')),
-        ADD COLUMN IF NOT EXISTS subscription_valid_until TIMESTAMPTZ DEFAULT (now() + interval '7 days');
+        ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'expired' CHECK (subscription_status IN ('active', 'trial', 'expired', 'cancelled')),
+        ADD COLUMN IF NOT EXISTS subscription_valid_until TIMESTAMPTZ DEFAULT (now());
     END IF;
 END $$;

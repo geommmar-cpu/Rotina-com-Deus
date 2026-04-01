@@ -88,7 +88,8 @@ serve(async (req) => {
       isAudio = true;
     }
 
-    let { data: waUser } = await supabase.from("whatsapp_users").select("*, user_preferences(*), user_progress(*)")
+    let { data: waUser } = await supabase.from("whatsapp_users")
+      .select("*, user_preferences(*), user_progress(*), profile:user_id(subscription_status, subscription_valid_until)")
       .eq("phone_number", phone).single();
 
     if (!waUser) {
@@ -108,7 +109,38 @@ serve(async (req) => {
     }
 
     const userProgress = waUser.user_progress?.[0];
+    const userProfile = waUser.profile;
+    const isSubscriptionActive = userProfile?.subscription_status === "active" || userProfile?.subscription_status === "trial";
     const normalizedMsg = messageText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    // ====== 🛑 VERIFICAÇÃO DE ASSINATURA (Paywall) ======
+    // Ignora se for o comando de menu ou se já estiver ativo
+    const isSpecialAdmin = phone === "556198416939" || phone === "556139841693"; // Exemplo de whitelist
+    
+    if (!isSubscriptionActive && !isSpecialAdmin) {
+      if (buttonId === "btn_subscribe") {
+        const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Anual (Recomendado)*: 12x de R$ 9,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL\n\n🔹 *Semestral*: 6x de R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_SEMESTRAL\n\n🔹 *Mensal*: R$ 19,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
+        await whatsappService.sendText({ number: phone, text: plansText });
+        return new Response("OK", { status: 200 });
+      }
+
+      if (buttonId === "btn_support") {
+        await whatsappService.sendText({ number: phone, text: "🙌 *Suporte Rotina com Deus*\n\nPrecisa de ajuda com sua assinatura ou tem alguma dúvida? Fale conosco por aqui ou envie um e-mail para suporte@rotinacomdeus.com.br" });
+        return new Response("OK", { status: 200 });
+      }
+
+      const renewText = `🙏 Olá! Percebi que sua jornada no *Rotina com Deus* ainda não foi ativada ou sua assinatura expirou.\n\nPara continuar recebendo as orações diárias, acompanhar a Bíblia 365 e ter o suporte da nossa IA espiritual, você pode renovar seu acesso clicando no botão abaixo.`;
+      
+      await whatsappService.sendButtons({
+        number: phone,
+        text: renewText,
+        buttons: [
+          { displayText: "⭐ Renovação Premium", id: "btn_subscribe" },
+          { displayText: "Dúvidas / Suporte", id: "btn_support" }
+        ]
+      });
+      return new Response("OK", { status: 200 });
+    }
 
     // ====== 🔥 GATILHOS DO MENU ======
     const isMenuTrigger = buttonId === "btn_menu" || normalizedMsg === "menu" || normalizedMsg === "menu principal";
