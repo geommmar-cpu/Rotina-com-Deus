@@ -1516,3 +1516,12 @@ section {
   font-weight: 800;
   margin-left: 10px;
 }
+
+/* Visibility Utilities */
+.mobile-only { display: none; }
+.desktop-only { display: block; }
+
+@media (max-width: 768px) {
+  .mobile-only { display: block; }
+  .desktop-only { display: none; }
+}

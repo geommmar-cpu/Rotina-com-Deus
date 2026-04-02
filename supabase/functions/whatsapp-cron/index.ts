@@ -45,8 +45,12 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const routineType = url.searchParams.get("type") as "morning" | "noon" | "night";
+    const force = url.searchParams.get("force") === "true";
+
+    console.log(`[CRON] Recebido disparo: Tipo = ${routineType}`);
 
     if (!routineType || !ROUTINES[routineType]) {
+      console.error(`[CRON] Erro: Tipo de rotina '${routineType}' inválido.`);
       return new Response("Parâmetro 'type' inválido. Use ?type=morning, noon ou night.", { 
         status: 400, 
         headers: corsHeaders 
@@ -64,7 +68,12 @@ serve(async (req) => {
       .from("whatsapp_users")
       .select("*, user_preferences(*), user_progress(*)");
 
-    if (userError) throw userError;
+    if (userError) {
+      console.error("[CRON] Erro ao buscar usuários:", userError);
+      throw userError;
+    }
+
+    console.log(`[CRON] Processando ${users?.length || 0} usuários para a rotina ${routineType}.`);
 
     let sentCount = 0;
     const intentName = `routine_${routineType}`;
@@ -88,8 +97,15 @@ serve(async (req) => {
         .gte("created_at", `${today}T00:00:00.000Z`)
         .limit(1);
 
-      if (logs && logs.length > 0) {
+      if (!force && logs && logs.length > 0) {
+        console.log(`[CRON] Ignorando ${user.phone_number}: Já recebeu a rotina ${routineType} hoje (${today}).`);
         continue;
+      }
+
+      if (force) {
+        console.log(`[CRON] MODO FORÇADO: Enviando rotina ${routineType} para ${user.phone_number} ignorando logs.`);
+      } else {
+        console.log(`[CRON] Enviando rotina ${routineType} para ${user.phone_number}...`);
       }
 
       // 3. Preparar a mensagem
@@ -184,6 +200,8 @@ serve(async (req) => {
         ai_response: routineMsg.text,
         intent: intentName
       });
+
+      console.log(`[CRON] Sucesso para ${user.phone_number}`);
 
       sentCount++;
     }

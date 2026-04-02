@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon-premium.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rotina com Deus | Volte a ter paz diária</title>
+    <meta name="description" content="Você não perdeu a fé… só perdeu a rotina com Deus. Recupere sua paz diária pelo WhatsApp." />
+    
+    <!-- Fonts Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <!-- Performance Preloads -->
+    <link rel="preload" href="/logo2-mobile.webp" as="image" type="image/webp" media="(max-width: 768px)" fetchpriority="high">
+    <link rel="preload" href="/logo2.webp" as="image" type="image/webp" media="(min-width: 769px)" fetchpriority="high">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rotinacomdeus.com.br/lp-paz" />
+    <meta property="og:title" content="Rotina com Deus | Volte a ter paz diária" />
+    <meta property="og:description" content="Você não perdeu a fé… só perdeu a rotina com Deus. Recupere sua paz diária pelo WhatsApp." />
+    <meta property="og:image" content="/logo2.webp" />
+
+    <style>
+      :root {
+        --primary: #12122b;
+        --accent: #f9a826;
+        --accent-glow: rgba(249, 168, 38, 0.4);
+        --premium-accent: #ffae19;
+        --bg-dark: #0a0a1a;
+        --glass: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+        --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Outfit', sans-serif;
+        --fs-h1: clamp(2.5rem, 8vw, 4.5rem);
+        --fs-h2: clamp(1.8rem, 5vw, 3rem);
+        --fs-h3: clamp(1.4rem, 3vw, 2.2rem);
+        --fs-body: clamp(1rem, 1.25vw, 1.15rem);
+        --section-padding: clamp(4rem, 12vw, 8rem);
+        --glow-shadow: 0 0 30px var(--accent-glow);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background-color: var(--bg-dark);
+        line-height: 1.7;
+        font-size: var(--fs-body);
+        font-weight: 300;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: radial-gradient(circle at 20% 30%, rgba(26, 31, 60, 0.5), transparent);
+        position: relative;
+        padding-top: 120px;
+        overflow: hidden;
+      }
+      .hero .container { display: flex; align-items: center; justify-content: space-between; gap: 4rem; width: 100%; }
+      .hero-logo { margin-bottom: 1.5rem; text-align: left; }
+      .hero-logo img { height: clamp(100px, 20vw, 150px); width: auto; object-fit: contain; }
+      .gradient-text {
+        background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .btn { display: inline-block; padding: 1.2rem 3rem; border-radius: 100px; text-decoration: none; font-weight: 700; transition: var(--transition); cursor: pointer; border: none; font-size: 1.1rem; text-align: center; }
+      .btn-primary { background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%); color: #000; box-shadow: 0 15px 30px var(--accent-glow); }
+      .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 20px 40px var(--accent-glow); }
+      .urgency-banner { background: var(--primary); color: white; padding: 0.8rem; text-align: center; font-size: 0.9rem; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--glass-border); font-weight: 700; }
+      .mockup-base { width: 100%; height: auto; display: block; }
+      .hero-content { z-index: 10; flex: 1; max-width: 750px; }
+      .highlight { color: var(--accent); }
+      
+      /* Pricing Enhancements */
+      .featured-plan { border: 2px solid var(--accent) !important; transform: scale(1.05); z-index: 5; background: rgba(255, 255, 255, 0.08) !important; }
+      .plan-tag.highlight { background: var(--accent); color: #000; }
+      
+      @media (max-width: 968px) {
+        .featured-plan { transform: scale(1); margin: 1rem 0; }
+        .hero .container { flex-direction: column; text-align: center; padding-top: 2rem; }
+        .hero-logo { text-align: center; }
+        .hero-btns { justify-content: center; display: flex; }
+      }
+    </style>
+    <link rel="stylesheet" href="/src/style.css" media="print" onload="this.media='all'" />
+  </head>
+  <body>
+    <!-- Urgency Banner -->
+    <div class="urgency-banner">
+      ⚠️ Valor promocional por tempo limitado: <span class="highlight">Apenas para os próximos 50</span> assinantes
+    </div>
+
+    <main>
+      <!-- 1. Hero -->
+      <section id="hero" class="hero">
+        <div class="container">
+          <div class="hero-content">
+            <div class="hero-logo">
+              <img src="/logo2-mobile.webp" alt="Rotina com Deus" fetchpriority="high" width="180" height="180" class="mobile-only" />
+              <img src="/logo2.webp" alt="Rotina com Deus" fetchpriority="high" width="180" height="180" class="desktop-only" />
+            </div>
+            <h1 class="gradient-text">“Você não perdeu a fé… só perdeu a rotina com Deus — e isso tá te deixando vazio todos os dias.”</h1>
+            <h2 class="hero-subtitle" style="margin-top: 1.5rem; font-size: 1.3rem; opacity: 0.9; font-weight: 400;">Um método simples no WhatsApp que te guia diariamente pra voltar a falar com Deus — mesmo sem tempo, disciplina ou motivação.</h2>
+            <div class="hero-btns" style="margin-top: 2.5rem;">
+              <a href="#planos" class="btn btn-primary">Quero voltar a ter paz com Deus</a>
+            </div>
+          </div>
+
+          <div class="phone-mockup">
+            <div class="phone-screen">
+              <div class="wa-header">
+                <span>Rotina com Deus</span>
+              </div>
+              <div class="wa-body">
+                <div class="wa-msg wa-received">🙏 Bom dia, Maria! Hoje contemplamos os Mistérios Gozosos. Vamos rezar?</div>
+                <div class="wa-msg wa-sent">Vamos sim!</div>
+                <div class="wa-msg wa-received">✝️ Mistério 1: A Anunciação. "Eis aqui a serva do Senhor..."</div>
+                <div class="wa-actions">
+                  <span class="wa-btn">Próximo Passo</span>
+                  <span class="wa-btn">Pausar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. O Problema -->
+      <section id="dificuldades" class="reveal section-padding pain-points-section">
+        <div class="container pain-points-container" style="text-align: center;">
+          <h2 class="pain-point-title">Qual é o verdadeiro problema?</h2>
+          <div class="pain-point-items" style="margin: 3rem 0;">
+            <p style="font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem;">Você não é fraco.</p>
+            <p style="font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem;">Você não é sem fé.</p>
+            <p style="font-size: 1.4rem; color: var(--accent);">Você só tá perdido na rotina.</p>
+          </div>
+          <div class="pain-point-text" style="max-width: 600px; margin: 0 auto; line-height: 2;">
+            <p>Sem direção…</p>
+            <p>sem consistência…</p>
+            <p>sem saber por onde começar.</p>
+            <p style="margin-top: 2rem; font-weight: 600;">E isso vai te afastando de Deus… dia após dia.</p>
+          </div>
+          <h3 class="gradient-text giant-text" style="margin-top: 4rem;">Resgate sua essência.</h3>
+        </div>
+      </section>
+
+      <!-- 3. Quebra de Objeções -->
+      <section id="quebra-objecoes" class="reveal section-padding">
+        <div class="container">
+          <div class="section-header" style="text-align: center; margin-bottom: 4rem;">
+            <h2 class="gradient-text">Chega de desculpas para a sua alma.</h2>
+          </div>
+          <div class="objections-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div class="glass-card" style="padding: 2rem;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">❌ “Eu não tenho tempo”</h4>
+              <p style="font-size: 0.95rem;">→ Você só precisa de poucos minutos guiados no seu WhatsApp.</p>
+            </div>
+            <div class="glass-card" style="padding: 2rem;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">❌ “Não consigo manter constância”</h4>
+              <p style="font-size: 0.95rem;">→ Aqui você não depende de disciplina. Nós te chamamos e te guiamos.</p>
+            </div>
+            <div class="glass-card" style="padding: 2rem;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">❌ “Eu não sei orar direito”</h4>
+              <p style="font-size: 0.95rem;">→ Você recebe tudo pronto: orações, meditações e o passo a passo.</p>
+            </div>
+            <div class="glass-card" style="padding: 2rem;">
+              <h4 style="color: var(--accent); margin-bottom: 1rem;">❌ “Já tentei e não consegui”</h4>
+              <p style="font-size: 0.95rem;">→ Porque você tentou sozinho. Agora você tem um guia espiritual 24h.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Funcionalidades -->
+      <section class="reveal section-padding" style="background: rgba(255,255,255,0.02);">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="gradient-text">Tudo o que você precisa em um só lugar.</h2>
+            <p class="section-subtitle">O seu direcionamento diário, direto no WhatsApp.</p>
+          </div>
+          <div class="features-grid">
+            <div class="feature-card glass-card">
+              <div class="feature-img-wrapper" style="font-size: 2.5rem;">✔️</div>
+              <h3>Direcionamento Simples</h3>
+              <p>Saiba exatamente o que rezar e como refletir em cada momento do dia.</p>
+            </div>
+            <div class="feature-card glass-card">
+              <div class="feature-img-wrapper" style="font-size: 2.5rem;">✔️</div>
+              <h3>Orações Prontas</h3>
+              <p>Chega de procurar textos. Enviamos as preces certas para o seu estado de espírito.</p>
+            </div>
+            <div class="feature-card glass-card">
+              <div class="feature-img-wrapper" style="font-size: 2.5rem;">✔️</div>
+              <h3>Áudios Guiados</h3>
+              <p>Feche os olhos e deixe nossa voz te conduzir em meditações profundas e terços.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Pra Quem É? -->
+      <section id="para-quem" class="reveal section-padding">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="gradient-text">Isso é pra você que:</h2>
+          </div>
+          <div class="trust-grid">
+            <div class="glass-card trust-card">
+              <p style="font-size: 1.1rem; font-weight: 500;">✔️ Sente que está se afastando de Deus e quer voltar.</p>
+            </div>
+            <div class="glass-card trust-card">
+              <p style="font-size: 1.1rem; font-weight: 500;">✔️ Quer voltar à fé, mas não consegue sozinho.</p>
+            </div>
+            <div class="glass-card trust-card">
+              <p style="font-size: 1.1rem; font-weight: 500;">✔️ Vive na correria e acaba perdendo o foco espiritual.</p>
+            </div>
+            <div class="glass-card trust-card">
+              <p style="font-size: 1.1rem; font-weight: 500;">✔️ Deseja sentir paz de verdade no meio do caos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Bônus -->
+      <section id="bonus" class="reveal section-padding" style="background: linear-gradient(180deg, transparent, rgba(249,168,38,0.05));">
+        <div class="container">
+          <div class="section-header">
+            <span class="bonus-tag">PRESENTES EXCLUSIVOS</span>
+            <h2 class="gradient-text">Sua Jornada de Paz Mental</h2>
+          </div>
+          <div class="bonus-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <div class="bonus-card glass-card">
+              <h4>🎁 Guia Rápido de Oração</h4>
+              <p>Ferramentas espirituais para momentos difíceis e decisões importantes.</p>
+            </div>
+            <div class="bonus-card glass-card">
+              <h4>🎁 Áudios Extras de Paz</h4>
+              <p>Meditações curtas para acalmar a mente em menos de 2 minutos.</p>
+            </div>
+            <div class="bonus-card glass-card">
+              <h4>🎁 Sequência Anti-Ansiedade</h4>
+              <p>Um roteiro especial de preces para dias de angústia e pressão.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Preços -->
+      <section id="planos" class="reveal section-padding">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+             <p style="font-size: 1.5rem; color: var(--accent); font-weight: 600; margin-bottom: 1rem;">“Quantos dias você já disse que ia voltar a falar com Deus… e não voltou?”</p>
+             <h2 class="gradient-text" style="font-size: clamp(2rem, 5vw, 3.5rem);">Menos de R$ 2 por dia para voltar a ter paz.</h2>
+          </div>
+
+          <div class="pricing-grid">
+            <!-- PLANO ESSENCIAL -->
+            <div class="glass-card pricing-card">
+              <h3 class="plan-name">Plano Essencial</h3>
+              <p style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 1rem;">Comece sua rotina hoje</p>
+              <div class="price">R$ 19,90<span class="period">/mês</span></div>
+              <ul class="plan-features">
+                <li>✔️ Acesso às mensagens diárias</li>
+                <li>✔️ Orações prontas e guiadas</li>
+                <li>✔️ Reflexões simples e diretas</li>
+              </ul>
+              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL" class="btn btn-secondary full-width">Começar agora</a>
+              <p style="font-size: 0.7rem; margin-top: 1rem; opacity: 0.5;">Ideal para remover objeções e experimentar.</p>
+            </div>
+
+            <!-- PLANO COMPLETO (O DESTAQUE) -->
+            <div class="glass-card pricing-card featured-plan">
+              <div class="plan-tag highlight">⭐ MAIS ESCOLHIDO</div>
+              <h3 class="plan-name accent-color">Plano Completo</h3>
+              <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem;">Para quem quer constância real</p>
+              <div class="price">12x R$ 9,74</div>
+              <p class="price-detail" style="color: var(--accent); font-weight: 700;">ou R$ 97 à vista</p>
+              <p style="text-decoration: line-through; opacity: 0.5; font-size: 0.8rem;">De R$ 197 por apenas R$ 97</p>
+              <ul class="plan-features border-accent">
+                <li>✔️ Tudo do essencial</li>
+                <li>✔️ Áudios guiados (Mente + Paz)</li>
+                <li>✔️ Sequência completa estruturada</li>
+                <li>✔️ Todos os bônus liberados</li>
+              </ul>
+              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL" class="btn btn-primary full-width glow-btn" style="font-size: 1.2rem;">Quero voltar a ter paz com Deus</a>
+              <p style="font-size: 0.8rem; margin-top: 1rem; color: var(--accent); font-weight: 600;">🔥 Melhor que 1 café por dia para sua alma.</p>
+            </div>
+
+            <!-- PLANO VITALÍCIO -->
+            <div class="glass-card pricing-card">
+              <h3 class="plan-name">Plano Vitalício</h3>
+              <p style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 1rem;">Uma decisão, paz para sempre</p>
+              <div class="price">R$ 147<span class="period"> à vista</span></div>
+              <ul class="plan-features">
+                <li>✔️ Acesso vitalício (sem mensalidade)</li>
+                <li>✔️ Todas as atualizações futuras</li>
+                <li>✔️ Todos os bônus e guias</li>
+              </ul>
+              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_VITALICIO" class="btn btn-secondary full-width">Garantir acesso vitalício</a>
+              <p style="font-size: 0.7rem; margin-top: 1rem; opacity: 0.5;">Pague uma vez e nunca mais se preocupe.</p>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 4rem;">
+            <p style="font-size: 1.1rem; opacity: 0.8;">🛡️ <strong>Garantia de 7 Dias:</strong> Teste por uma semana. Se não fizer sentido, devolvemos 100%.</p>
+            <p style="font-size: 0.9rem; color: #ff6b6b; margin-top: 1rem; font-weight: 700;">⚠️ Valor promocional por tempo limitado. Pode sair do ar a qualquer momento.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Resumido -->
+      <section id="faq" class="reveal section-padding">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="gradient-text">Dúvidas Frequentes</h2>
+          </div>
+          <div class="faq-container" style="max-width: 800px; margin: 0 auto;">
+            <div class="faq-item">
+              <button class="faq-question">Como recebo o acesso? <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              <div class="faq-answer">Imediatamente após a confirmação do pagamento, você receberá um link por e-mail para ativar seu acompanhamento no WhatsApp.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question">Posso cancelar quando quiser? <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              <div class="faq-answer">Sim! Nos planos recorrentes (mensal/anual), você tem total controle sobre sua assinatura.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="main-footer">
+      <div class="container" style="text-align: center; padding: 4rem 0; opacity: 0.6;">
+        <h3 style="font-family: var(--font-heading);">Rotina com Deus</h3>
+        <p>Volte a falar com Ele. Onde quer que você esteja. 🕊️</p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.js" defer></script>
+  </body>
+</html>
