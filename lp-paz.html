@@ -18,387 +18,274 @@
 
     <style>
       :root {
-        --primary: #1a1a2e;
-        --accent: #f9a826;
-        --accent-soft: rgba(249, 168, 38, 0.1);
-        --bg: #fcfcfd;
-        --bg-alt: #f3f4f6;
-        --text: #171923;
-        --text-dim: #4a5568;
-        --glass: #ffffff;
-        --glass-border: rgba(0, 0, 0, 0.06);
-        --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        --font-heading: 'Playfair Display', serif;
-        --font-body: 'Outfit', sans-serif;
-        --fs-h1: clamp(2.5rem, 8vw, 4rem);
-        --fs-h2: clamp(1.8rem, 5vw, 2.8rem);
-        --fs-body: clamp(1.05rem, 1.25vw, 1.2rem);
-        --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.04);
-        --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.08);
+        --lp-primary: #1a1a2e;
+        --lp-accent: #f9a826;
+        --lp-accent-soft: rgba(249, 168, 38, 0.08);
+        --lp-bg: #ffffff;
+        --lp-bg-alt: #f8f9fb;
+        --lp-text: #1a202c;
+        --lp-text-dim: #4a5568;
+        --lp-border: rgba(0, 0, 0, 0.06);
+        --lp-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+        --lp-shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.08);
       }
 
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      
-      body {
-        font-family: var(--font-body);
-        color: var(--text);
-        background-color: var(--bg);
-        line-height: 1.8;
-        font-size: var(--fs-body);
-        font-weight: 400;
-        overflow-x: hidden;
-        -webkit-font-smoothing: antialiased;
+      /* Estilos para forçar o tema claro e sobrepor o style.css global */
+      body.light-theme {
+        background-color: var(--lp-bg) !important;
+        color: var(--lp-text) !important;
+        font-family: 'Outfit', sans-serif;
       }
 
-      .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
-
-      .hero {
-        min-height: 90vh;
-        display: flex;
-        align-items: center;
-        background: radial-gradient(circle at 80% 20%, var(--accent-soft), transparent);
-        position: relative;
-        padding: 100px 0 60px;
+      .light-theme .hero {
+        background: radial-gradient(circle at 80% 20%, var(--lp-accent-soft), transparent) !important;
+        min-height: 85vh !important;
+        padding-top: 80px !important;
+        color: var(--lp-text) !important;
       }
 
-      .hero .container { display: flex; align-items: center; justify-content: space-between; gap: 4rem; width: 100%; }
-      
-      .hero-logo img { height: clamp(80px, 15vw, 120px); width: auto; margin-bottom: 2rem; }
+      .light-theme .hero::after { display: none !important; }
 
-      .gradient-text {
-        color: var(--primary);
-        font-family: var(--font-heading);
+      .light-theme .gradient-text {
+        background: none !important;
+        -webkit-text-fill-color: var(--lp-primary) !important;
+        color: var(--lp-primary) !important;
       }
 
-      h1.gradient-text {
-        font-size: var(--fs-h1);
-        line-height: 1.1;
-        margin-bottom: 2rem;
+      .light-theme h1.gradient-text {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2.5rem, 8vw, 3.8rem) !important;
+        line-height: 1.1 !important;
       }
 
-      .hero-subtitle {
-        color: var(--text-dim);
-        font-size: 1.25rem;
+      .light-theme .hero-subtitle {
+        color: var(--lp-text-dim) !important;
+        font-size: 1.3rem !important;
         max-width: 600px;
-        margin-bottom: 3rem;
-        font-weight: 400;
+        margin-bottom: 2.5rem !important;
       }
 
-      .btn {
-        display: inline-block;
-        padding: 1.2rem 3.5rem;
+      /* Container e Cards */
+      .light-theme .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+      .light-theme .glass-card {
+        background: #ffffff !important;
+        border: 1px solid var(--lp-border) !important;
+        backdrop-filter: none !important;
+        box-shadow: var(--lp-shadow) !important;
+        border-radius: 24px;
+        padding: 3rem;
+        transition: all 0.4s ease;
+      }
+
+      .light-theme .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--lp-shadow-strong) !important;
+      }
+
+      /* Botões */
+      .light-theme .btn-primary {
+        background: var(--lp-primary) !important;
+        color: #ffffff !important;
+        padding: 1.2rem 3rem;
         border-radius: 12px;
-        text-decoration: none;
         font-weight: 700;
-        transition: var(--transition);
-        cursor: pointer;
-        border: none;
-        font-size: 1.1rem;
-        text-align: center;
+        box-shadow: 0 10px 25px rgba(26, 26, 46, 0.15) !important;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
       }
 
-      .btn-primary {
-        background: var(--primary);
-        color: #fff;
-        box-shadow: 0 10px 25px rgba(26, 26, 46, 0.2);
-      }
-
-      .btn-primary:hover {
+      .light-theme .btn-primary:hover {
         transform: translateY(-2px);
-        background: #252545;
-        box-shadow: 0 15px 35px rgba(26, 26, 46, 0.3);
+        box-shadow: 0 15px 35px rgba(26, 26, 46, 0.25) !important;
       }
 
-      .urgency-banner {
-        background: #fff;
-        color: var(--primary);
-        padding: 1rem;
+      /* Urgency Banner */
+      .light-theme .urgency-banner {
+        background: var(--lp-accent) !important;
+        color: #000 !important;
+        padding: 0.8rem;
         text-align: center;
-        font-size: 0.95rem;
+        font-weight: 700;
+        font-size: 0.9rem;
         position: sticky;
         top: 0;
         z-index: 1000;
-        border-bottom: 1px solid var(--glass-border);
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
       }
 
-      .highlight { color: var(--accent); font-weight: 700; }
-
-      /* Sections Styling */
-      .section-padding { padding: 6rem 0; }
-      
-      .glass-card {
-        background: #fff;
-        border: 1px solid var(--glass-border);
-        border-radius: 24px;
-        padding: 3rem;
-        box-shadow: var(--shadow-soft);
-        transition: var(--transition);
-      }
-
-      .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-strong);
-      }
-
-      .pricing-grid {
+      /* Pricing Section */
+      .light-theme .pricing-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 2rem;
-        align-items: center;
         margin-top: 4rem;
       }
 
-      .featured-plan {
-        border: 2px solid var(--accent) !important;
-        background: #fff;
+      .light-theme .featured-plan {
+        border: 2px solid var(--lp-accent) !important;
         transform: scale(1.05);
-        z-index: 10;
-        box-shadow: 0 30px 70px rgba(249, 168, 38, 0.12);
+        box-shadow: 0 30px 70px rgba(249, 168, 38, 0.1) !important;
       }
 
-      .plan-tag.highlight {
-        background: var(--accent);
-        color: #fff;
-        padding: 0.5rem 1.5rem;
-        border-radius: 50px;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 1.5rem;
-        display: inline-block;
-      }
-
-      .price {
+      .light-theme .price {
         font-size: 3rem;
         font-weight: 800;
-        color: var(--primary);
+        color: var(--lp-primary);
         margin: 1rem 0;
       }
 
-      .plan-name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-dim);
-      }
-
-      .plan-features {
+      .light-theme .plan-features li {
+        color: var(--lp-text-dim) !important;
+        border-bottom: 1px solid var(--lp-border) !important;
+        padding: 0.8rem 0;
         list-style: none;
-        margin: 2rem 0;
-        text-align: left;
+        font-size: 0.95rem;
       }
 
-      .plan-features li {
-        margin-bottom: 1rem;
-        color: var(--text-dim);
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-      }
-
-      /* Mockup clean */
-      .phone-mockup {
-        background: #fff;
-        padding: 10px;
+      /* Mockup */
+      .light-theme .phone-mockup {
+        background: #ffffff !important;
+        border: 10px solid #f1f1f1 !important;
+        box-shadow: var(--lp-shadow-strong) !important;
         border-radius: 40px;
-        box-shadow: var(--shadow-strong);
-        border: 8px solid #f1f1f1;
+        padding: 10px;
+        transform: none !important;
+        animation: none !important;
       }
 
-      .wa-header { background: #f8f9fa; color: #1a1a1a; padding: 1.5rem; border-bottom: 1px solid #eee; font-weight: 600; }
-      .wa-body { padding: 1.5rem; background: #fff; min-height: 400px; display: flex; flex-direction: column; gap: 1rem; }
-      .wa-msg { padding: 1rem; border-radius: 12px; max-width: 85%; font-size: 0.95rem; line-height: 1.5; }
-      .wa-received { background: #f0f2f5; align-self: flex-start; border-bottom-left-radius: 2px; }
-      .wa-sent { background: var(--accent-soft); color: var(--text); align-self: flex-end; border-bottom-right-radius: 2px; }
-      .wa-btn { border: 1px solid #eee; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: var(--primary); }
+      .light-theme .wa-header { background: #f8f9fa !important; color: #1a1a1a !important; padding: 1.5rem !important; border-bottom: 1px solid #eee !important; height: auto !important; }
+      .light-theme .wa-body { background: #ffffff !important; min-height: 400px !important; }
+      .light-theme .wa-msg.wa-received { background: #f0f2f5 !important; color: #333 !important; }
+      .light-theme .wa-msg.wa-sent { background: var(--lp-accent-soft) !important; color: #1a1a1a !important; }
 
       @media (max-width: 968px) {
-        .hero .container { flex-direction: column; text-align: center; }
-        .hero-logo img { margin: 0 auto 2rem; }
-        .featured-plan { transform: scale(1); }
-      }
-
-      .objections-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.5rem;
-      }
-      
-      .faq-item {
-        border-bottom: 1px solid var(--glass-border);
-        margin-bottom: 1rem;
-      }
-      
-      .faq-question {
-        width: 100%;
-        text-align: left;
-        padding: 1.5rem 0;
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: var(--primary);
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .faq-answer {
-        padding-bottom: 1.5rem;
-        color: var(--text-dim);
-        display: none;
+        .light-theme .hero .container { flex-direction: column; text-align: center; }
+        .light-theme .hero-content { max-width: 100%; }
+        .light-theme .featured-plan { transform: scale(1); }
       }
     </style>
-    <link rel="stylesheet" href="/src/style.css" media="print" onload="this.media='all'" />
+    <!-- Importar o CSS global mas com override total pelas classes acima -->
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body>
-    <!-- Urgency Banner -->
+  <body class="light-theme">
+    <!-- Banner de Urgência -->
     <div class="urgency-banner">
-      🕊️ <span class="highlight">Oportunidade de Paz:</span> Valor promocional liberado apenas para os próximos 50 assinantes
+      🕊️ Oportunidade de Paz: Valor promocional liberado apenas para os próximos 50 assinantes
     </div>
 
     <main>
-      <!-- 1. Hero -->
-      <section id="hero" class="hero">
+      <!-- Hero -->
+      <section class="hero">
         <div class="container">
           <div class="hero-content">
-            <div class="hero-logo">
-              <img src="/logo2.webp" alt="Rotina com Deus" fetchpriority="high" width="120" height="120" />
+            <div class="hero-logo" style="margin-bottom: 2rem;">
+              <img src="/logo2.webp" alt="Rotina com Deus" width="140" height="auto" />
             </div>
             <h1 class="gradient-text">“Você não perdeu a fé… só perdeu a rotina com Deus.”</h1>
             <p class="hero-subtitle">Um direcionamento diário e suave pelo WhatsApp para você reencontrar a paz e a consistência na sua vida de oração.</p>
-            <div class="hero-btns">
-              <a href="#planos" class="btn btn-primary">Voltar a falar com Deus agora</a>
+            <div>
+              <a href="#planos" class="btn-primary">Voltar a falar com Deus agora</a>
             </div>
           </div>
 
-          <div class="phone-mockup mobile-hide">
-            <div class="phone-screen" style="width: 300px;">
-              <div class="wa-header">Rotina com Deus</div>
-              <div class="wa-body">
-                <div class="wa-msg wa-received">🙏 Bom dia! Hoje o seu momento com Deus é sobre gratidão. Vamos rezar?</div>
-                <div class="wa-msg wa-sent">Estava precisando disso hoje...</div>
-                <div class="wa-msg wa-received">📖 "O Senhor é o meu pastor..." Respire fundo e sinta Sua presença.</div>
-                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                  <span class="wa-btn">Começar</span>
-                  <span class="wa-btn">Oração Livre</span>
-                </div>
+          <div class="phone-mockup" style="max-width: 300px; width: 100%;">
+            <div class="wa-header">Rotina com Deus</div>
+            <div class="wa-body" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+              <div class="wa-msg wa-received" style="padding: 1rem; border-radius: 12px; font-size: 0.9rem;">🙏 Bom dia! Hoje o seu momento com Deus é sobre gratidão. Vamos rezar?</div>
+              <div class="wa-msg wa-sent" style="padding: 1rem; border-radius: 12px; font-size: 0.9rem; align-self: flex-end;">Estava precisando disso hoje...</div>
+              <div class="wa-msg wa-received" style="padding: 1rem; border-radius: 12px; font-size: 0.9rem;">📖 "O Senhor é o meu pastor..." Respire fundo e sinta Sua presença.</div>
+              <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <span style="border: 1px solid #eee; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600;">Começar</span>
+                <span style="border: 1px solid #eee; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600;">Oração Livre</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 2. Minimalist Pain Section -->
-      <section class="section-padding" style="background: #fff; text-align: center;">
+      <!-- Minimalist Pain Section -->
+      <section style="padding: 8rem 0; background-color: #fff; text-align: center;">
         <div class="container">
-          <h2 class="gradient-text" style="font-size: 2.5rem; margin-bottom: 1.5rem;">Sua alma não precisa de complexidade.</h2>
-          <p style="color: var(--text-dim); max-width: 700px; margin: 0 auto 4rem;">Precisa apenas de um momento real. Todos os dias.</p>
+          <h2 class="gradient-text" style="font-size: 2.8rem; margin-bottom: 1.5rem;">Sua alma não precisa de complexidade.</h2>
+          <p style="color: var(--lp-text-dim); max-width: 700px; margin: 0 auto 5rem; font-size: 1.2rem;">Precisa apenas de um momento real. Todos os dias.</p>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem;">
-            <div>
-              <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--primary);">Sem Cargas</h4>
-              <p style="font-size: 1rem; color: var(--text-dim);">Nada de aplicativos pesados ou senhas. Apenas a simplicidade do seu WhatsApp.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 4rem;">
+            <div class="glass-card" style="padding: 2.5rem; text-align: left;">
+              <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--lp-primary);">Sem Cargas</h4>
+              <p style="color: var(--lp-text-dim);">Nada de aplicativos pesados ou senhas. Apenas a simplicidade do seu WhatsApp.</p>
             </div>
-            <div>
-              <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--primary);">Sem Culpa</h4>
-              <p style="font-size: 1rem; color: var(--text-dim);">Não é sobre ser perfeito, é sobre estar presente. Nós te guiamos onde você estiver.</p>
+            <div class="glass-card" style="padding: 2.5rem; text-align: left;">
+              <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--lp-primary);">Sem Culpa</h4>
+              <p style="color: var(--lp-text-dim);">Não é sobre ser perfeito, é sobre estar presente. Nós te guiamos onde você estiver.</p>
             </div>
-            <div>
-              <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--primary);">Pura Paz</h4>
-              <p style="font-size: 1rem; color: var(--text-dim);">Orações, Bíblia e Terço direto no seu ritmo. Sem pressa, com foco.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 3. Clean Objections -->
-      <section class="section-padding" style="background: var(--bg-alt);">
-        <div class="container">
-          <div class="objections-grid">
-            <div class="glass-card" style="padding: 2.5rem; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-              <h4 style="color: var(--accent); margin-bottom: 1rem;">O tempo não é o problema.</h4>
-              <p style="font-size: 1.05rem; opacity: 0.9;">Nossas orações levam 3 a 5 minutos. O que importa é a direção, não a duração.</p>
-            </div>
-            <div class="glass-card" style="padding: 2.5rem; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-              <h4 style="color: var(--accent); margin-bottom: 1rem;">A disciplina não é o problema.</h4>
-              <p style="font-size: 1.05rem; opacity: 0.9;">Nós cuidamos de te chamar. Você só precisa responder e se deixar guiar.</p>
+            <div class="glass-card" style="padding: 2.5rem; text-align: left;">
+              <h4 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--lp-primary);">Pura Paz</h4>
+              <p style="color: var(--lp-text-dim);">Orações, Bíblia e Terço direto no seu ritmo. Sem pressa, com foco absoluto.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 4. Pricing (Centered & Clean) -->
-      <section id="planos" class="section-padding" style="background: #fff; text-align: center;">
+      <!-- Pricing -->
+      <section id="planos" style="padding: 8rem 0; background-color: var(--lp-bg-alt); text-align: center;">
         <div class="container">
-          <h2 class="gradient-text" style="margin-bottom: 1rem;">Uma Pequena Decisão, Paz Diária.</h2>
-          <p style="color: var(--text-dim); margin-bottom: 4rem;">Menos de R$ 2 por dia para investir na sua vida espiritual.</p>
+          <h2 class="gradient-text" style="margin-bottom: 1.5rem;">Uma Pequena Decisão, Paz Diária.</h2>
+          <p style="color: var(--lp-text-dim); margin-bottom: 5rem; font-size: 1.1rem;">Menos de R$ 2 por dia para investir na sua vida espiritual.</p>
 
           <div class="pricing-grid">
             <!-- Essencial -->
             <div class="glass-card">
-              <span class="plan-name">Plano Essencial</span>
+              <h4 style="color: var(--lp-text-dim);">Essencial</h4>
               <div class="price">R$ 19,90<span style="font-size: 1rem; opacity: 0.6;">/mês</span></div>
-              <ul class="plan-features">
+              <ul class="plan-features" style="margin: 2rem 0; padding: 0;">
                 <li>✔️ Mensagens diárias de oração</li>
                 <li>✔️ Reflexões do Evangelho</li>
                 <li>✔️ Guia espiritual básico</li>
               </ul>
-              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL" class="btn btn-primary" style="background: #f1f1f1; color: #1a1a1a; box-shadow: none;">Começar agora</a>
+              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL" class="btn-primary" style="background-color: #f1f1f1 !important; color: #1a1a1a !important; box-shadow: none !important;">Começar agora</a>
             </div>
 
-            <!-- Completo (Destaque) -->
+            <!-- Completo -->
             <div class="glass-card featured-plan">
-              <span class="plan-tag highlight">Recomendado</span>
-              <span class="plan-name" style="color: var(--primary);">Plano Completo</span>
+              <span style="background: var(--lp-accent); color: #000; padding: 0.5rem 1.5rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Mais Escolhido</span>
+              <h4 style="margin-top: 1.5rem; color: var(--lp-primary);">Plano Completo</h4>
               <div class="price" style="margin-bottom: 0;">12x R$ 9,74</div>
-              <p style="color: var(--accent); font-weight: 700; margin-bottom: 1rem;">ou R$ 97 à vista</p>
-              <ul class="plan-features">
+              <p style="color: var(--lp-accent); font-weight: 700; margin-bottom: 1.5rem;">ou R$ 97 à vista</p>
+              <ul class="plan-features" style="margin: 2rem 0; padding: 0;">
                 <li>✔️ Tudo do plano essencial</li>
                 <li>✔️ Áudios guiados (Mente em Paz)</li>
                 <li>✔️ Terço completo diário</li>
                 <li>🎁 Todos os bônus inclusos</li>
               </ul>
-              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL" class="btn btn-primary" style="width: 100%;">Quero ter Paz com Deus</a>
-              <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.6;">🛡️ Garantia de 7 Dias</p>
+              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL" class="btn-primary" style="width: 100%; box-sizing: border-box;">Quero ter Paz com Deus</a>
+              <p style="font-size: 0.8rem; margin-top: 1.5rem; opacity: 0.6;">🛡️ Garantia total de 7 Dias</p>
             </div>
 
             <!-- Vitalício -->
             <div class="glass-card">
-              <span class="plan-name">Plano Vitalício</span>
+              <h4 style="color: var(--lp-text-dim);">Vitalício</h4>
               <div class="price">R$ 147<span style="font-size: 1rem; opacity: 0.6;">/único</span></div>
-              <ul class="plan-features">
-                <li>✔️ Acesso para sempre</li>
+              <ul class="plan-features" style="margin: 2rem 0; padding: 0;">
+                <li>✔️ Acesso vitalício para sempre</li>
                 <li>✔️ Sem mensalidades</li>
-                <li>✔️ Atualizações gratuitas</li>
+                <li>✔️ Todas as atualizações futuras</li>
               </ul>
-              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_VITALICIO" class="btn btn-primary" style="background: #f1f1f1; color: #1a1a1a; box-shadow: none;">Acesso Vitalício</a>
+              <a href="https://pay.kiwify.com.br/PROCESSO_DE_VENDA_VITALICIO" class="btn-primary" style="background-color: #f1f1f1 !important; color: #1a1a1a !important; box-shadow: none !important;">Acesso Garantido</a>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 5. Footer Clean -->
-      <footer style="padding: 4rem 0; border-top: 1px solid #eee; text-align: center; color: var(--text-dim);">
+      <!-- Footer -->
+      <footer style="padding: 5rem 0; text-align: center; color: var(--lp-text-dim); border-top: 1px solid #eee;">
         <div class="container">
-          <h3 style="font-family: var(--font-heading); color: var(--primary); margin-bottom: 1rem;">Rotina com Deus</h3>
-          <p style="font-size: 0.9rem;">Tecnologia inspirada pela fé. 🕊️</p>
+          <h3 style="font-family: 'Playfair Display', serif; color: var(--lp-primary); margin-bottom: 1rem;">Rotina com Deus</h3>
+          <p style="font-size: 0.9rem;">Tecnologia inspirada pela fé. © 2026</p>
         </div>
       </footer>
     </main>
 
-    <script type="module" src="/src/main.js" defer></script>
-    <script>
-      // Simple FAQ Toggle fallback if needed
-      document.querySelectorAll('.faq-question').forEach(button => {
-        button.addEventListener('click', () => {
-          const answer = button.nextElementSibling;
-          const isVisible = answer.style.display === 'block';
-          answer.style.display = isVisible ? 'none' : 'block';
-        });
-      });
-    </script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
