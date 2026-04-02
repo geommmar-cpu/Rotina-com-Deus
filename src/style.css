@@ -1428,6 +1428,7 @@ section {
 
 .mockup-base {
   width: 100%;
+  height: auto;
   display: block;
   border-radius: inherit;
 }
