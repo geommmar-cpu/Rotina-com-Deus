@@ -35,7 +35,7 @@ body {
   background-color: var(--bg-dark);
   line-height: 1.7; /* Increased for breathing room */
   font-size: var(--fs-body);
-  font-weight: 300; /* Lighter body weight is more 'premium' */
+  font-weight: 400; /* Unified body weight for better authority and readability */
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -184,6 +184,7 @@ h1, h2, h3 {
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   line-height: 1.4;
   position: relative;
+  font-family: var(--font-body); /* Harmonizing with the site's brand */
 }
 
 .wa-received { 
@@ -416,28 +417,87 @@ section {
   border-bottom-color: rgba(249, 168, 38, 0.15);
 }
 
-.plan-tagline {
-  font-size: 0.95rem;
-  margin-bottom: 2rem;
-  font-style: italic;
-  font-weight: 500;
+/* 
+   ==========================================================================
+   TYPOGRAPHIC UNIFICATION (ARROCHO)
+   ==========================================================================
+*/
+
+.pricing-hero {
+  max-width: 800px;
+  margin: 0 auto 4rem;
+  text-align: center;
 }
 
-.accent-color {
-  color: var(--accent) !important;
+.impact-phrase {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #ff6b6b; /* Emotional contrast for the problem */
+  font-weight: 700;
+  font-family: var(--font-body);
 }
 
-/* Button Refinement */
-.full-width {
-  width: 100% !important;
+.plan-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
 }
 
-.glow-btn {
-  box-shadow: 0 10px 25px rgba(249, 168, 38, 0.3);
+.plan-intent {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-dim);
 }
 
-.glow-btn:hover {
-  box-shadow: 0 15px 35px rgba(249, 168, 38, 0.5);
+.featured-plan .plan-intent {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.featured-features li {
+  border-bottom-color: rgba(249, 168, 38, 0.15) !important;
+}
+
+.bonus-header {
+  margin-top: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.9rem;
+  border-bottom: none !important;
+}
+
+.constancy-trigger {
+  color: var(--accent);
+  font-weight: 700;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 1rem !important;
+  margin-top: 1rem;
+  border-bottom: none !important;
+}
+
+.pricing-cta {
+  padding: 1.5rem !important;
+  font-size: 1.2rem !important;
+}
+
+.guarantee-text {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.pricing-footer {
+  margin-top: 6rem;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.pricing-footer p {
+  font-size: 1.1rem;
+  color: var(--text-dim);
 }
 
 /* Animations */
