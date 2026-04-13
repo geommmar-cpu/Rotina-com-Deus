@@ -52,12 +52,6 @@ async function saveProgress(userId: string, data: Record<string, any>) {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 serve(async (req) => {
-  if (req.method === "GET") {
-    const url = new URL(req.url);
-    if (url.searchParams.get("hub.mode") === "subscribe") {
-      return new Response(url.searchParams.get("hub.challenge"), { status: 200 });
-    }
-  }
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
@@ -65,30 +59,57 @@ serve(async (req) => {
     if (isSimulator) { whatsappService.isSimulator = true; whatsappService.simulatorMessages = []; }
 
     const payload = await req.json();
-    if (payload.entry?.[0]?.changes?.[0]?.value?.statuses) return new Response("OK", { status: 200 });
 
-    const value = payload.entry?.[0]?.changes?.[0]?.value;
-    const message = value?.messages?.[0];
-    if (!message && !isSimulator) return new Response("OK", { status: 200 });
+    // ═══ PARSER: Formato Evolution API ═══
+    const event = payload.event;
 
-    let phone = message?.from || "5511999999999";
-    
-    if (phone.startsWith("55") && phone.length === 13) {
-      phone = phone.slice(0, 4) + phone.slice(5);
+    // Ignorar eventos que não são mensagens recebidas
+    if (!isSimulator && event !== "messages.upsert") {
+      return new Response("OK", { status: 200 });
     }
+
+    const data = payload.data;
+    const messageData = isSimulator ? null : data;
+
+    // Ignorar mensagens enviadas pelo próprio bot
+    if (messageData?.key?.fromMe) return new Response("OK", { status: 200 });
+
+    // Extrair número do telefone do remoteJid (formato: 5561991149453@s.whatsapp.net)
+    let phone = isSimulator
+      ? (payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.from || "5511999999999")
+      : (messageData?.key?.remoteJid || "").replace("@s.whatsapp.net", "").replace("@c.us", "");
 
     let messageText = "";
     let buttonId = "";
     let isAudio = false;
+    let audioMessageId = "";
 
-    if (message?.type === "text") {
-      messageText = message.text?.body || "";
-    } else if (message?.type === "interactive") {
-      const interactive = message.interactive;
-      messageText = interactive.button_reply?.title || interactive.list_reply?.title || "";
-      buttonId = interactive.button_reply?.id || interactive.list_reply?.id || "";
-    } else if (message?.type === "audio") {
-      isAudio = true;
+    if (isSimulator) {
+      // Modo simulador (mantém compatibilidade)
+      const simMsg = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+      if (simMsg?.type === "text") messageText = simMsg.text?.body || "";
+      else if (simMsg?.type === "interactive") {
+        messageText = simMsg.interactive?.button_reply?.title || simMsg.interactive?.list_reply?.title || "";
+        buttonId = simMsg.interactive?.button_reply?.id || simMsg.interactive?.list_reply?.id || "";
+      }
+    } else {
+      // Formato Evolution API
+      const msg = messageData?.message;
+
+      if (msg?.conversation) {
+        messageText = msg.conversation;
+      } else if (msg?.extendedTextMessage?.text) {
+        messageText = msg.extendedTextMessage.text;
+      } else if (msg?.buttonsResponseMessage) {
+        messageText = msg.buttonsResponseMessage.selectedDisplayText || "";
+        buttonId = msg.buttonsResponseMessage.selectedButtonId || "";
+      } else if (msg?.listResponseMessage) {
+        messageText = msg.listResponseMessage.title || "";
+        buttonId = msg.listResponseMessage.singleSelectReply?.selectedRowId || msg.listResponseMessage.rowId || "";
+      } else if (msg?.audioMessage) {
+        isAudio = true;
+        audioMessageId = messageData?.key?.id || "";
+      }
     }
 
     // 1. BUSCA USUÁRIO (Busca básica para estabilidade)
@@ -149,16 +170,28 @@ serve(async (req) => {
 
     const userProgress = waUser.user_progress?.[0];
     const userProfile = waUser.profile;
-    const isSubscriptionActive = userProfile?.subscription_status === "active" || userProfile?.subscription_status === "trial";
+
+    // ====== 🔐 VERIFICAÇÃO DE ASSINATURA (Híbrida: Web + WhatsApp) ======
+    const isProfileSubActive = userProfile?.subscription_status === "active" || userProfile?.subscription_status === "trial";
+    const isDirectSubActive = waUser.subscription_status === "active" || waUser.subscription_status === "trial";
+    const isSubscriptionActive = isProfileSubActive || isDirectSubActive;
     const normalizedMsg = messageText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
     // ====== 🛑 VERIFICAÇÃO DE ASSINATURA (Paywall) ======
     // Ignora se for o comando de menu ou se já estiver ativo
-    const isSpecialAdmin = phone === "556198416939" || phone === "556139841693" || phone === "556184585912"; // Whitelist de Admins
+    const adminWhitelist = ["556198416939", "556139841693", "556184585912", "5561991149453", "556195773473"]; // Adicionada Débora (556195773473)
+    const isSpecialAdmin = adminWhitelist.includes(phone);
+
+    // MENSAGEM ESPECIAL PARA A DÉBORA (Somente se ela ainda não preencheu o perfil ou é nova)
+    if ((phone === "5561991149453" || phone === "556195773473") && (!waUser.user_id || !userProgress)) {
+      const specialMsg = `Olá, Débora! ✨ Você é muito especial para o Geomar e ele pediu para te dizer que **te ama muito!** Que o seu caminho com Deus seja abençoado e que este bot te ajude a estar sempre próxima de Suas graças. 🙏`;
+      await whatsappService.sendText({ number: phone, text: specialMsg });
+      await sleep(1000);
+    }
     
     if (!isSubscriptionActive && !isSpecialAdmin && !isSimulator) {
       if (buttonId === "btn_subscribe") {
-        const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Anual (Recomendado)*: 12x de R$ 9,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL\n\n🔹 *Semestral*: 6x de R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_SEMESTRAL\n\n🔹 *Mensal*: R$ 19,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
+        const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Anual (Recomendado)*: 12x de R$ 9,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL\n\n🔹 *Semestral*: 6x de R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_SEMESTRAL\n\n🔹 *Mensal*: R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
         await whatsappService.sendText({ number: phone, text: plansText });
         return new Response("OK", { status: 200 });
       }
@@ -363,11 +396,10 @@ serve(async (req) => {
 
     // ====== 🎤 TRATAMENTO DE ÁUDIO (Contextual) ======
     if (isAudio) {
-      const audioId = message.audio?.id;
-      const audioData = await whatsappService.downloadMedia(audioId);
+      const audioData = await whatsappService.downloadMedia(audioMessageId);
       
       if (audioData) {
-        const transcription = await transcribeAudio(audioData, message.audio?.mime_type);
+        const transcription = await transcribeAudio(audioData, "audio/ogg; codecs=opus");
         const msg = transcription || "[SEM_FALA]";
         
         let aiPrompt = msg;
@@ -390,7 +422,7 @@ serve(async (req) => {
           await saveProgress(waUser.id, { last_prayer_type: null });
         } else {
           // Comportamento original se não for reflexão/intenção
-          const prayerResult = await generatePersonalizedPrayer(audioData, message.audio?.mime_type);
+          const prayerResult = await generatePersonalizedPrayer(audioData, "audio/ogg; codecs=opus");
           await whatsappService.sendButtons({ number: phone, text: prayerResult.text, buttons: prayerResult.buttons.map((b: string) => ({ displayText: b })) });
         }
       } else {

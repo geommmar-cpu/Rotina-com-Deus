@@ -1,4 +1,9 @@
 import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// ═══════════════════════════════════════════════════
+// EVOLUTION API - WhatsApp Service
+// ═══════════════════════════════════════════════════
 
 export interface SendTextOptions {
   number: string;
@@ -27,18 +32,55 @@ export interface SendImageOptions {
   caption?: string;
 }
 
+interface EvolutionInstance {
+  instance_name: string;
+  api_url: string;
+  api_key: string;
+}
+
 export class WhatsAppService {
+  private instanceName: string;
   private apiUrl: string;
-  private accessToken: string;
-  private phoneNumberId: string;
+  private apiKey: string;
 
   public simulatorMessages: string[] = [];
   public isSimulator: boolean = false;
 
   constructor() {
-    this.apiUrl = "https://graph.facebook.com/v19.0";
-    this.accessToken = Deno.env.get("META_ACCESS_TOKEN") || "";
-    this.phoneNumberId = Deno.env.get("META_PHONE_NUMBER_ID") || "";
+    this.apiUrl = Deno.env.get("EVOLUTION_API_URL") || "";
+    this.apiKey = Deno.env.get("EVOLUTION_API_KEY") || "";
+    this.instanceName = Deno.env.get("EVOLUTION_INSTANCE_NAME") || "rotina-principal";
+  }
+
+  // Carrega a instância ativa do banco de dados (para failover)
+  async loadActiveInstance(): Promise<boolean> {
+    try {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") || "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+      );
+
+      const { data: instance } = await supabase
+        .from("whatsapp_instances")
+        .select("instance_name, api_url, api_key")
+        .eq("is_primary", true)
+        .eq("status", "active")
+        .single();
+
+      if (instance) {
+        this.instanceName = instance.instance_name;
+        this.apiUrl = instance.api_url;
+        this.apiKey = instance.api_key;
+        console.log(`✅ [EVO] Instância ativa carregada: ${this.instanceName}`);
+        return true;
+      }
+
+      console.warn("[EVO] Nenhuma instância ativa no banco. Usando env vars como fallback.");
+      return false;
+    } catch (err: any) {
+      console.warn("[EVO] Falha ao carregar instância do banco:", err.message);
+      return false;
+    }
   }
 
   async sendText(options: SendTextOptions) {
@@ -48,14 +90,11 @@ export class WhatsAppService {
     }
 
     const body = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: this.formatNumber(options.number),
-      type: "text",
-      text: { body: options.text }
+      number: this.formatNumber(options.number),
+      text: options.text
     };
 
-    return this.postRequest(body);
+    return this.postRequest(`/message/sendText/${this.instanceName}`, body);
   }
 
   async sendAudio(options: SendAudioOptions) {
@@ -65,14 +104,11 @@ export class WhatsAppService {
     }
 
     const body = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: this.formatNumber(options.number),
-      type: "audio",
-      audio: { link: options.audioUrl }
+      number: this.formatNumber(options.number),
+      audio: options.audioUrl
     };
 
-    return this.postRequest(body);
+    return this.postRequest(`/message/sendWhatsAppAudio/${this.instanceName}`, body);
   }
 
   async sendImage(options: SendImageOptions) {
@@ -82,17 +118,13 @@ export class WhatsAppService {
     }
 
     const body = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: this.formatNumber(options.number),
-      type: "image",
-      image: { 
-        link: options.imageUrl,
-        caption: options.caption 
-      }
+      number: this.formatNumber(options.number),
+      mediatype: "image",
+      media: options.imageUrl,
+      caption: options.caption || ""
     };
 
-    return this.postRequest(body);
+    return this.postRequest(`/message/sendMedia/${this.instanceName}`, body);
   }
 
   async sendButtons(options: SendButtonOptions) {
@@ -102,27 +134,18 @@ export class WhatsAppService {
     }
 
     const body = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: this.formatNumber(options.number),
-      type: "interactive",
-      interactive: {
-        type: "button",
-        body: { text: options.text },
-        footer: { text: options.footer || "Escolha uma opção" },
-        action: {
-          buttons: options.buttons.slice(0, 3).map((b, index) => ({
-            type: "reply",
-            reply: {
-              id: b.id || `btn_${index}_${Date.now()}`.substring(0, 256),
-              title: b.displayText.substring(0, 20)
-            }
-          }))
-        }
-      }
+      number: this.formatNumber(options.number),
+      title: options.title || "Rotina com Deus",
+      description: options.text,
+      footerText: options.footer || "Escolha uma opção",
+      buttons: options.buttons.slice(0, 3).map((b, index) => ({
+        type: "reply",
+        displayText: b.displayText.substring(0, 20),
+        id: b.id || `btn_${index}_${Date.now()}`
+      }))
     };
 
-    return this.postRequest(body);
+    return this.postRequest(`/message/sendButtons/${this.instanceName}`, body);
   }
 
   async sendList(options: { number: string; title?: string; text: string; buttonText: string; sections: { title: string; rows: { title: string; description?: string; id?: string }[] }[] }) {
@@ -133,77 +156,75 @@ export class WhatsAppService {
     }
 
     const body = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: this.formatNumber(options.number),
-      type: "interactive",
-      interactive: {
-        type: "list",
-        header: { type: "text", text: options.title || "Rotina com Deus" },
-        body: { text: options.text },
-        footer: { text: "Toque abaixo para ver as opções" },
-        action: {
-          button: options.buttonText.substring(0, 20),
-          sections: options.sections.map(s => ({
-            title: s.title.substring(0, 24),
-            rows: s.rows.map((r, idx) => ({
-              id: r.id || `row_${idx}_${Date.now()}`.substring(0, 200),
-              title: r.title.substring(0, 24),
-              description: r.description?.substring(0, 72) || ""
-            }))
-          }))
-        }
-      }
+      number: this.formatNumber(options.number),
+      title: options.title || "Rotina com Deus",
+      description: options.text,
+      buttonText: options.buttonText.substring(0, 20),
+      footerText: "Toque abaixo para ver as opções",
+      sections: options.sections.map(s => ({
+        title: s.title.substring(0, 24),
+        rows: s.rows.map((r, idx) => ({
+          title: r.title.substring(0, 24),
+          description: r.description?.substring(0, 72) || "",
+          rowId: r.id || `row_${idx}_${Date.now()}`
+        }))
+      }))
     };
 
-    return this.postRequest(body);
+    return this.postRequest(`/message/sendList/${this.instanceName}`, body);
   }
 
-  async downloadMedia(mediaId: string): Promise<string | null> {
+  async downloadMedia(messageId: string): Promise<string | null> {
     try {
-      // 1. Obter a URL da mídia
-      const urlInfo = `${this.apiUrl}/${mediaId}`;
-      const resInfo = await fetch(urlInfo, {
-        headers: { "Authorization": `Bearer ${this.accessToken}` }
+      // Evolution API: GET /chat/getBase64FromMediaMessage/{instance}
+      const url = `${this.apiUrl}/chat/getBase64FromMediaMessage/${this.instanceName}`;
+      console.log(`📥 [EVO] Baixando mídia: ${messageId}`);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": this.apiKey
+        },
+        body: JSON.stringify({
+          message: { key: { id: messageId } },
+          convertToMp4: false
+        })
       });
 
-      if (!resInfo.ok) {
-        console.error("Erro ao obter info da mídia:", await resInfo.text());
+      if (!response.ok) {
+        console.error("❌ [EVO] Erro ao baixar mídia:", await response.text());
         return null;
       }
 
-      const { url } = await resInfo.json();
-      console.log(`📡 URL de mídia recebida: ${url.substring(0, 50)}...`);
+      const data = await response.json();
+      const base64 = data.base64 || null;
 
-      // 2. Baixar o arquivo binário (Com Header de Auth e User-Agent para evitar 401/Bloqueio)
-      console.log("📥 Iniciando fetch do binário (com Auth)...");
-      const resFile = await fetch(url, {
-        headers: { 
-          "Authorization": `Bearer ${this.accessToken}`,
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        }
-      }); 
-
-      console.log(`📡 Status do download binário: ${resFile.status} ${resFile.statusText}`);
-
-      if (!resFile.ok) {
-        console.error("❌ Erro ao baixar binário da mídia:", await resFile.text());
-        return null;
+      if (base64) {
+        console.log(`✅ [EVO] Mídia baixada com sucesso (${base64.length} chars base64).`);
       }
 
-      console.log("📚 Lendo buffer do arquivo...");
-      const arrayBuffer = await resFile.arrayBuffer();
-      const uint8 = new Uint8Array(arrayBuffer);
-      console.log(`✅ Buffer lido: ${uint8.byteLength} bytes.`);
-
-      if (uint8.byteLength === 0) return null;
-
-      // Conversão Base64 Segura e Moderna para Deno/Edge Functions
-      const base64 = encode(uint8);
       return base64;
     } catch (err: any) {
-      console.error("Falha crítica no downloadMedia (Log Final):", err.message || err);
+      console.error("🔥 [EVO] Falha crítica no downloadMedia:", err.message || err);
       return null;
+    }
+  }
+
+  // Checa estado da conexão da instância
+  async checkConnection(): Promise<string> {
+    try {
+      const url = `${this.apiUrl}/instance/connectionState/${this.instanceName}`;
+      const response = await fetch(url, {
+        headers: { "apikey": this.apiKey }
+      });
+
+      if (!response.ok) return "error";
+
+      const data = await response.json();
+      return data.instance?.state || "unknown";
+    } catch {
+      return "error";
     }
   }
 
@@ -212,46 +233,47 @@ export class WhatsAppService {
     if (!cleaned.startsWith("55") && cleaned.length >= 10) {
       cleaned = "55" + cleaned;
     }
-    
-    // Tratamento especial para o 9 extra no Brasil (Somente se tiver 13 dígitos e começar com 55)
-    // Exemplo: 55 61 9 8458-5912 -> 55 61 8458-5912 (Como o Meta geralmente usa internamente)
-    if (cleaned.startsWith("55") && cleaned.length === 13) {
-      // Remove o nono dígito (o quinto caractere: 55XX9...)
-      cleaned = cleaned.slice(0, 4) + cleaned.slice(5);
-    }
-    
+    // Evolution API aceita o formato brasileiro completo com 9° dígito
+    // Não precisa remover o 9 como na Meta API
     return cleaned;
   }
 
-  private async postRequest(body: any) {
-    const url = `${this.apiUrl}/${this.phoneNumberId}/messages`;
-    console.log(`📡 [WhatsApp] Enviando request para: ${url}\nPayload:`, JSON.stringify(body, null, 2));
+  private async postRequest(endpoint: string, body: any) {
+    const url = `${this.apiUrl}${endpoint}`;
+    console.log(`📡 [EVO] POST ${url}\nPayload:`, JSON.stringify(body, null, 2));
     
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.accessToken}`
+          "apikey": this.apiKey
         },
         body: JSON.stringify(body)
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ Erro Meta API (${url}) Status: ${response.status}\nResponse:`, errorText);
-        return { success: false, error: errorText };
+        console.error(`❌ [EVO] Erro (${url}) Status: ${response.status}\nResponse:`, errorText);
+        
+        if (response.status === 404) {
+          console.error("🚨 [EVO] Instância não encontrada! Verifique o EVOLUTION_INSTANCE_NAME.");
+        }
+        if (response.status === 401) {
+          console.error("🚨 [EVO] API Key inválida! Verifique EVOLUTION_API_KEY.");
+        }
+        
+        return { success: false, error: errorText, status: response.status };
       }
 
       const resJson = await response.json();
-      console.log(`✅ [WhatsApp] Sucesso:`, JSON.stringify(resJson));
+      console.log(`✅ [EVO] Sucesso:`, JSON.stringify(resJson));
       return { success: true, data: resJson };
-    } catch (err) {
-      console.error(`🔥 Falha crítica Meta WhatsApp (${url}):`, err.message);
+    } catch (err: any) {
+      console.error(`🔥 [EVO] Falha crítica (${url}):`, err.message);
       return { success: false, error: err.message };
     }
   }
 }
 
 export const whatsappService = new WhatsAppService();
-

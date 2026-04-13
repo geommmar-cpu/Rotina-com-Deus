@@ -22,7 +22,7 @@ serve(async (req) => {
     const rawBody = await req.text();
     const signature = req.headers.get("X-Kiwify-Signature");
 
-    // 🛡️ VERIFICAÇÃO DE ASSINATURA (SG-PRO-MAX)
+    // 🛡️ VERIFICAÇÃO DE ASSINATURA KIWIFY
     if (KIWIFY_SECRET && signature) {
       const hmac = crypto.subtle.importKey(
         "raw", new TextEncoder().encode(KIWIFY_SECRET),
@@ -36,107 +36,85 @@ serve(async (req) => {
         console.error("❌ Assinatura Kiwify Inválida!");
         return new Response("Invalid signature", { status: 401 });
       }
-    } else if (KIWIFY_SECRET && !signature) {
-       console.warn("⚠️ Webhook recebido sem assinatura, mas secret está configurada!");
-       return new Response("Missing signature", { status: 401 });
     }
 
     const payload = JSON.parse(rawBody);
-    console.log("📦 Kiwify Webhook Approved & Validated:", JSON.stringify(payload));
+    console.log("📦 Kiwify Webhook Data:", JSON.stringify(payload));
 
-    const { order_status, customer_mobile, customer_email, product_name } = payload;
+    const { order_status, customer_mobile, product_name } = payload;
     
     if (!customer_mobile) {
       console.warn("⚠️ Sem número de celular no payload");
       return new Response("No mobile number provided", { status: 400 });
     }
 
-    // Formata o número (Kiwify costuma mandar com +55 ou apenas DDD)
+    // Formata o número para padrão E.164
     let phone = customer_mobile.toString().replace(/\D/g, "");
     if (!phone.startsWith("55")) phone = "55" + phone;
 
-    // 1. Localiza o usuário do WhatsApp
-    let { data: waUser } = await supabase
-      .from("whatsapp_users")
-      .select("id, full_name, user_id")
-      .eq("phone_number", phone)
-      .single();
+    // 1. Busca usuário
+    let { data: waUser } = await supabase.from("whatsapp_users").select("*").eq("phone_number", phone).single();
 
     if (!waUser) {
-       console.log("👤 Usuário não encontrado no WhatsApp:", phone, ". Criando base para ativação posterior...");
-       // Criar apenas para ter o registro e ativar depois
-       const { data: newUser, error: insertError } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
-       if (insertError) {
-         console.error("❌ Erro ao criar waUser no Kiwify Webhook:", insertError.message);
-       }
+       const { data: newUser } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
        waUser = newUser;
     }
 
-    // 2. Atualiza o status da assinatura
-    let status = "expired";
+    // 2. Determina o Status da Assinatura
+    const normalizedStatus = order_status?.toLowerCase();
+    let subStatus = "expired";
     let validUntil = new Date();
 
-    if (["approved", "paid"].includes(order_status?.toLowerCase())) {
-        status = "active";
-        
-        // Define data com base no produto
+    if (["approved", "paid"].includes(normalizedStatus)) {
+        subStatus = "active";
         const lowerProd = product_name?.toLowerCase() || "";
         if (lowerProd.includes("anual")) {
             validUntil.setFullYear(validUntil.getFullYear() + 1);
         } else if (lowerProd.includes("semestral")) {
             validUntil.setMonth(validUntil.getMonth() + 6);
         } else {
-            validUntil.setMonth(validUntil.getMonth() + 1); // Mensal padrão
+            validUntil.setMonth(validUntil.getMonth() + 1);
         }
-
-        console.log(`✅ Ativando assinatura para: ${phone} até ${validUntil.toISOString()}`);
-
-        if (waUser?.id) {
-            // Se tiver user_id vinculado (profiles), atualiza lá
-            if (waUser.user_id) {
-               await supabase.from("profiles").update({ 
-                    subscription_status: status, 
-                    subscription_valid_until: validUntil.toISOString() 
-               }).eq("id", waUser.user_id);
-            }
-            
-            // Log de interação para histórico de pagamento
-            await supabase.from("interaction_logs").insert({
-                whatsapp_user_id: waUser.id,
-                message_type: "system",
-                raw_message: `Pagamento Kiwify: ${order_status}`,
-                intent: "payment_activation"
-            });
-        }
-
-        // 3. Envia mensagem de confirmação no WhatsApp
-        const welcomeMessage = `✨ *Acesso Premium Liberado!* ✨\n\nOlá! Sua jornada no *Rotina com Deus* foi ativada com sucesso.\n\nAgora você tem acesso ilimitado a todas as ferramentas de oração e espiritualidade. 🙏\n\nQue Deus te abençoe! Digite *MENU* para começar agora.`;
-        
-        await fetch(`https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${WHATSAPP_API_TOKEN}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                messaging_product: "whatsapp",
-                to: phone,
-                type: "text",
-                text: { body: welcomeMessage }
-            })
-        });
+        console.log(`✅ Ativando: ${phone} até ${validUntil.toISOString()}`);
+    } else if (["refunded", "chargedback", "expired"].includes(normalizedStatus)) {
+        subStatus = "expired";
+        validUntil = new Date(); // Expira agora
+        console.log(`🚫 Bloqueando: ${phone} (Motivo: ${normalizedStatus})`);
+    } else {
+        return new Response(JSON.stringify({ success: true, message: "Status ignored" }), { status: 200, headers: corsHeaders });
     }
 
-    return new Response(JSON.stringify({ success: true }), { 
-        status: 200, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
-    });
+    // 3. Atualiza o Banco de Dados
+    if (waUser?.id) {
+        // Atualiza na whatsapp_users (Direto)
+        await supabase.from("whatsapp_users").update({ 
+            subscription_status: subStatus, 
+            subscription_valid_until: validUntil.toISOString() 
+        }).eq("id", waUser.id);
+
+        // Sincroniza com profiles se existir
+        if (waUser.user_id) {
+            await supabase.from("profiles").update({ 
+                subscription_status: subStatus, 
+                subscription_valid_until: validUntil.toISOString() 
+            }).eq("id", waUser.user_id);
+        }
+
+        // Envia mensagem se for aprovação
+        if (subStatus === "active") {
+            const welcomeMessage = `✨ *Acesso Premium Liberado!* ✨\n\nOlá! Sua jornada no *Rotina com Deus* foi ativada com sucesso.\n\nAgora você tem acesso ilimitado a todas as ferramentas. 🙏\n\nDigite *MENU* para começar agora.`;
+            await fetch(`https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${WHATSAPP_API_TOKEN}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ messaging_product: "whatsapp", to: phone, type: "text", text: { body: welcomeMessage } })
+            });
+        }
+    }
+
+    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (error: any) {
-    console.error("🔥 Error in Kiwify Webhook:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), { 
-        status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
-    });
+    console.error("🔥 Kiwify Webhook Error:", error.message);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

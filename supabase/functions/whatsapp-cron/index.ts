@@ -13,6 +13,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-simulator',
 };
 
+
 const ROUTINES: any = {
   morning: {
     title: "O PRIMEIRO PENSAMENTO",
@@ -77,28 +78,52 @@ serve(async (req) => {
 
     let sentCount = 0;
     const intentName = `routine_${routineType}`;
-    const today = new Date().toISOString().split("T")[0]; // Data atual YYYY-MM-DD
+    const nowBRT = new Date(new Date().getTime() - 3 * 3600 * 1000);
+    const todayBRT = nowBRT.toISOString().split("T")[0];
+    const logStartWindow = `${todayBRT}T03:00:00.000Z`; // UTC-3 (00:00 BRT de hoje)
     const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotina-com-deus.vercel.app/audios/";
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     for (const user of (users || [])) {
-      // Regra 1: O usuário precisa estar ativo (se preferência existir, verifica se quer notificação)
+      // Regra 0: Whitelist de Administradores (Sempre recebem)
+      // Normaliza para 12 dígitos (remove o 9° dígito) para comparação segura
+      const normalizePhone = (p: string) => {
+        const c = p.replace(/\D/g, "");
+        return (c.startsWith("55") && c.length === 13) ? c.slice(0, 4) + c.slice(5) : c;
+      };
+      const adminWhitelist = ["556198416939", "556139841693", "556184585912", "5561991149453", "556195773473"];
+      const userNorm = normalizePhone(user.phone_number);
+      const isSpecialAdmin = adminWhitelist.some(adm => normalizePhone(adm) === userNorm);
+
+      // Regra 1: Verificação de Assinatura (Somente se não for Admin)
+      const isSubscriptionActive = user.subscription_status === "active" || user.subscription_status === "trial";
+      
+      // Carência: Para rotina da noite, damos 12h de margem para evitar corte precoce
+      const nowForCheck = routineType === "night" ? new Date(new Date().getTime() - 12 * 3600 * 1000) : new Date();
+      const isValidUntil = user.subscription_valid_until ? new Date(user.subscription_valid_until) > nowForCheck : false;
+
+      if (!isSpecialAdmin && (!isSubscriptionActive || !isValidUntil)) {
+        console.log(`[CRON] 🚫 Pulando ${user.phone_number}: Status ${user.subscription_status || 'vazio'} | Válido até ${user.subscription_valid_until || 'nunca'}`);
+        continue;
+      }
+
+      // Regra 2: O usuário precisa estar ativo (se preferência existir, verifica se quer notificação)
       const prefs = user.user_preferences?.[0];
       if (prefs && prefs.notifications_enabled === false) {
         continue;
       }
 
-      // Regra 2: Evitar repetir mensagem no mesmo dia!
+      // Regra 2: Evitar repetir mensagem no mesmo dia (Fuso Brasília) - Janela a partir de 03:00 UTC
       const { data: logs } = await supabase
         .from("interaction_logs")
         .select("id")
         .eq("whatsapp_user_id", user.id)
         .eq("intent", intentName)
-        .gte("created_at", `${today}T00:00:00.000Z`)
+        .gte("created_at", logStartWindow)
         .limit(1);
 
       if (!force && logs && logs.length > 0) {
-        console.log(`[CRON] Ignorando ${user.phone_number}: Já recebeu a rotina ${routineType} hoje (${today}).`);
+        console.log(`[CRON] ⏭️ Ignorando ${user.phone_number}: Já enviada hoje (${todayBRT} desde 03:00 UTC).`);
         continue;
       }
 
@@ -112,15 +137,12 @@ serve(async (req) => {
       const routineMsg = ROUTINES[routineType];
       const prodAudioUrl = routineMsg.audioUrl;
       
-      // Enviar Cabeçalho e Texto Inicial
+      // Enviar Cabeçalho e Texto (Evolution API = sem janela de 24h!)
       const headerText = `✨ *${routineMsg.title}*\n_${routineMsg.subtitle}_\n\n${routineMsg.text}`;
-      await whatsappService.sendText({
-        number: user.phone_number,
-        text: headerText
-      });
-      await sleep(1000);
+      await whatsappService.sendText({ number: user.phone_number, text: headerText });
+      await sleep(2000);
 
-      // Enviar Áudio Principal se houver
+      // Enviar Áudio Principal
       if (routineMsg.audioUrl) {
         await whatsappService.sendAudio({ number: user.phone_number, audioUrl: prodAudioUrl });
         await sleep(1500);
