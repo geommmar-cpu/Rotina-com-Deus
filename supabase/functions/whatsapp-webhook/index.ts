@@ -191,7 +191,7 @@ serve(async (req) => {
     
     if (!isSubscriptionActive && !isSpecialAdmin && !isSimulator) {
       if (buttonId === "btn_subscribe") {
-        const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Anual (Recomendado)*: 12x de R$ 9,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_ANUAL\n\n🔹 *Semestral*: 6x de R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_SEMESTRAL\n\n🔹 *Mensal*: R$ 14,90\n🔗 https://pay.kiwify.com.br/PROCESSO_DE_VENDA_MENSAL\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
+        const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Plano Anual*: R$ 97,00\n🔗 https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=GQ4X0T5\n\n🔹 *Plano Semestral*: R$ 79,00\n🔗 https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=TMMWDKA\n\n🔹 *Plano Mensal*: R$ 14,90\n🔗 https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=ZDR0L7X\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
         await whatsappService.sendText({ number: phone, text: plansText });
         return new Response("OK", { status: 200 });
       }
