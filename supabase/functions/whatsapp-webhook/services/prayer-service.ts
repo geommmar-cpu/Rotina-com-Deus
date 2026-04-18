@@ -7,12 +7,14 @@ export const MYSTERIES = {
 
 export const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotina-com-deus.vercel.app/audios/";
 
-export function getMysteryOfDay(date: Date) {
+
+export function getMysteryOfDay(date: Date = new Date()) {
   const day = date.getDay();
-  if (day === 1 || day === 6) return { name: "Gozosos", mysteries: MYSTERIES.Gozosos, audio: "terco_misterios_gozosos.mp3" };
-  if (day === 2 || day === 5) return { name: "Dolorosos", mysteries: MYSTERIES.Dolorosos, audio: "terco_misterios_doloroso.mp3" };
-  if (day === 4) return { name: "Luminosos", mysteries: MYSTERIES.Luminosos, audio: "terco_misterios_luminosos.mp3" };
-  return { name: "Gloriosos", mysteries: MYSTERIES.Gloriosos, audio: "terco_misterios_gloriosos.mp3" };
+  // 0-Dom, 1-Seg, 2-Ter, 3-Qua, 4-Qui, 5-Sex, 6-Sab
+  if (day === 0 || day === 3) return { name: "Gloriosos", audio: "terco_misterios_gloriosos.mp3", mysteries: MYSTERIES.Gloriosos };
+  if (day === 1 || day === 6) return { name: "Gozosos", audio: "terco_misterios_gozosos.mp3", mysteries: MYSTERIES.Gozosos };
+  if (day === 2 || day === 5) return { name: "Dolorosos", audio: "terco_misterios_doloroso.mp3", mysteries: MYSTERIES.Dolorosos };
+  return { name: "Luminosos", audio: "terco_misterios_luminosos.mp3", mysteries: MYSTERIES.Luminosos };
 }
 
 export function getNextRosaryStep(currentStep: number, date: Date = new Date()) {

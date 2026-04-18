@@ -32,6 +32,13 @@ export interface SendImageOptions {
   caption?: string;
 }
 
+export interface SendPollOptions {
+  number: string;
+  name: string;
+  values: string[];
+  selectableCount?: number;
+}
+
 interface EvolutionInstance {
   instance_name: string;
   api_url: string;
@@ -60,25 +67,30 @@ export class WhatsAppService {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
       );
 
-      const { data: instance } = await supabase
+      const { data: instance, error } = await supabase
         .from("whatsapp_instances")
         .select("instance_name, api_url, api_key")
         .eq("is_primary", true)
         .eq("status", "active")
         .single();
 
+      if (error) {
+        console.error("❌ [EVO] Erro ao carregar instância do banco:", error.message);
+        return false;
+      }
+
       if (instance) {
         this.instanceName = instance.instance_name;
         this.apiUrl = instance.api_url;
         this.apiKey = instance.api_key;
-        console.log(`✅ [EVO] Instância ativa carregada: ${this.instanceName}`);
+        console.log(`✅ [EVO] Instância carregada do Banco: ${this.instanceName} | endpoint: ${this.apiUrl.substring(0, 15)}...`);
         return true;
       }
 
-      console.warn("[EVO] Nenhuma instância ativa no banco. Usando env vars como fallback.");
+      console.warn("[EVO] Nenhuma instância 'active' e 'primary' encontrada no banco.");
       return false;
     } catch (err: any) {
-      console.warn("[EVO] Falha ao carregar instância do banco:", err.message);
+      console.error("🔥 [EVO] Falha crítica no loadActiveInstance:", err.message);
       return false;
     }
   }
@@ -103,12 +115,18 @@ export class WhatsAppService {
       return { success: true };
     }
 
+    // Para arquivos grandes, sendMedia com mimetype explícito costuma ser mais performático
     const body = {
       number: this.formatNumber(options.number),
-      audio: options.audioUrl
+      mediatype: "audio",
+      mimetype: options.audioUrl.endsWith(".ogg") ? "audio/ogg" : "audio/mpeg",
+      media: options.audioUrl,
+      fileName: options.audioUrl.split('/').pop(),
+      delay: 0
     };
 
-    return this.postRequest(`/message/sendWhatsAppAudio/${this.instanceName}`, body);
+    console.log(`📡 [EVO] Enviando Áudio (Otimizado): ${options.audioUrl}`);
+    return this.postRequest(`/message/sendMedia/${this.instanceName}`, body);
   }
 
   async sendImage(options: SendImageOptions) {
@@ -137,10 +155,10 @@ export class WhatsAppService {
       number: this.formatNumber(options.number),
       title: options.title || "Rotina com Deus",
       description: options.text,
-      footerText: options.footer || "Escolha uma opção",
+      footer: options.footer || "Escolha uma opção",
       buttons: options.buttons.slice(0, 3).map((b, index) => ({
         type: "reply",
-        displayText: b.displayText.substring(0, 20),
+        text: b.displayText.substring(0, 20),
         id: b.id || `btn_${index}_${Date.now()}`
       }))
     };
@@ -174,9 +192,25 @@ export class WhatsAppService {
     return this.postRequest(`/message/sendList/${this.instanceName}`, body);
   }
 
+  async sendPoll(options: SendPollOptions) {
+    if (this.isSimulator) {
+      this.simulatorMessages.push(`📊 [Enquete: ${options.name}]\nOpções: ${options.values.join(", ")}`);
+      return { success: true };
+    }
+
+    const body = {
+      number: this.formatNumber(options.number),
+      name: options.name,
+      selectableCount: options.selectableCount || 1,
+      values: options.values,
+      delay: 0
+    };
+
+    return this.postRequest(`/message/sendPoll/${this.instanceName}`, body);
+  }
+
   async downloadMedia(messageId: string): Promise<string | null> {
     try {
-      // Evolution API: GET /chat/getBase64FromMediaMessage/{instance}
       const url = `${this.apiUrl}/chat/getBase64FromMediaMessage/${this.instanceName}`;
       console.log(`📥 [EVO] Baixando mídia: ${messageId}`);
 
@@ -211,7 +245,6 @@ export class WhatsAppService {
     }
   }
 
-  // Checa estado da conexão da instância
   async checkConnection(): Promise<string> {
     try {
       const url = `${this.apiUrl}/instance/connectionState/${this.instanceName}`;
@@ -233,14 +266,12 @@ export class WhatsAppService {
     if (!cleaned.startsWith("55") && cleaned.length >= 10) {
       cleaned = "55" + cleaned;
     }
-    // Evolution API aceita o formato brasileiro completo com 9° dígito
-    // Não precisa remover o 9 como na Meta API
-    return cleaned;
+    return cleaned.includes("@") ? cleaned : `${cleaned}@s.whatsapp.net`;
   }
 
   private async postRequest(endpoint: string, body: any) {
     const url = `${this.apiUrl}${endpoint}`;
-    console.log(`📡 [EVO] POST ${url}\nPayload:`, JSON.stringify(body, null, 2));
+    console.log(`📡 [EVO] POST ${url}`);
     
     try {
       const response = await fetch(url, {
@@ -255,19 +286,11 @@ export class WhatsAppService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`❌ [EVO] Erro (${url}) Status: ${response.status}\nResponse:`, errorText);
-        
-        if (response.status === 404) {
-          console.error("🚨 [EVO] Instância não encontrada! Verifique o EVOLUTION_INSTANCE_NAME.");
-        }
-        if (response.status === 401) {
-          console.error("🚨 [EVO] API Key inválida! Verifique EVOLUTION_API_KEY.");
-        }
-        
         return { success: false, error: errorText, status: response.status };
       }
 
       const resJson = await response.json();
-      console.log(`✅ [EVO] Sucesso:`, JSON.stringify(resJson));
+      console.log(`✅ [EVO] Sucesso em ${endpoint}`);
       return { success: true, data: resJson };
     } catch (err: any) {
       console.error(`🔥 [EVO] Falha crítica (${url}):`, err.message);

@@ -25,7 +25,7 @@ CREATE POLICY "Serviço gerencia instâncias" ON public.whatsapp_instances FOR A
 INSERT INTO public.whatsapp_instances (instance_name, phone_number, api_url, api_key, status, is_primary)
 VALUES (
     'rotina-principal',
-    '5561991149453',
+    '5561999220401',
     'https://evo.rotinacomdeus.online',
     'SUA_API_KEY_AQUI',
     'active',

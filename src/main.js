@@ -88,4 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+  // Facebook Pixel Events Tracking
+  const checkoutLinks = document.querySelectorAll('a[href*="checkout.nexano.com.br"]');
+  checkoutLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'InitiateCheckout', {
+          content_name: 'Escolha de Plano - RCD',
+          content_category: 'Assinatura'
+        });
+        console.log('📈 [Pixel] Evento InitiateCheckout disparado');
+      }
+    });
+  });
 });

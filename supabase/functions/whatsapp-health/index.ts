@@ -15,6 +15,48 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function ensureWebhook(instance: any): Promise<boolean> {
+  try {
+    const webhookUrl = `${SUPABASE_URL}/functions/v1/whatsapp-webhook`;
+    console.log(`[HEALTH] Configurando Webhook para ${instance.instance_name}: ${webhookUrl}`);
+
+    const response = await fetch(`${instance.api_url}/webhook/set/${instance.instance_name}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": instance.api_key
+      },
+      body: JSON.stringify({
+        webhook: {
+          enabled: true,
+          url: webhookUrl,
+          webhook_by_events: false,
+          events: [
+            "MESSAGES_UPSERT",
+            "MESSAGES_UPDATE",
+            "MESSAGES_DELETE",
+            "SEND_MESSAGE",
+            "CONNECTION_UPDATE",
+            "CALL"
+          ],
+          base64: true
+        }
+      })
+    });
+
+    if (!response.ok) {
+      console.error(`[HEALTH] Erro ao configurar webhook em ${instance.instance_name}:`, await response.text());
+      return false;
+    }
+
+    console.log(`✅ [HEALTH] Webhook configurado com sucesso em ${instance.instance_name}`);
+    return true;
+  } catch (err: any) {
+    console.error(`[HEALTH] Falha na configuração do webhook em ${instance.instance_name}:`, err.message);
+    return false;
+  }
+}
+
 async function checkInstanceHealth(instance: any): Promise<string> {
   try {
     const url = `${instance.api_url}/instance/connectionState/${instance.instance_name}`;
@@ -27,6 +69,12 @@ async function checkInstanceHealth(instance: any): Promise<string> {
     const data = await response.json();
     const state = data.instance?.state || data.state || "unknown";
     console.log(`[HEALTH] ${instance.instance_name}: ${state}`);
+
+    // Se estiver conectado, garante o webhook
+    if (state === "open" || state === "connected") {
+      await ensureWebhook(instance);
+    }
+
     return state;
   } catch (err: any) {
     console.error(`[HEALTH] Erro ao checar ${instance.instance_name}:`, err.message);
@@ -104,7 +152,7 @@ serve(async (req) => {
           }).eq("id", backup.id);
 
           // Notificar admin via a instância backup
-          const adminPhone = "5561991149453";
+          const adminPhone = "5561984585912";
           try {
             const alertBody = {
               number: adminPhone,

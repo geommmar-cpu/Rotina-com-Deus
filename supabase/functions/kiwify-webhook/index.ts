@@ -1,12 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { whatsappService } from "../whatsapp-webhook/services/whatsapp-service.ts";
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-const WHATSAPP_API_TOKEN = Deno.env.get("META_ACCESS_TOKEN") || "";
-const PHONE_NUMBER_ID = Deno.env.get("META_PHONE_NUMBER_ID") || "";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -100,14 +99,18 @@ serve(async (req) => {
             }).eq("id", waUser.user_id);
         }
 
-        // Envia mensagem se for aprovação
+        // Envia mensagem se for aprovação via Evolution API
         if (subStatus === "active") {
-            const welcomeMessage = `✨ *Acesso Premium Liberado!* ✨\n\nOlá! Sua jornada no *Rotina com Deus* foi ativada com sucesso.\n\nAgora você tem acesso ilimitado a todas as ferramentas. 🙏\n\nDigite *MENU* para começar agora.`;
-            await fetch(`https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${WHATSAPP_API_TOKEN}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ messaging_product: "whatsapp", to: phone, type: "text", text: { body: welcomeMessage } })
-            });
+            try {
+                await whatsappService.loadActiveInstance();
+                const welcomeMessage = `✨ *Acesso Premium Liberado!* ✨\n\nOlá! Sua jornada no *Rotina com Deus* foi ativada com sucesso.\n\nAgora você tem acesso ilimitado a todas as ferramentas. 🙏\n\nDigite *MENU* para começar agora.`;
+                await whatsappService.sendText({
+                    number: phone,
+                    text: welcomeMessage
+                });
+            } catch (msgError: any) {
+                console.error("❌ Erro ao enviar mensagem Kiwify:", msgError.message);
+            }
         }
     }
 
