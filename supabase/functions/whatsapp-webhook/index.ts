@@ -317,7 +317,13 @@ serve(async (req) => {
         async () => {
           await sleep(4000);
           if (getNextRosaryStep(next.id)) {
-            await whatsappService.sendText({ number: rawPhone, text: "👉 *DIGITE 1* - Próximo mistério" });
+            let promptText = "👉 *DIGITE 1* - Próximo mistério";
+            if (next.id === 1) {
+              promptText = "👉 *DIGITE 1* - Iniciar os ritos de introdução do Terço";
+            } else if (next.id === 7) {
+              promptText = "👉 *DIGITE 1* - Iniciar Salve Rainha";
+            }
+            await whatsappService.sendText({ number: rawPhone, text: promptText });
           } else {
             await whatsappService.sendText({ number: rawPhone, text: "🙏 *Terço Concluído!* Que Maria interceda por você.\n\n👉 *DIGITE 0* - Menu principal" });
             await saveProgress(waUser, { last_prayer_type: "menu", last_prayer_step: 0 });
