@@ -115,18 +115,14 @@ export class WhatsAppService {
       return { success: true };
     }
 
-    // Para arquivos grandes, sendMedia com mimetype explícito costuma ser mais performático
     const body = {
       number: this.formatNumber(options.number),
-      mediatype: "audio",
-      mimetype: options.audioUrl.endsWith(".ogg") ? "audio/ogg" : "audio/mpeg",
-      media: options.audioUrl,
-      fileName: options.audioUrl.split('/').pop(),
+      audio: options.audioUrl,
       delay: 0
     };
 
-    console.log(`📡 [EVO] Enviando Áudio (Otimizado): ${options.audioUrl}`);
-    return this.postRequest(`/message/sendMedia/${this.instanceName}`, body);
+    console.log(`📡 [EVO] Enviando Áudio (sendWhatsAppAudio): ${options.audioUrl}`);
+    return this.postRequest(`/message/sendWhatsAppAudio/${this.instanceName}`, body);
   }
 
   async sendImage(options: SendImageOptions) {

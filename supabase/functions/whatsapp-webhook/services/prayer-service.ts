@@ -7,14 +7,14 @@ export const MYSTERIES = {
 
 export const AUDIO_BASE_URL = Deno.env.get("AUDIO_BASE_URL") || "https://rotina-com-deus.vercel.app/audios/";
 
-
 export function getMysteryOfDay(date: Date = new Date()) {
   const day = date.getDay();
   // 0-Dom, 1-Seg, 2-Ter, 3-Qua, 4-Qui, 5-Sex, 6-Sab
-  if (day === 0 || day === 3) return { name: "Gloriosos", audio: "terco_misterios_gloriosos.mp3", mysteries: MYSTERIES.Gloriosos };
-  if (day === 1 || day === 6) return { name: "Gozosos", audio: "terco_misterios_gozosos.mp3", mysteries: MYSTERIES.Gozosos };
-  if (day === 2 || day === 5) return { name: "Dolorosos", audio: "terco_misterios_doloroso.mp3", mysteries: MYSTERIES.Dolorosos };
-  return { name: "Luminosos", audio: "terco_misterios_luminosos.mp3", mysteries: MYSTERIES.Luminosos };
+  // Mapeamos o nome para o prefixo do arquivo nos novos audios
+  if (day === 0 || day === 3) return { name: "Gloriosos", filePrefix: "gloriosos", mysteries: MYSTERIES.Gloriosos };
+  if (day === 1 || day === 6) return { name: "Gozosos", filePrefix: "gozosos", mysteries: MYSTERIES.Gozosos };
+  if (day === 2 || day === 5) return { name: "Dolorosos", filePrefix: "doloroso", mysteries: MYSTERIES.Dolorosos };
+  return { name: "Luminosos", filePrefix: "luminosos", mysteries: MYSTERIES.Luminosos };
 }
 
 export function getNextRosaryStep(currentStep: number, date: Date = new Date()) {
@@ -25,34 +25,42 @@ export function getNextRosaryStep(currentStep: number, date: Date = new Date()) 
       id: 0, 
       name: "Intenções", 
       text: `✝️ *Terço Guiado - Mistérios ${mystery.name}*\n\nAntes de iniciarmos, vamos colocar nossas intenções nas mãos de Deus e de Nossa Senhora...\n\nFeche os olhos por um momento. Entregue suas lutas, sua família, seus sonhos e sua gratidão.\n\n_Faça sua intenção em silêncio no coração..._`, 
-      audioUrl: null, 
-      buttons: [{ displayText: "Intenção feita", id: "terco_next" }] 
+      audioUrl: null,
+      duration: 0
     },
     { 
       id: 1, 
       name: "Oferecimento", 
       text: `🙏 *Oferecimento do Terço*\n\nVamos rezar juntos este oferecimento, preparando nosso espírito para contemplar a vida de Jesus:`, 
-      audioUrl: `${AUDIO_BASE_URL}oracao_intencoes.mp3`, 
-      buttons: [{ displayText: "Iniciar o Terço", id: "terco_next" }] 
-    },
-    { 
-      id: 2, 
-      name: "Mistérios", 
-      text: `✝️ *Mistérios ${mystery.name}*\n\nHoje contemplaremos:\n\n${mystery.mysteries.map((m, i) => `${i + 1}º - ${m}`).join("\n")}\n\nO áudio a seguir contém as contas do Terço completo. Mantenha-se em espírito de profunda oração e meditação.`, 
-      audioUrl: `${AUDIO_BASE_URL}${mystery.audio}`, 
-      buttons: [{ displayText: "Concluir Terço", id: "terco_next" }] 
+      audioUrl: `${AUDIO_BASE_URL}oracao_intencoes.mp3`,
+      duration: 30
     },
     {
-      id: 3,
+      id: 2,
+      name: "Ritos Iniciais",
+      text: `✝️ *Ritos Iniciais e Introdução*\n\nVamos iniciar os ritos de introdução do Terço.`,
+      audioUrl: `${AUDIO_BASE_URL}ritos-introducao-${mystery.filePrefix}.ogg`,
+      duration: 180
+    },
+    // Os 5 mistérios divididos
+    ...mystery.mysteries.map((m, i) => ({
+      id: 3 + i,
+      name: `${i + 1}º Mistério`,
+      text: `✝️ *${i + 1}º Mistério - ${mystery.name}*\n\nContemplamos: *${m}*.\n\nOuça o áudio e acompanhe em oração.`,
+      audioUrl: `${AUDIO_BASE_URL}terco-misterios-${mystery.filePrefix}-misterio-${i + 1}.ogg`,
+      duration: i === 0 ? 300 : (i === 4 ? 240 : 180) // _1 (5 min), _2-4 (3 min), _5 (4 min) aproximadamente
+    })),
+    {
+      id: 8,
       name: "Encerramento",
       text: "🙏 *Agradecimento e Salve Rainha*\n\nConcluímos este momento sagrado entregando nosso dia sob o manto de Maria. Que a paz de Deus te acompanhe sempre!",
       audioUrl: `${AUDIO_BASE_URL}ave_maria.mp3`,
-      buttons: [{ displayText: "Menu Principal", id: "btn_menu" }]
+      duration: 50
     }
   ];
 
   if (currentStep >= steps.length - 1) return null;
-  return steps[currentStep + 1];
+  return steps.find(s => s.id === currentStep + 1) || null;
 }
 
 export const PRAYERS = {

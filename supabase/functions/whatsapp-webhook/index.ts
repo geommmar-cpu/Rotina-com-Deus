@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { whatsappService } from "./services/whatsapp-service.ts";
-import { generateSpiritualResponse, generatePersonalizedPrayer, transcribeAudio, generateSpecialPeriodDay } from "./services/ai-service.ts";
+import { generateSpiritualResponse } from "./services/ai-service.ts";
 import { getDailyLiturgy } from "./services/liturgy-service.ts";
 import { getBible365Content } from "./services/bible-service.ts";
 import { getMysteryOfDay, getNextRosaryStep } from "./services/prayer-service.ts";
@@ -12,428 +12,452 @@ const supabase = createClient(
 );
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-simulator',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-simulator",
 };
 
-// --- HELPERS ---
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function sendMainMenu(phone: string, waUser: any) {
-  const menuText = `🙏 *Menu Principal*\n\n1️⃣ - Minha Rotina de Hoje\n2️⃣ - Orações Especiais\n3️⃣ - Terço (Passo a Passo)\n4️⃣ - Dúvidas / Suporte\n\n👉 *DIGITE O NÚMERO DA OPÇÃO*`;
-  await whatsappService.sendText({ number: phone, text: menuText });
+// ─── Phone normalization ───────────────────────────────────────────────────
+// Strips country code + removes the optional 9th digit so every Brazilian
+// mobile number has a single canonical form: "55" + DDD + 8 digits.
+function canonicalize(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits.startsWith("55") || digits.length < 12) return digits;
+  const ddd = digits.slice(2, 4);
+  const local = digits.slice(4); // 8 or 9 digits
+  const body = local.length === 9 && local.startsWith("9") ? local.slice(1) : local;
+  return "55" + ddd + body; // always 12 digits
 }
 
-async function saveProgress(userId: string, data: Record<string, any>) {
-  const { data: existing } = await supabase.from("user_progress").select("id").eq("whatsapp_user_id", userId).limit(1).single();
-  if (existing) {
-    await supabase.from("user_progress").update({ ...data, updated_at: new Date().toISOString() }).eq("whatsapp_user_id", userId);
-  } else {
-    await supabase.from("user_progress").insert({ whatsapp_user_id: userId, ...data, updated_at: new Date().toISOString() });
+// ─── User lookup – fetches ALL accounts matching any phone variant ─────────
+async function findUser(phone: string) {
+  const canonical = canonicalize(phone);
+  const withNinth = canonical.slice(0, 4) + "9" + canonical.slice(4);
+
+  const { data: allUsers } = await supabase
+    .from("whatsapp_users")
+    .select("id, full_name, phone_number, user_id, subscription_status, bot_state, bot_step, bot_started_at, bible_day, user_preferences(*)")
+    .in("phone_number", [phone, canonical, withNinth])
+    .order("created_at", { ascending: true }); // oldest = canonical account
+
+  if (!allUsers || allUsers.length === 0) return null;
+
+  const primary = allUsers[0];
+  primary._allUserIds = allUsers.map((u: any) => u.id);
+  return primary;
+}
+
+// ─── Save progress to ALL user IDs – updates whatsapp_users directly ──────
+async function saveProgress(waUser: any, data: Record<string, unknown>) {
+  // Map old keys to new columns
+  const updateData: any = {};
+  if (data.last_prayer_type !== undefined) updateData.bot_state = data.last_prayer_type;
+  if (data.last_prayer_step !== undefined) updateData.bot_step = data.last_prayer_step;
+  if (data.last_step_started_at !== undefined) updateData.bot_started_at = data.last_step_started_at;
+  if (data.bible_365_day !== undefined) updateData.bible_day = data.bible_365_day;
+
+  const userIds: string[] = waUser._allUserIds ?? [waUser.id];
+  console.log(`💾 saveState | userIds=${JSON.stringify(userIds)} | state=${updateData.bot_state}`);
+
+  for (const userId of userIds) {
+    const { error } = await supabase
+      .from("whatsapp_users")
+      .update(updateData)
+      .eq("id", userId);
+    if (error) console.error(`❌ saveState error (${userId}):`, error.message);
   }
 }
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Helper para executar tarefas em segundo plano de forma ordenada e segura
-function queueBackgroundTasks(ctx: any, tasks: (() => Promise<any>)[]) {
-  // @ts-ignore: EdgeRuntime is available in Supabase
-  if (typeof EdgeRuntime !== "undefined") {
-    // @ts-ignore
-    EdgeRuntime.waitUntil((async () => {
-      for (const task of tasks) {
-        try { await task(); } catch (e) { console.error("❌ Erro em tarefa de background:", e); }
-      }
-    })());
-  } else {
-    // Fallback para desenvolvimento local
-    (async () => {
-      for (const task of tasks) {
-        try { await task(); } catch (e) { console.error("❌ Erro em tarefa de background (Local):", e); }
-      }
-    })();
-  }
+// ─── Menu ──────────────────────────────────────────────────────────────────
+async function sendMainMenu(phone: string) {
+  await whatsappService.sendText({
+    number: phone,
+    text: "🙏 *Menu Principal*\n\n1️⃣ - Minha Rotina de Hoje\n2️⃣ - Orações Especiais\n3️⃣ - Terço (Passo a Passo)\n4️⃣ - Dúvidas / Suporte\n\n👉 *DIGITE O NÚMERO DA OPÇÃO*",
+  });
 }
 
-// --- MAIN SERVE ---
+// ─── Background queue ──────────────────────────────────────────────────────
+function background(tasks: (() => Promise<unknown>)[]) {
+  const run = async () => {
+    for (const t of tasks) {
+      try { await t(); } catch (e) { console.error("background task error:", e); }
+    }
+  };
+  // @ts-ignore EdgeRuntime exists in Supabase
+  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(run());
+  else run();
+}
 
-serve(async (req, ctx) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+// ─── Admin list ────────────────────────────────────────────────────────────
+const ADMINS = new Set([
+  "55618416939",
+  "556184585912",
+  "556139841693",
+  "55619220401",
+  "556195773473",
+  "5561999220401",
+  "556199220401",
+]);
+
+function isAdmin(phone: string): boolean {
+  const c = canonicalize(phone);
+  // Check both raw and canonical form, and also check if any admin number ends the same way
+  return ADMINS.has(phone) || ADMINS.has(c) || [...ADMINS].some(a => phone.endsWith(a.slice(-8)) || c.endsWith(a.slice(-8)));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
     const isSimulator = req.headers.get("x-simulator") === "true";
     if (isSimulator) { whatsappService.isSimulator = true; whatsappService.simulatorMessages = []; }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    console.log(`🚀 [WEBHOOK] Recebendo requisição. URL Config: ${supabaseUrl ? "✅" : "❌"} | Key Config: ${supabaseKey ? "✅" : "❌"}`);
-
-    if (!supabaseUrl || !supabaseKey) {
-      console.error("🔥 ERRO CRÍTICO: Variáveis do Supabase (URL/KEY) estão faltando!");
-    }
-
-    // 1. Carregar configuração ativa do banco (Failover)
-    const loadSuccess = await whatsappService.loadActiveInstance();
-    if (!loadSuccess) {
-      console.warn("⚠️ Fallback: Não foi possível carregar instâncias do banco. Usando Env Vars.");
-    }
+    await whatsappService.loadActiveInstance();
 
     const payload = await req.json();
-    const event = (payload.event || "").toLowerCase();
-    const instance = payload.instance || "unknown";
-    const msgId = payload.data?.key?.id;
-    
-    console.log(`📡 [EVO] Evento recebido: ${event} | ID: ${msgId} | Instância: ${instance}`);
-    
-    // Idempotência: Evita processar a mesma mensagem duas vezes
+    const event: string = (payload.event || "").toLowerCase();
+    const msgId: string | undefined = payload.data?.key?.id;
+
+    console.log(`📡 evento=${event} id=${msgId}`);
+
+    // ── Idempotency lock ──
     if (msgId) {
-      const { error: lockError } = await supabase
-        .from("processed_messages")
-        .insert({ id: msgId });
-      
-      if (lockError) {
-        if (lockError.code === '23505') {
-          console.warn(`⏩ [IDEM] Mensagem ${msgId} já processada. Ignorando duplicata.`);
-          return new Response("OK", { status: 200 });
-        }
-        console.error("⚠️ [IDEM] Erro ao verificar idempotência (tabela existe?):", lockError.message);
-      }
-    }
-
-    if (!isSimulator && event !== "messages.upsert") {
-      console.log(`⏩ Evento ${event} ignorado.`);
-      return new Response("OK", { status: 200 });
-    }
-
-    const data = payload.data;
-    const messageData = isSimulator ? null : data;
-    if (messageData?.key?.fromMe) {
-        console.log("⏩ Mensagem enviada pelo próprio bot (fromMe). Ignorando.");
+      const { error } = await supabase.from("processed_messages").insert({ id: msgId });
+      if (error?.code === "23505") {
+        console.log(`⏩ already processed ${msgId}`);
         return new Response("OK", { status: 200 });
+      }
     }
 
-    const normalizePhone = (p: string) => {
-      let raw = p.replace(/\D/g, "");
-      // Remove o prefixo 55 se vier com ele para facilitar a lógica de 9º dígito
-      let clean = raw.startsWith("55") ? raw.substring(2) : raw;
-      
-      // Se tiver 11 dígitos, é celular com 9º dígito. Se tiver 10, é sem 9º dígito
-      if (clean.length === 11) {
-        // Formato: DDD + 9 + 8 dígitos. Removemos o 9 (posição 2) se for necessário normalizar
-        // Mas para a whitelist, vamos aceitar os dois formatos no adminWhitelist
-      }
-      
-      // Retorna com o 55 de volta de forma padronizada
-      return "55" + clean;
-    };
+    if (!isSimulator && event !== "messages.upsert")
+      return new Response("OK", { status: 200 });
 
-    const phone = (messageData?.key?.remoteJid || "").replace("@s.whatsapp.net", "").replace("@c.us", "");
-    const normalizedPhone = normalizePhone(phone);
-    console.log(`📩 [EVO] Mensagem de ${phone} (Normalizado: ${normalizedPhone})`);
-    
+    const msgData = isSimulator ? null : payload.data;
+    if (msgData?.key?.fromMe) return new Response("OK", { status: 200 });
+
+    // ── Phone ──
+    const rawPhone = (msgData?.key?.remoteJid ?? "")
+      .replace("@s.whatsapp.net", "")
+      .replace("@c.us", "");
+
+    // ── Message text ──
     let messageText = "";
     let buttonId = "";
-    let isAudio = false;
-    let audioMessageId = "";
 
     if (isSimulator) {
-      const simMsg = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
-      if (simMsg?.type === "text") messageText = simMsg.text?.body || "";
-      else if (simMsg?.type === "interactive") {
-        messageText = simMsg.interactive?.button_reply?.title || simMsg.interactive?.list_reply?.title || "";
-        buttonId = simMsg.interactive?.button_reply?.id || simMsg.interactive?.list_reply?.id || "";
+      const m = payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+      if (m?.type === "text") messageText = m.text?.body ?? "";
+      else if (m?.type === "interactive") {
+        messageText = m.interactive?.button_reply?.title ?? m.interactive?.list_reply?.title ?? "";
+        buttonId = m.interactive?.button_reply?.id ?? m.interactive?.list_reply?.id ?? "";
       }
     } else {
-      const msg = messageData?.message;
+      const msg = msgData?.message;
       if (msg?.conversation) messageText = msg.conversation;
       else if (msg?.extendedTextMessage?.text) messageText = msg.extendedTextMessage.text;
       else if (msg?.buttonsResponseMessage) {
-        messageText = msg.buttonsResponseMessage.selectedDisplayText || "";
-        buttonId = msg.buttonsResponseMessage.selectedButtonId || "";
+        messageText = msg.buttonsResponseMessage.selectedDisplayText ?? "";
+        buttonId = msg.buttonsResponseMessage.selectedButtonId ?? "";
       } else if (msg?.listResponseMessage) {
-        messageText = msg.listResponseMessage.title || "";
-        buttonId = msg.listResponseMessage.singleSelectReply?.selectedRowId || msg.listResponseMessage.rowId || "";
-      } else if (msg?.audioMessage) {
-        isAudio = true;
-        audioMessageId = messageData?.key?.id || "";
-      } else if (msg?.pollUpdateMessage) messageText = "Menu Principal"; 
+        messageText = msg.listResponseMessage.title ?? "";
+        buttonId =
+          msg.listResponseMessage.singleSelectReply?.selectedRowId ??
+          msg.listResponseMessage.rowId ?? "";
+      } else if (msg?.pollUpdateMessage) messageText = "menu";
     }
 
-    // Busca o usuário tentando correspondência exata ou normalizada (mais robusto que .single())
-    const { data: users } = await supabase.from("whatsapp_users")
-      .select("*, user_preferences(*), user_progress(*)")
-      .or(`phone_number.eq.${phone},phone_number.eq.${normalizedPhone}`)
-      .order('created_at', { ascending: false })
-      .limit(1);
+    if (!messageText && !buttonId) return new Response("OK", { status: 200 });
 
-    let waUser = users && users.length > 0 ? users[0] : null;
+    const nm = messageText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const msgTypes = msgData?.message ? Object.keys(msgData.message).join(",") : "unknown";
+    console.log(`📩 phone=${rawPhone} nm="${nm}" btnId="${buttonId}" types=${msgTypes}`);
 
-    if (waUser && waUser.user_id) {
-      const { data: profile } = await supabase.from("profiles")
-        .select("subscription_status").eq("id", waUser.user_id).single();
-      waUser.profile = profile;
-    }
+    // ── Find or create user ──
+    let waUser = await findUser(rawPhone);
 
     if (!waUser) {
-      console.log(`🆕 Novo usuário detectado: ${phone}. Criando no banco...`);
-      const { data: newUser, error: insertError } = await supabase.from("whatsapp_users").insert({ phone_number: phone }).select().single();
-      if (insertError) {
-        console.error("❌ Erro ao inserir usuário:", insertError.message);
-        if (insertError.code === '23505') {
-          const { data: retryUser } = await supabase.from("whatsapp_users").select("*").eq("phone_number", phone).single();
-          waUser = retryUser;
-        } else return new Response("OK", { status: 200 });
-      } else waUser = newUser;
-
+      const { data: nu } = await supabase
+        .from("whatsapp_users")
+        .insert({ phone_number: rawPhone })
+        .select()
+        .single();
+      waUser = nu;
       if (waUser && !waUser.full_name) {
-        console.log("🗣️ Solicitando nome do novo usuário...");
-        await whatsappService.sendText({ number: phone, text: "Bem-vindo ao *Rotina com Deus*! 🙏\n\nComo você prefere ser chamado(a)?" });
+        await whatsappService.sendText({
+          number: rawPhone,
+          text: "Bem-vindo ao *Rotina com Deus*! 🙏\n\nComo você prefere ser chamado(a)?",
+        });
         return new Response("OK", { status: 200 });
       }
     }
 
+    if (!waUser) return new Response("OK", { status: 200 });
+
+    // ── Collect name if missing ──
     if (!waUser.full_name) {
       await supabase.from("whatsapp_users").update({ full_name: messageText }).eq("id", waUser.id);
-      await whatsappService.sendText({ number: phone, text: `Prazer em te conhecer, *${messageText}*! ✨` });
+      await whatsappService.sendText({ number: rawPhone, text: `Prazer, *${messageText}*! ✨` });
       await sleep(500);
-      await sendMainMenu(phone, { ...waUser, full_name: messageText });
+      await sendMainMenu(rawPhone);
       await supabase.from("user_preferences").insert({ whatsapp_user_id: waUser.id });
       return new Response("OK", { status: 200 });
     }
 
-    const userProgress = waUser.user_progress?.[0];
-    const userProfile = waUser.profile;
+    // ── State & subscription ──
+    const progress: any = {
+      last_prayer_type: waUser.bot_state,
+      last_prayer_step: waUser.bot_step,
+      last_step_started_at: waUser.bot_started_at,
+      bible_365_day: waUser.bible_day
+    };
+    
+    console.log(`📊 STATE | bot_state=${progress.last_prayer_type ?? 'NULL'} step=${progress.last_prayer_step ?? 'NULL'}`);
+    const state: string = progress.last_prayer_type ?? "menu";
 
-    const isProfileSubActive = userProfile?.subscription_status === "active" || userProfile?.subscription_status === "trial";
-    const isDirectSubActive = waUser.subscription_status === "active" || waUser.subscription_status === "trial";
-    const isSubscriptionActive = isProfileSubActive || isDirectSubActive;
-    const normalizedMsg = messageText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // Subscription check
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("subscription_status")
+      .eq("id", waUser.user_id)
+      .single();
 
-    const adminWhitelist = [
-      "55618416939", 
-      "556184585912", 
-      "556139841693", 
-      "55619220401", 
-      "556195773473",
-      "5561999220401", // Seu número completo
-      "556199220401"   // Seu número normalizado (sem um 9)
-    ];
-    const isSpecialAdmin = adminWhitelist.includes(normalizedPhone) || adminWhitelist.includes(phone);
-    console.log(`👤 Usuário: ${phone} | Normalizado: ${normalizedPhone} | Admin: ${isSpecialAdmin}`);
+    const subActive =
+      profile?.subscription_status === "active" ||
+      profile?.subscription_status === "trial" ||
+      waUser.subscription_status === "active" ||
+      waUser.subscription_status === "trial";
 
-    if ((phone === "5561999220401" || phone === "556195773473") && (!waUser.user_id || !userProgress)) {
-      await whatsappService.sendText({ number: phone, text: `Olá, Débora! ✨ Você é muito especial para o Geomar e ele pediu para te dizer que **te ama muito!** Que o seu caminho com Deus seja abençoado e que este bot te ajude a estar sempre próxima de Suas graças. 🙏` });
-      await sleep(1000);
-    }
+    const admin = isAdmin(rawPhone);
 
-    // Paywall
-    if (!isSubscriptionActive && !isSpecialAdmin) {
-      if (normalizedMsg === "1") {
-        console.log("💳 [PAYWALL] Usuário escolheu ver planos.");
-        const plansText = `⭐ *Escolha seu plano e ative agora:* \n\n🔹 *Plano Anual*: R$ 97,00\n🔗 https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=GQ4X0T5\n\n🔹 *Plano Semestral*: R$ 79,00\n🔗 https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=TMMWDKA\n\n🔹 *Plano Mensal*: R$ 14,90\n🔗 https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=ZDR0L7X\n\n🛡️ *Garantia Incondicional de 7 dias.*`;
-        await whatsappService.sendText({ number: phone, text: plansText });
-        return new Response("OK", { status: 200 });
+    console.log(`👤 state=${state} admin=${admin} sub=${subActive}`);
+
+    // ── Paywall ──
+    if (!subActive && !admin) {
+      if (nm === "1") {
+        await whatsappService.sendText({
+          number: rawPhone,
+          text: "⭐ *Planos disponíveis:*\n\n🔹 Anual R$97 → https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=GQ4X0T5\n🔹 Semestral R$79 → https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=TMMWDKA\n🔹 Mensal R$14,90 → https://checkout.nexano.com.br/checkout/cmnxk2hue03sb1ymt5aqismsd?offer=ZDR0L7X\n\n🛡️ Garantia de 7 dias.",
+        });
+      } else if (nm === "2") {
+        await whatsappService.sendText({
+          number: rawPhone,
+          text: "🙌 *Suporte Rotina com Deus*\n\nPrecisa de ajuda com sua assinatura ou tem alguma dúvida?\n\n📧 *contato.rotinacomdeus@gmail.com*\n\nEstamos à disposição! 🙏",
+        });
+      } else {
+        await whatsappService.sendText({
+          number: rawPhone,
+          text: "🙏 Sua assinatura não está ativa.\n\n1️⃣ - Renovar acesso\n2️⃣ - Suporte\n\n👉 DIGITE O NÚMERO",
+        });
       }
-      if (normalizedMsg === "2") {
-        await whatsappService.sendText({ number: phone, text: "🙌 *Suporte Rotina com Deus*\n\nPrecisa de ajuda com sua assinatura ou tem alguma dúvida? Fale conosco por aqui ou envie um e-mail para suporte@rotinacomdeus.com.br" });
-        return new Response("OK", { status: 200 });
-      }
-      const renewText = `🙏 Olá! Percebi que sua jornada no *Rotina com Deus* ainda não foi ativada ou sua assinatura expirou.\n\nPara continuar recebendo as orações diárias, você pode renovar seu acesso.\n\n1️⃣ - ⭐ *Renovação Premium*\n2️⃣ - Dúvidas / Suporte\n\n👉 *DIGITE O NÚMERO DA OPÇÃO*`;
-      await whatsappService.sendText({ number: phone, text: renewText });
+
       return new Response("OK", { status: 200 });
     }
 
-    // Gatilhos
-    const isMenuTrigger = normalizedMsg === "menu" || normalizedMsg === "menu principal" || normalizedMsg === "0" || normalizedMsg === "oi" || normalizedMsg === "ola" || normalizedMsg === "bom dia";
-    const isInMainMenu = !userProgress?.last_prayer_type || userProgress?.last_prayer_type === "none" || userProgress?.last_prayer_type === "menu";
-    const isRoutineTrigger = (isInMainMenu && normalizedMsg === "1") || normalizedMsg === "rotina de hoje";
-    const isSpecialPrayersTrigger = (isInMainMenu && normalizedMsg === "2") || normalizedMsg === "oracoes especiais";
-    const isTercoTrigger = (isInMainMenu && normalizedMsg === "3") || normalizedMsg === "terco";
-    const isSupportTrigger = (isInMainMenu && normalizedMsg === "4") || normalizedMsg === "suporte" || normalizedMsg === "duvidas";
+    // ══════════════════════════════════════════════════════════════
+    // ROUTING — active states have ABSOLUTE priority over menu triggers
+    // ══════════════════════════════════════════════════════════════
+    console.log(`🔀 ROTEAMENTO | state='${state}' stepId=${progress?.last_prayer_step ?? 'null'} msg='${nm}'`);
 
-    const isInSpecialPrayers = userProgress?.last_prayer_type === "special_prayers";
-    const isSaoJoseTrigger = (isInSpecialPrayers && normalizedMsg === "1");
-    const isSaoMiguelTrigger = (isInSpecialPrayers && normalizedMsg === "2");
-    
-    // --- LÓGICA DE ROTINA ---
-    if (isRoutineTrigger) {
-      await saveProgress(waUser.id, { last_prayer_type: null, last_prayer_step: 0 });
-      await whatsappService.sendText({ number: phone, text: "🚀 Preparando sua rotina premium... 🙏" });
-      
-      const now = new Date(); 
-      // Ajuste para Horário de Brasília (UTC-3)
-      const nowBrasilia = new Date(now.getTime() - (3 * 60 * 60 * 1000));
-      const todayStr = nowBrasilia.toISOString().split('T')[0];
+    // ── MENU reset ──
+    if (nm === "0" || nm === "menu" || nm === "oi" || nm === "ola") {
+      await saveProgress(waUser, { last_prayer_type: "menu", last_prayer_step: 0 });
+      await sendMainMenu(rawPhone);
+      return new Response("OK", { status: 200 });
+    }
+
+    // nm command helpers – match digit, keyword, or full option title from list responses
+    const isCmd1    = nm === "1" || nm.includes("rotina");
+    const isCmd2    = nm === "2" || nm.includes("oracoes") || nm.includes("especiais");
+    const isCmd3    = nm === "3" || nm === "terco" || nm.includes("terco");
+    const isCmd4    = nm === "4" || nm.includes("suporte") || nm.includes("duvida");
+    const isCmdAndar = nm === "1" || nm === "proximo" || buttonId === "terco_next";
+
+    // ── TERCO state (priority 1) ──
+    if (state === "terco") {
+      if (!isCmdAndar) {
+        // Not a valid rosary advance — gentle reminder
+        await whatsappService.sendText({ number: rawPhone, text: "🙏 Você está no Terço.\n\n👉 *DIGITE 1* para continuar\n👉 *DIGITE 0* para o Menu" });
+        return new Response("OK", { status: 200 });
+      }
+
+      const stepId: number = progress?.last_prayer_step ?? 0;
+
+      // Time lock
+      if (progress?.last_step_started_at && !admin) {
+        const elapsed = (Date.now() - new Date(progress.last_step_started_at).getTime()) / 1000;
+        const prevStep = getNextRosaryStep(stepId - 1);
+        const dur = prevStep?.duration ?? 0;
+        const minimum = dur - 20;
+        if (elapsed < minimum) {
+          const remaining = Math.ceil(minimum - elapsed);
+          await whatsappService.sendText({ number: rawPhone, text: `🙏 *Ainda em oração...* Aguarde *${remaining}s* para avançar.` });
+          return new Response("OK", { status: 200 });
+        }
+      }
+
+      const next = getNextRosaryStep(stepId);
+      if (!next) {
+        await saveProgress(waUser, { last_prayer_type: "menu", last_prayer_step: 0 });
+        await sendMainMenu(rawPhone);
+        return new Response("OK", { status: 200 });
+      }
+
+      await whatsappService.sendText({ number: rawPhone, text: next.text });
+
+      background([
+        async () => {
+          if (next.audioUrl) {
+            await whatsappService.sendText({ number: rawPhone, text: "🎧 Preparando áudio..." });
+            await whatsappService.sendAudio({ number: rawPhone, audioUrl: next.audioUrl });
+          }
+        },
+        async () => {
+          await sleep(4000);
+          if (getNextRosaryStep(next.id)) {
+            await whatsappService.sendText({ number: rawPhone, text: "👉 *DIGITE 1* - Próximo mistério" });
+          } else {
+            await whatsappService.sendText({ number: rawPhone, text: "🙏 *Terço Concluído!* Que Maria interceda por você.\n\n👉 *DIGITE 0* - Menu principal" });
+            await saveProgress(waUser, { last_prayer_type: "menu", last_prayer_step: 0 });
+          }
+        },
+      ]);
+
+      await saveProgress(waUser, {
+        last_prayer_step: next.id,
+        last_step_started_at: new Date().toISOString(),
+        last_prayer_type: "terco",
+      });
+
+      return new Response("OK", { status: 200 });
+    }
+
+    // ── ROUTINE end state ──
+    if (state === "routine_end" && (nm === "1" || nm.includes("amem"))) {
+      await saveProgress(waUser, { last_prayer_type: "menu" });
+      await whatsappService.sendText({ number: rawPhone, text: "Amém! 🙏" });
+      await sleep(500);
+      await sendMainMenu(rawPhone);
+      return new Response("OK", { status: 200 });
+    }
+
+    // ── SPECIAL PRAYERS state ──
+    if (state === "special_prayers") {
+      if (nm === "1" || nm.includes("jose")) {
+        await whatsappService.sendText({ number: rawPhone, text: "🙏 *Oração a São José*\n\nOuça e reze com o coração." });
+        background([
+          async () => {
+             await whatsappService.sendText({ number: rawPhone, text: "🎧 Preparando áudio..." });
+             await whatsappService.sendAudio({ number: rawPhone, audioUrl: "https://rotina-com-deus.vercel.app/audios/oracao_sao_jose.mp3" });
+          },
+          async () => {
+             await sleep(3000);
+             await whatsappService.sendText({ number: rawPhone, text: "👉 *DIGITE 0* - Voltar ao Menu" });
+          }
+        ]);
+        await saveProgress(waUser, { last_prayer_type: "menu" });
+        return new Response("OK", { status: 200 });
+      } else if (nm === "2" || nm.includes("miguel")) {
+        await whatsappService.sendText({ number: rawPhone, text: "🙏 *Oração a São Miguel Arcanjo*\n\nOuça e reze com o coração." });
+        background([
+          async () => {
+             await whatsappService.sendText({ number: rawPhone, text: "🎧 Preparando áudio..." });
+             await whatsappService.sendAudio({ number: rawPhone, audioUrl: "https://rotina-com-deus.vercel.app/audios/oracao_sao_miguel.mp3" });
+          },
+          async () => {
+             await sleep(3000);
+             await whatsappService.sendText({ number: rawPhone, text: "👉 *DIGITE 0* - Voltar ao Menu" });
+          }
+        ]);
+        await saveProgress(waUser, { last_prayer_type: "menu" });
+        return new Response("OK", { status: 200 });
+      } else {
+         await saveProgress(waUser, { last_prayer_type: "menu" });
+         await sendMainMenu(rawPhone);
+         return new Response("OK", { status: 200 });
+      }
+    }
+
+    // ── Menu triggers — ONLY fire when there is NO active prayer state ──
+    const ACTIVE_STATES = new Set(["terco", "special_prayers", "routine_active"]);
+    const canTriggerMenu = !ACTIVE_STATES.has(state);
+
+    if (isCmd1 && canTriggerMenu) {
+      await saveProgress(waUser, { last_prayer_type: "routine_active" });
+      await whatsappService.sendText({ number: rawPhone, text: "🚀 Preparando sua rotina... 🙏" });
 
       const liturgy = await getDailyLiturgy();
       if (liturgy) {
-        await whatsappService.sendText({ number: phone, text: `📖 *${liturgy.title}*\n\n${liturgy.reflection}\n\n😇 *Santo:* ${liturgy.saint}` });
+        await whatsappService.sendText({ number: rawPhone, text: `📖 *${liturgy.title}*\n\n${liturgy.reflection}` });
         await sleep(1000);
       }
-      
-      const lastReadAt = userProgress?.bible_last_read_at ? new Date(userProgress.bible_last_read_at) : null;
-      let lastReadStr = "";
-      if (lastReadAt) {
-        const lastReadBrasilia = new Date(lastReadAt.getTime() - (3 * 60 * 60 * 1000));
-        lastReadStr = lastReadBrasilia.toISOString().split('T')[0];
-      }
 
-      let currentDay = userProgress?.bible_365_day || 0;
-      
-      // Só incrementa se for um NOVO dia de leitura
-      if (lastReadStr !== todayStr) {
-        currentDay += 1;
-      }
-      
-      const bibleContent = await getBible365Content(currentDay);
-      await whatsappService.sendText({ number: phone, text: `✨ *Leitura do Dia ${currentDay}*\n\n${bibleContent}` });
+      const day = (progress?.bible_365_day ?? 0) + 1;
+      const bible = await getBible365Content(day);
+      await whatsappService.sendText({ number: rawPhone, text: `✨ *Leitura do Dia ${day}*\n\n${bible}` });
       await sleep(1000);
 
-      const encText = `🙏 *Glória a Deus!* Você completou sua jornada de hoje.\n\nAmém! 🙏 Que a paz de Cristo permaneça com você, *${waUser.full_name || ""}*. ✨`;
-      await whatsappService.sendText({ number: phone, text: encText });
-      
-      // Salva progresso: atualiza o dia e a data da última leitura
-      await saveProgress(waUser.id, { 
-        bible_365_day: currentDay, 
-        bible_last_read_at: now.toISOString(),
-        last_prayer_type: "menu" 
-      });
-      await sleep(1500);
-      await sendMainMenu(phone, waUser);
+      await whatsappService.sendText({ number: rawPhone, text: `🙏 *Glória a Deus!* Jornada completa.\n\n👉 *DIGITE 0* - Menu` });
+      await saveProgress(waUser, { bible_365_day: day, last_prayer_type: "routine_end" });
       return new Response("OK", { status: 200 });
     }
 
-    // --- LÓGICA DO TERÇO ---
-    if (isTercoTrigger) {
+    if (isCmd3 && canTriggerMenu) {
       const mystery = getMysteryOfDay(new Date());
-      const firstStep = getNextRosaryStep(-1);
-      const stepText = `✝️ *Terço - Mistérios ${mystery.name}*\n\n${firstStep!.text}`;
-      
-      await whatsappService.sendText({ number: phone, text: stepText });
-      
-      // Envio ordenado em background
-      queueBackgroundTasks(ctx, [
-        async () => { if (firstStep?.audioUrl) await whatsappService.sendAudio({ number: phone, audioUrl: firstStep.audioUrl }); },
-        async () => { await whatsappService.sendText({ number: phone, text: "👉 *DIGITE 1* - Para o próximo passo" }); }
-      ]);
+      const first = getNextRosaryStep(-1);
+      if (!first) return new Response("OK", { status: 200 });
 
-      await saveProgress(waUser.id, { last_prayer_type: "terco", last_prayer_step: firstStep!.id });
-      return new Response("OK", { status: 200 });
-    }
+      await whatsappService.sendText({ number: rawPhone, text: `✝️ *Terço - Mistérios ${mystery.name}*\n\n${first.text}` });
 
-    if (userProgress?.last_prayer_type === "terco" && (normalizedMsg === "1" || normalizedMsg === "proximo" || buttonId === "terco_next")) {
-      const next = getNextRosaryStep(userProgress.last_prayer_step || 0);
-      if (next) {
-        // Envia o texto principal
-        await whatsappService.sendText({ number: phone, text: next.text });
-        
-        // No passo dos mistérios ou áudios longos, dá um feedback
-        if (next.id > 0) {
-          await whatsappService.sendText({ number: phone, text: "Aguarde um instante, estou preparando o áudio para você... 🎧" });
-        }
-
-        // Envia o áudio PRIORITARIAMENTE
-        queueBackgroundTasks(ctx, [
-          async () => { 
-            if (next.audioUrl) {
-              console.log(`🎵 [TERCO] Solicitando áudio: ${next.audioUrl}`);
-              const res = await whatsappService.sendAudio({ number: phone, audioUrl: next.audioUrl });
-              if (!res.success) console.error(`❌ [TERCO] Falha ao enviar áudio:`, res.error);
-            }
-          },
-          async () => { 
-            if (next.id < 3) { // Não envia instrução no último passo
-              await sleep(4000); // Dá mais tempo para o áudio processar antes da instrução
-              await whatsappService.sendText({ number: phone, text: "👉 *DIGITE 1* - Para o próximo passo" }); 
-            } else {
-              // PASSO FINAL: Salve Rainha enviada, agora volta ao menu
-              await sleep(5000);
-              await whatsappService.sendText({ 
-                number: phone, 
-                text: "🙏 *Terço Concluído!*\n\nQue a intercessão de Maria Santíssima te acompanhe.\n\n👉 *DIGITE 1* - Para voltar ao menu inicial" 
-              });
-              await sleep(1000);
-              // Removemos o envio automático do menu para esperar o "1" do usuário, ou podemos manter os dois. 
-              // O usuário pediu especificamente a instrução, então vamos manter o fluxo guiado.
-              await supabase.from("user_progress").update({ last_prayer_type: null, last_prayer_step: 0 }).eq("user_id", waUser.id);
-            }
+      background([
+        async () => {
+          if (first.audioUrl) {
+            await whatsappService.sendText({ number: rawPhone, text: "🎧 Preparando áudio..." });
+            await whatsappService.sendAudio({ number: rawPhone, audioUrl: first.audioUrl });
           }
-        ]);
-
-        await saveProgress(waUser.id, { last_prayer_step: next.id });
-      } else {
-        await whatsappService.sendText({ number: phone, text: "🎉 Você concluiu o Terço! Que Deus te abençoe." });
-        await sleep(1000);
-        await saveProgress(waUser.id, { last_prayer_type: "menu", last_prayer_step: 0 });
-        await sendMainMenu(phone, waUser);
-      }
-      return new Response("OK", { status: 200 });
-    }
-
-    // --- DIÁLOGOS E ORAÇÕES ---
-    // Handler para o fim da rotina (Aceita "Amém" ou o número 1)
-    if (normalizedMsg.includes("amem") || (userProgress?.last_prayer_type === "routine_end" && (normalizedMsg === "1" || normalizedMsg === "amem"))) {
-      await whatsappService.sendText({ number: phone, text: "Amém! 🙏 Que a paz de Cristo permaneça com você, *" + (waUser.full_name || "") + "*." });
-      await saveProgress(waUser.id, { last_prayer_type: "menu" });
-      await sleep(500);
-      await sendMainMenu(phone, waUser);
-      return new Response("OK", { status: 200 });
-    }
-
-    if (isMenuTrigger) {
-      await saveProgress(waUser.id, { last_prayer_type: "menu", last_prayer_step: 0 });
-      await sendMainMenu(phone, waUser);
-      return new Response("OK", { status: 200 });
-    }
-
-    if (isSpecialPrayersTrigger) {
-      await saveProgress(waUser.id, { last_prayer_type: "special_prayers" });
-      await whatsappService.sendText({ number: phone, text: `🙏 *Orações Especiais*\n\n1️⃣ - São José 🧔‍♂️\n2️⃣ - São Miguel 🗡️\n0️⃣ - Menu Principal\n\n👉 *DIGITE O NÚMERO*` });
-      return new Response("OK", { status: 200 });
-    }
-
-    if (isSaoJoseTrigger || isSaoMiguelTrigger) {
-      const isJose = isSaoJoseTrigger;
-      const title = isJose ? "🧔‍♂️ *Oração a São José*" : "🗡️ *Oração a São Miguel Arcanjo*";
-      const audio = isJose ? "oracao_sao_jose.mp3" : "oracao_sao_miguel.mp3";
-      const conclusion = isJose ? "Que São José interceda por você! 🙏" : "São Miguel Arcanjo, defendei-nos no combate! 🗡️";
-
-      await whatsappService.sendText({ number: phone, text: `${title}\n\nPreparando o áudio para você... 🙏` });
-      
-      queueBackgroundTasks(ctx, [
-        async () => { await whatsappService.sendAudio({ number: phone, audioUrl: `https://rotina-com-deus.vercel.app/audios/${audio}` }); },
-        async () => { await whatsappService.sendText({ number: phone, text: conclusion }); },
-        async () => { await sleep(1500); await sendMainMenu(phone, waUser); }
+        },
+        async () => {
+          await sleep(4000);
+          await whatsappService.sendText({ number: rawPhone, text: "👉 *DIGITE 1* - Próximo passo" });
+        },
       ]);
 
-      await saveProgress(waUser.id, { last_prayer_type: "menu" });
+      await saveProgress(waUser, {
+        last_prayer_type: "terco",
+        last_prayer_step: first.id,
+        last_step_started_at: new Date().toISOString(),
+      });
       return new Response("OK", { status: 200 });
     }
 
-    // --- SUPORTE ---
-    if (isSupportTrigger) {
-      const supportText = `🙌 *Suporte Rotina com Deus*\n\nPrecisa de ajuda com sua assinatura ou tem alguma dúvida? Fale conosco por aqui ou envie um e-mail para:\n\n📧 *contato.rotinacomdeus@gmail.com*\n\nEstamos à disposição para te ajudar! 🙏`;
-      await whatsappService.sendText({ number: phone, text: supportText });
-      await sleep(1000);
-      await sendMainMenu(phone, waUser);
+    if (isCmd2 && canTriggerMenu) {
+      await saveProgress(waUser, { last_prayer_type: "special_prayers" });
+      await whatsappService.sendText({
+        number: rawPhone,
+        text: "🙏 *Orações Especiais*\n\n1️⃣ - São José\n2️⃣ - São Miguel\n0️⃣ - Menu\n\n👉 DIGITE O NÚMERO",
+      });
       return new Response("OK", { status: 200 });
     }
 
-    // --- IA CONVERSACIONAL ---
-    const aiRes = await generateSpiritualResponse(messageText, `Nome: ${waUser.full_name}, Tipo: ${userProgress?.last_prayer_type || "conversa"}`);
-    const buttons = aiRes.buttons.slice(0, 2);
-    let aiResponseText = aiRes.text + "\n\n";
-    if (buttons.length > 0) {
-      buttons.forEach((b: string, idx: number) => { aiResponseText += `${idx + 1}️⃣ - ${b}\n`; });
-      aiResponseText += `\n👉 *DIGITE O NÚMERO* ou *0* para Menu`;
+    if (isCmd4 && canTriggerMenu) {
+      await whatsappService.sendText({
+          number: rawPhone,
+          text: "🙌 *Suporte Rotina com Deus*\n\nPrecisa de ajuda com sua assinatura ou tem alguma dúvida?\n\n📧 *contato.rotinacomdeus@gmail.com*\n\nEstamos à disposição! 🙏",
+        });
+      await sleep(500);
+      await sendMainMenu(rawPhone);
+      return new Response("OK", { status: 200 });
     }
-    await whatsappService.sendText({ number: phone, text: aiResponseText });
-    if (userProgress?.last_prayer_type === "reflection" || userProgress?.last_prayer_type === "intention") await saveProgress(waUser.id, { last_prayer_type: null });
 
-    console.log(`✅ [WEBHOOK] Processo concluído com sucesso para ${phone}`);
+    // ── Fallback: AI ──
+    const aiRes = await generateSpiritualResponse(messageText, `Nome: ${waUser.full_name}`);
+    await whatsappService.sendText({ number: rawPhone, text: aiRes.text });
     return new Response("OK", { status: 200 });
-  } catch (err) { 
-    console.error("🔥 [WEBHOOK] Erro fatal:", err);
-    return new Response("Error", { status: 500 }); 
+
+  } catch (err) {
+    console.error("🔥 ERRO FATAL:", err);
+    return new Response("Error", { status: 500 });
   }
 });
