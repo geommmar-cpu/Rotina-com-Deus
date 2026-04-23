@@ -29,6 +29,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Swiper.js for Testimonials Carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <!-- Performance Preloads -->
     <link rel="preload" href="/logo2-mobile.webp" as="image" type="image/webp" media="(max-width: 768px)" fetchpriority="high">
@@ -327,71 +330,185 @@
             <h2 class="gradient-text">Pessoas que decidiram voltar:</h2>
             <p class="section-subtitle">O que dizem os membros da nossa comunidade que transformaram sua rotina.</p>
           </div>
-          <div class="testimonial-grid">
+          
+          <!-- Swiper Carousel -->
+          <div class="swiper testimonial-carousel">
+            <div class="swiper-wrapper">
+              
+              <!-- Slide 1 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <img src="/testimonials/user1.png" alt="Maria Alice" />
+                    <div class="wa-header-info">
+                      <h4>Maria Alice</h4>
+                      <p>visto por último hoje às 08:32</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Amém! Comecei a usar o Rotina com Deus e finalmente sinto que saí do automático. É libertador não sentir mais aquela culpa de "esquecer" de Deus durante o dia. 🙏✨</p>
+                      <span class="wa-time">08:15</span>
+                    </div>
+                    <div class="wa-bubble sent">
+                      <p>Que alegria, Maria! Ficamos muito felizes em fazer parte dessa sua jornada. 🙌</p>
+                      <span class="wa-time">08:20</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 2 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <img src="/testimonials/user2.png" alt="Ricardo P." />
+                    <div class="wa-header-info">
+                      <h4>Ricardo P.</h4>
+                      <p>online</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Como médico, minha rotina é um caos absoluto. O Terço guiado e as pausas do Ângelus são minhas pequenas ilhas de sanidade entre um plantão e outro. Minha mente finalmente desacelera.</p>
+                      <span class="wa-time">12:45</span>
+                    </div>
+                    <div class="wa-bubble received">
+                      <p>Recomendo pra todo mundo que vive na correria!</p>
+                      <span class="wa-time">12:46</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 3 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <img src="/testimonials/user3.png" alt="Dona Sônia" />
+                    <div class="wa-header-info">
+                      <h4>Dona Sônia</h4>
+                      <p>visto por último ontem às 21:15</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>No começo achei que ia ser difícil por ser no "zap", mas é tão simples! Recebo a oração e já começo o dia com paz. Sinto Deus bem pertinho de mim todos os dias agora. Obrigada por esse projeto lindo.</p>
+                      <span class="wa-time">07:30</span>
+                    </div>
+                    <div class="wa-bubble sent">
+                      <p>Nós que agradecemos sua confiança, Dona Sônia! Que Deus continue abençoando muito a senhora. ❤️</p>
+                      <span class="wa-time">08:10</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 4 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <img src="/testimonials/user4.png" alt="Lucas M." />
+                    <div class="wa-header-info">
+                      <h4>Lucas M.</h4>
+                      <p>visto hoje às 10:15</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Paz do Senhor! No meio da correria da faculdade e dos estágios, o Rotina com Deus tem sido meu porto seguro. As mensagens matinais me dão foco e calma pra enfrentar o dia. Vale cada centavo.</p>
+                      <span class="wa-time">11:02</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 5 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <img src="/testimonials/user5.png" alt="Clara S." />
+                    <div class="wa-header-info">
+                      <h4>Clara S.</h4>
+                      <p>visto por último às 14:20</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Como mãe de dois pequenos, meu tempo é curtíssimo. Consigo rezar enquanto eles dormem à tarde usando os áudios e o terço guiado. Sinto que finalmente reencontrei minha paz interior.</p>
+                      <span class="wa-time">15:30</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 6 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <div class="user-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000;">SJ</div>
+                    <div class="wa-header-info">
+                      <h4>Seu Jorge</h4>
+                      <p>online</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Sempre quis ler a bíblia inteira, mas nunca passava das primeiras páginas. Com o plano de 365 dias estou no dia 12 e amando cada reflexão. Que Deus abençoe vcs.</p>
+                      <span class="wa-time">19:15</span>
+                    </div>
+                    <div class="wa-bubble sent">
+                      <p>Amém, Seu Jorge! Seguimos firmes na Palavra. 🙌</p>
+                      <span class="wa-time">19:20</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 7 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <div class="user-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #222;">BF</div>
+                    <div class="wa-header-info">
+                      <h4>Beatriz F.</h4>
+                      <p>visto por último às 22:00</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>As orações por áudio personalizadas são incríveis. Eu mando minha intenção e recebo uma oração que toca fundo na alma. Não é só automático, parece que me entendem de verdade.</p>
+                      <span class="wa-time">22:05</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 8 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <div class="user-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #dcf8c6; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #075e54;">HT</div>
+                    <div class="wa-header-info">
+                      <h4>Henrique T.</h4>
+                      <p>online</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Tentei várias vezes criar o hábito de rezar diário e sempre falhava. O segredo do Rotina com Deus é que ele te encontra onde vc está, no zap. Agora não tem mais desculpa de "esqueci".</p>
+                      <span class="wa-time">09:30</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
             
-            <!-- Depoimento 1 -->
-            <div class="wa-testimonial-card">
-              <div class="wa-testimonial-header">
-                <img src="/testimonials/user1.png" alt="Maria Alice" />
-                <div class="wa-header-info">
-                  <h4>Maria Alice</h4>
-                  <p>visto por último hoje às 08:32</p>
-                </div>
-              </div>
-              <div class="wa-testimonial-body">
-                <div class="wa-bubble received">
-                  <p>Amém! Comecei a usar o Rotina com Deus e finalmente sinto que saí do automático. É libertador não sentir mais aquela culpa de "esquecer" de Deus durante o dia. 🙏✨</p>
-                  <span class="wa-time">08:15</span>
-                </div>
-                <div class="wa-bubble sent">
-                  <p>Que alegria, Maria! Ficamos muito felizes em fazer parte dessa sua jornada. 🙌</p>
-                  <span class="wa-time">08:20</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Depoimento 2 -->
-            <div class="wa-testimonial-card">
-              <div class="wa-testimonial-header">
-                <img src="/testimonials/user2.png" alt="Ricardo P." />
-                <div class="wa-header-info">
-                  <h4>Ricardo P.</h4>
-                  <p>online</p>
-                </div>
-              </div>
-              <div class="wa-testimonial-body">
-                <div class="wa-bubble received">
-                  <p>Como médico, minha rotina é um caos absoluto. O Terço guiado e as pausas do Ângelus são minhas pequenas ilhas de sanidade entre um plantão e outro. Minha mente finalmente desacelera.</p>
-                  <span class="wa-time">12:45</span>
-                </div>
-                <div class="wa-bubble received">
-                  <p>Recomendo pra todo mundo que vive na correria!</p>
-                  <span class="wa-time">12:46</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Depoimento 3 -->
-            <div class="wa-testimonial-card">
-              <div class="wa-testimonial-header">
-                <img src="/testimonials/user3.png" alt="Dona Sônia" />
-                <div class="wa-header-info">
-                  <h4>Dona Sônia</h4>
-                  <p>visto por último ontem às 21:15</p>
-                </div>
-              </div>
-              <div class="wa-testimonial-body">
-                <div class="wa-bubble received">
-                  <p>No começo achei que ia ser difícil por ser no "zap", mas é tão simples! Recebo a oração e já começo o dia com paz. Sinto Deus bem pertinho de mim todos os dias agora. Obrigada por esse projeto lindo.</p>
-                  <span class="wa-time">07:30</span>
-                </div>
-                <div class="wa-bubble sent">
-                  <p>Nós que agradecemos sua confiança, Dona Sônia! Que Deus continue abençoando muito a senhora. ❤️</p>
-                  <span class="wa-time">08:10</span>
-                </div>
-              </div>
-            </div>
-
+            <!-- Swiper Pagination/Navigation -->
+            <div class="swiper-pagination testimonial-pagination"></div>
+            <div class="swiper-button-prev testimonial-prev"></div>
+            <div class="swiper-button-next testimonial-next"></div>
           </div>
         </div>
       </section>
@@ -620,5 +737,37 @@
     </footer>
 
     <script type="module" src="/src/main.js" defer></script>
+    
+    <!-- Swiper.js Initialization -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        new Swiper('.testimonial-carousel', {
+          slidesPerView: 1,
+          spaceBetween: 30,
+          loop: true,
+          autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+          },
+          pagination: {
+            el: '.testimonial-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.testimonial-next',
+            prevEl: '.testimonial-prev',
+          },
+          breakpoints: {
+            768: {
+              slidesPerView: 2,
+            },
+            1024: {
+              slidesPerView: 3,
+            }
+          }
+        });
+      });
+    </script>
   </body>
 </html>
