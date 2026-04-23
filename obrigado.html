@@ -213,7 +213,7 @@
         </div>
       </div>
 
-      <a href="https://wa.me/5511999999999?text=MENU" class="btn" id="wa-link">Ir para o WhatsApp Agora</a>
+      <a href="https://wa.me/5511999999999?text=MENU" class="btn" id="wa-link">Acessar meu Assistente no WhatsApp</a>
 
       <img src="/logo2.webp" alt="Rotina com Deus" class="logo-footer">
     </div>
@@ -230,7 +230,19 @@
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', '1510686987248792');
     fbq('track', 'PageView');
-    fbq('track', 'Purchase', {currency: 'BRL', value: 47.00}); // Valor médio, pode ser omitido ou dinâmico
+    fbq('track', 'Purchase', {currency: 'BRL', value: 47.00});
+    </script>
+
+    <script>
+      // Redirecionamento Automático após 5 segundos
+      document.addEventListener('DOMContentLoaded', () => {
+        const waLink = document.getElementById('wa-link').href;
+        
+        setTimeout(() => {
+          console.log("Redirecionando para o WhatsApp...");
+          window.location.href = waLink;
+        }, 5000); // 5 segundos de delay para leitura
+      });
     </script>
   </body>
 </html>
