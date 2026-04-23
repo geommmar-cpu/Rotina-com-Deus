@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.whatsapp-health]
 verify_jwt = false
+
+[functions.nexano-webhook]
+verify_jwt = false

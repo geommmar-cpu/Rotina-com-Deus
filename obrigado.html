@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon-premium.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bem-vindo(a) à Família | Rotina com Deus</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        --primary: #12122b;
+        --accent: #f9a826;
+        --accent-glow: rgba(249, 168, 38, 0.4);
+        --bg-dark: #0a0a1a;
+        --glass: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
+        --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Outfit', sans-serif;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background-color: var(--bg-dark);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        background: radial-gradient(circle at center, #1a1f3c 0%, #0a0a1a 100%);
+      }
+
+      .success-card {
+        max-width: 600px;
+        width: 90%;
+        text-align: center;
+        padding: 3rem 2rem;
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 40px;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+        animation: cardAppear 1s ease-out forwards;
+      }
+
+      @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(40px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      .check-container {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
+        border-radius: 50%;
+        margin: 0 auto 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 50px var(--accent-glow);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 30px var(--accent-glow); }
+        50% { transform: scale(1.05); box-shadow: 0 0 60px var(--accent-glow); }
+        100% { transform: scale(1); box-shadow: 0 0 30px var(--accent-glow); }
+      }
+
+      .check-container svg {
+        width: 50px;
+        height: 50px;
+        color: #000;
+        animation: checkDraw 0.8s 0.5s ease-in-out both;
+      }
+
+      @keyframes checkDraw {
+        from { transform: scale(0); rotate: -45deg; }
+        to { transform: scale(1); rotate: 0deg; }
+      }
+
+      h1 {
+        font-family: var(--font-heading);
+        font-size: clamp(2rem, 5vw, 3rem);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      p {
+        font-size: 1.1rem;
+        color: var(--text-dim);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+
+      .next-steps {
+        text-align: left;
+        background: rgba(255,255,255,0.03);
+        padding: 2rem;
+        border-radius: 24px;
+        margin-bottom: 2.5rem;
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+
+      .step {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: flex-start;
+      }
+
+      .step-num {
+        background: var(--accent);
+        color: #000;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+
+      .step-text h4 {
+        color: #fff;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+
+      .step-text p {
+        font-size: 0.95rem;
+        margin-bottom: 0;
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 1.2rem;
+        border-radius: 100px;
+        background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
+        color: #000;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: var(--transition);
+        box-shadow: 0 15px 30px var(--accent-glow);
+      }
+
+      .btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px var(--accent-glow);
+      }
+
+      .logo-footer {
+        margin-top: 3rem;
+        opacity: 0.5;
+        height: 60px;
+      }
+
+      @media (max-width: 480px) {
+        .success-card { padding: 2rem 1.5rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="success-card">
+      <div class="check-container">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <h1>Deus seja louvado!</h1>
+      <p>Sua vida de oração acaba de ganhar uma nova aliada. Estamos muito felizes em ter você conosco.</p>
+
+      <div class="next-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h4>Verifique seu WhatsApp</h4>
+            <p>Acabamos de te enviar uma mensagem de boas-vindas com as instruções.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h4>Responda "MENU"</h4>
+            <p>Se a conversa não abrir sozinha, digite MENU para ativar seu robô espiritual.</p>
+          </div>
+        </div>
+        <div class="step" style="margin-bottom: 0;">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h4>Comece sua jornada</h4>
+            <p>Já deixamos o Terço de hoje e a leitura bíblica preparados para você.</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="https://wa.me/5511999999999?text=MENU" class="btn" id="wa-link">Ir para o WhatsApp Agora</a>
+
+      <img src="/logo2.webp" alt="Rotina com Deus" class="logo-footer">
+    </div>
+
+    <!-- Meta Pixel Code Success Tracking -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1510686987248792');
+    fbq('track', 'PageView');
+    fbq('track', 'Purchase', {currency: 'BRL', value: 47.00}); // Valor médio, pode ser omitido ou dinâmico
+    </script>
+  </body>
+</html>

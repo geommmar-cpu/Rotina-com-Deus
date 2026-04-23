@@ -17,7 +17,16 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const payload = await req.json();
+    if (req.method === 'GET') {
+      return new Response("Nexano Webhook Active", { status: 200 });
+    }
+
+    const bodyText = await req.text();
+    if (!bodyText) {
+      return new Response("Empty body received", { status: 400 });
+    }
+
+    const payload = JSON.parse(bodyText);
     console.log("📦 Nexano Webhook Received:", JSON.stringify(payload, null, 2));
 
     const { event, token, offerCode, client, transaction } = payload;
