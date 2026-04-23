@@ -1585,3 +1585,113 @@ section {
   .mobile-only { display: block; }
   .desktop-only { display: none; }
 }
+
+/* ==========================================================================
+   WHATSAPP TESTIMONIALS STYLE
+   ========================================================================== */
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 3rem;
+  margin-top: 4rem;
+}
+
+.wa-testimonial-card {
+  background: #e5ddd5 url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') repeat !important;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  border: 1px solid var(--glass-border);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.wa-testimonial-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+}
+
+.wa-testimonial-header {
+  background: #075e54;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: white;
+}
+
+.wa-testimonial-header img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.wa-header-info h4 {
+  font-family: var(--font-body) !important;
+  font-size: 1rem;
+  margin: 0;
+  color: white;
+}
+
+.wa-header-info p {
+  font-size: 0.75rem;
+  margin: 0;
+  opacity: 0.8;
+  color: white;
+}
+
+.wa-testimonial-body {
+  padding: 25px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.wa-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 15px;
+  font-size: 1rem;
+  line-height: 1.5;
+  position: relative;
+  color: #111;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-family: var(--font-body);
+}
+
+.wa-bubble.received {
+  background: white;
+  align-self: flex-start;
+  border-top-left-radius: 2px;
+}
+
+.wa-bubble.sent {
+  background: #dcf8c6;
+  align-self: flex-end;
+  border-top-right-radius: 2px;
+}
+
+.wa-bubble p {
+  margin: 0;
+  font-style: normal !important;
+  color: #333 !important;
+}
+
+.wa-time {
+  display: block;
+  font-size: 0.65rem;
+  color: #888;
+  text-align: right;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}

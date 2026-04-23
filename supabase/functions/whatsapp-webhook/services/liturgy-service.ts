@@ -1,9 +1,12 @@
 import { generateLiturgyReflection, generateStructuredLiturgy } from "./ai-service.ts";
+import { getSaintOfToday } from "./saints-service.ts";
 
 const CANCAO_NOVA_URL = "https://liturgia.cancaonova.com/pb/";
 const SECONDARY_API = "https://liturgiadiaria-com-br.vercel.app/api/v1/liturgia";
 
 export async function getDailyLiturgy() {
+  const officialSaint = getSaintOfToday();
+  
   try {
     // TENTATIVA 1: CANÇÃO NOVA (Scraping Inteligente por IDs)
     console.log("📡 TENTATIVA 1: Buscando na Canção Nova...");
@@ -41,10 +44,8 @@ export async function getDailyLiturgy() {
       const structuredData = await generateStructuredLiturgy(cleanContent);
 
       if (structuredData && (structuredData.evangelho || structuredData.primeiraLeitura)) {
-        // Se a IA não encontrou o santo ou deu erro, usamos o nosso saintSearch manual
-        if (!structuredData.saint || structuredData.saint.toLowerCase().includes("conferência")) {
-            structuredData.saint = saintSearch;
-        }
+        // PRIORIDADE: Usamos a lista oficial do usuário se disponível
+        const finalSaint = officialSaint !== "Santo do Dia" ? officialSaint : (structuredData.saint || saintSearch);
 
         const pLeitura = typeof structuredData.primeiraLeitura === 'string' ? structuredData.primeiraLeitura : (structuredData.primeiraLeitura?.texto || "");
         const evan = typeof structuredData.evangelho === 'string' ? structuredData.evangelho : (structuredData.evangelho?.texto || "");
@@ -56,7 +57,7 @@ export async function getDailyLiturgy() {
           title: structuredData.title || "Liturgia do Dia",
           readings: structuredData,
           reflection: reflection,
-          saint: structuredData.saint || saintSearch
+          saint: finalSaint
         };
       }
     }
@@ -73,7 +74,7 @@ export async function getDailyLiturgy() {
           title: data.evangelho.titulo || "Liturgia do Dia",
           readings: data,
           reflection: reflection,
-          saint: data.santoDoDia || "Santo do Dia"
+          saint: officialSaint !== "Santo do Dia" ? officialSaint : (data.santoDoDia || "Santo do Dia")
         };
       }
     }
@@ -91,7 +92,7 @@ export async function getDailyLiturgy() {
     return {
       title: "📖 Momento de Paz",
       reflection: `${reflection}`,
-      saint: "São José"
+      saint: officialSaint
     };
   }
 }

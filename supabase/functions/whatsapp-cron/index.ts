@@ -165,8 +165,7 @@ serve(async (req) => {
         }
 
         // 2. Enviar Bíblia 365
-        const userProg = user.user_progress?.[0];
-        const nextBibleDay = (userProg?.bible_365_day || 0) + 1;
+        const nextBibleDay = (user.bible_day || 0) + 1;
         const bibleContent = await getBible365Content(nextBibleDay);
 
         if (bibleContent) {
@@ -176,13 +175,11 @@ serve(async (req) => {
           });
           await sleep(1500);
 
-          // Atualiza progresso da Bíblia
-          const progId = userProg?.id;
-          if (progId) {
-            await supabase.from("user_progress").update({ bible_365_day: nextBibleDay }).eq("id", progId);
-          } else {
-            await supabase.from("user_progress").insert({ whatsapp_user_id: user.id, bible_365_day: nextBibleDay });
-          }
+          // Atualiza progresso da Bíblia diretamente no usuário (Single Source of Truth)
+          await supabase
+            .from("whatsapp_users")
+            .update({ bible_day: nextBibleDay })
+            .eq("id", user.id);
         }
 
         // 3. Lembretes de Datas Especiais (Quaresma de São Miguel)
