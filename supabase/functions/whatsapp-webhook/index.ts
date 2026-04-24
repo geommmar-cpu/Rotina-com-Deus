@@ -198,7 +198,17 @@ serve(async (req) => {
 
     // ── Collect name if missing ──
     if (!waUser.full_name) {
+      const forbidden = ["menu", "oi", "ola", "assinar", "ajuda", "suporte", "quero", "bom dia", "boa tarde", "boa noite"];
+      if (forbidden.some(f => nm.includes(f)) || nm.length < 3) {
+        await whatsappService.sendText({
+          number: rawPhone,
+          text: "Bem-vindo ao *Rotina com Deus*! 🙏\n\nComo você prefere ser chamado(a)?",
+        });
+        return new Response("OK", { status: 200 });
+      }
+
       await supabase.from("whatsapp_users").update({ full_name: messageText }).eq("id", waUser.id);
+      waUser.full_name = messageText;
       await whatsappService.sendText({ number: rawPhone, text: `Prazer, *${messageText}*! ✨` });
       await sleep(500);
       await sendMainMenu(rawPhone);
@@ -261,9 +271,13 @@ serve(async (req) => {
     // ══════════════════════════════════════════════════════════════
     console.log(`🔀 ROTEAMENTO | state='${state}' stepId=${progress?.last_prayer_step ?? 'null'} msg='${nm}'`);
 
-    // ── MENU reset ──
-    if (nm === "0" || nm === "menu" || nm === "oi" || nm === "ola") {
+    // ── MENU reset & Personalized Greeting ──
+    if (nm === "0" || nm === "menu" || nm === "oi" || nm === "ola" || nm.includes("acabei de assinar")) {
       await saveProgress(waUser, { last_prayer_type: "menu", last_prayer_step: 0 });
+      if (nm.includes("acabei de assinar")) {
+        await whatsappService.sendText({ number: rawPhone, text: `Deus seja louvado! Que alegria ter você conosco, *${waUser.full_name || 'Abençoado(a)'}*! 🙏` });
+        await sleep(500);
+      }
       await sendMainMenu(rawPhone);
       return new Response("OK", { status: 200 });
     }

@@ -88,12 +88,14 @@ serve(async (req) => {
       // Criar novo usuário
       await supabase.from("whatsapp_users").insert({
         phone_number: phone,
+        full_name: customerName,
         subscription_status: "active",
         subscription_valid_until: validUntil.toISOString()
       });
     } else {
       // Atualizar existente
       await supabase.from("whatsapp_users").update({
+        full_name: customerName,
         subscription_status: "active",
         subscription_valid_until: validUntil.toISOString()
       }).eq("id", waUser.id);

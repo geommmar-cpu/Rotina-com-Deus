@@ -234,6 +234,25 @@
     </script>
 
     <script>
+      // Personalização do link do WhatsApp
+      function personalizeWhatsAppLink() {
+        const urlParams = new URLSearchParams(window.location.search);
+        // Tenta pegar o nome de vários parâmetros comuns
+        const name = urlParams.get('name') || urlParams.get('fullname') || urlParams.get('cliente') || urlParams.get('customer_name');
+        
+        if (name) {
+          const decodedName = decodeURIComponent(name).split(' ')[0]; // Pega apenas o primeiro nome
+          const waLink = document.getElementById('wa-link');
+          if (waLink) {
+            const message = `Olá, sou o ${decodedName} e acabei de assinar o Rotina com Deus!`;
+            waLink.href = `https://wa.me/5561999220401?text=${encodeURIComponent(message)}`;
+          }
+        }
+      }
+      
+      // Executa a personalização
+      personalizeWhatsAppLink();
+
       // Pixel Purchase Tracking
       if (typeof fbq === 'function') {
         fbq('track', 'Purchase', {
