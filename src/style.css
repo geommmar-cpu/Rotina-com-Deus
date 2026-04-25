@@ -1702,6 +1702,7 @@ section {
 .testimonial-carousel {
   padding: 2rem 1rem 5rem 1rem !important;
   margin: 0 -1rem;
+  min-height: 400px;
 }
 
 .swiper-pagination-bullet {

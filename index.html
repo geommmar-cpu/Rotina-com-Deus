@@ -751,10 +751,16 @@
     <script type="module" src="/src/main.js" defer></script>
     
     <!-- Swiper.js Initialization -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         new Swiper('.testimonial-carousel', {
+          // Ajuste para evitar CLS (Cumulative Layout Shift)
+          wrapperClass: 'swiper-wrapper',
+          slideClass: 'swiper-slide',
+          /* O CSS abaixo deve ser aplicado via estilo ou classes:
+             .testimonial-carousel { min-height: 400px; padding: 2rem 1rem 5rem 1rem !important; }
+          */
           slidesPerView: 1,
           spaceBetween: 30,
           loop: true,
