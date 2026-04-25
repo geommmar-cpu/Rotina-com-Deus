@@ -37,22 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lastScrollY = window.scrollY;
     if (!ticking) {
       window.requestAnimationFrame(() => {
-        // Sticky Header
-        const header = document.querySelector('#main-header');
-        if (header) {
-          if (lastScrollY > 50) {
-            header.classList.add('scrolled');
-          } else {
-            header.classList.remove('scrolled');
-          }
-        }
-
-        // Parallax Effect
-        const hero = document.querySelector('.hero');
-        if (hero) {
-          hero.style.backgroundPositionY = `${lastScrollY * 0.5}px`;
-        }
-        
         ticking = false;
       });
       ticking = true;

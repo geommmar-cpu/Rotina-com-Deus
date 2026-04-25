@@ -1597,7 +1597,7 @@ section {
 }
 
 .wa-testimonial-card {
-  background: #e5ddd5 url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') repeat !important;
+  background: #e5ddd5 url('/wa-bg.webp') repeat !important;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
