@@ -50,3 +50,4 @@ SELECT cron.schedule(
 ALTER TABLE public.whatsapp_users 
     ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'expired',
     ADD COLUMN IF NOT EXISTS subscription_valid_until TIMESTAMPTZ;
+ 

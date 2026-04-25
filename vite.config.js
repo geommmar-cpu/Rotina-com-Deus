@@ -3,6 +3,8 @@ import { resolve } from 'path'
 
 export default defineConfig({
   build: {
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),

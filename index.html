@@ -7,28 +7,37 @@
     <title>Rotina com Deus | Sua Jornada Espiritual Diária</title>
     <meta name="description" content="Encontre paz e constância em sua vida de oração com o Rotina com Deus diretamente no seu WhatsApp." />
     
-    <!-- Meta Pixel Code -->
+    <!-- Meta Pixel Code - Deferred -->
     <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1510686987248792');
-    fbq('track', 'PageView');
+    function loadPixel() {
+      if (window.pixelLoaded) return;
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1510686987248792');
+      fbq('track', 'PageView');
+      window.pixelLoaded = true;
+    }
+    // Load after 3s or first interaction
+    setTimeout(loadPixel, 3000);
+    ['scroll', 'mousemove', 'touchstart'].forEach(ev => {
+      window.addEventListener(ev, loadPixel, {once: true, passive: true});
+    });
     </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1510686987248792&ev=PageView&noscript=1"
-    /></noscript>
     <!-- End Meta Pixel Code -->
     
     <!-- Fonts Optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"></noscript>
+    
     
     <!-- Swiper.js for Testimonials Carousel -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -111,6 +120,9 @@
     </style>
     <link rel="stylesheet" href="/src/style.css" media="print" onload="this.media='all'" />
   <body>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1510686987248792&ev=PageView&noscript=1"
+    /></noscript>
     <!-- Urgency Banner -->
     <div class="urgency-banner">
       🕊️ Oferta de Lançamento: Bônus exclusivos liberados <span class="highlight">Apenas para os próximos 50</span> assinantes
@@ -234,21 +246,21 @@
           <div class="features-grid">
             <div class="feature-card glass-card">
               <div class="feature-img-wrapper">
-                <img src="/no-install.png" alt="Zero Instalação" />
+                <img src="/no-install.webp" alt="Zero Instalação" loading="lazy" width="300" height="300" />
               </div>
               <h3>Zero Instalação</h3>
               <p>Comece em segundos. Sem senhas, sem logins complexos. Apenas a sua fé.</p>
             </div>
             <div class="feature-card glass-card">
               <div class="feature-img-wrapper">
-                <img src="/audio-prayer.png" alt="Oração por Áudio" />
+                <img src="/audio-prayer.webp" alt="Oração por Áudio" loading="lazy" width="300" height="300" />
               </div>
               <h3>Oração por Áudio</h3>
               <p>Envie sua intenção com sua própria voz. Nossa IA ouve sua alma e reza com você.</p>
             </div>
             <div class="feature-card glass-card">
               <div class="feature-img-wrapper">
-                <img src="/reminders.png" alt="Lembretes de Paz" />
+                <img src="/reminders.webp" alt="Lembretes de Paz" loading="lazy" width="300" height="300" />
               </div>
               <h3>Lembretes de Paz</h3>
               <p>Liturgia, Ângelus e Exame de Consciência em horários que respeitam seu dia.</p>
@@ -292,7 +304,7 @@
             <div class="glass-card routine-card">
                <div class="routine-img-card">
                   <span class="routine-tag">Manhã (07:00)</span>
-                  <img src="/morning-routine.png" alt="Oração matinal" />
+                  <img src="/morning-routine.webp" alt="Oração matinal" loading="lazy" width="400" height="400" />
                </div>
                <div class="routine-content">
                  <h3>O Primeiro Pensamento</h3>
@@ -302,7 +314,7 @@
             <div class="glass-card routine-card">
                <div class="routine-img-card">
                   <span class="routine-tag">Meio-Dia (12:00)</span>
-                  <img src="/rosary-card.png" alt="Terço ao meio-dia" />
+                  <img src="/rosary-card.webp" alt="Terço ao meio-dia" loading="lazy" width="400" height="400" />
                </div>
                <div class="routine-content">
                  <h3>Pausa para o Céu</h3>
@@ -312,7 +324,7 @@
             <div class="glass-card routine-card">
                <div class="routine-img-card">
                   <span class="routine-tag">Noite (21:00)</span>
-                  <img src="/night-routine.png" alt="Exame de consciência" />
+                  <img src="/night-routine.webp" alt="Exame de consciência" loading="lazy" width="400" height="400" />
                </div>
                <div class="routine-content">
                  <h3>Exame de Consciência</h3>
@@ -339,7 +351,7 @@
               <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user1.png" alt="Maria Alice" />
+                    <img src="/testimonials/user1.webp" alt="Maria Alice" loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Maria Alice</h4>
                       <p>visto por último hoje às 08:32</p>
@@ -362,7 +374,7 @@
               <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user2.png" alt="Ricardo P." />
+                    <img src="/testimonials/user2.webp" alt="Ricardo P." loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Ricardo P.</h4>
                       <p>online</p>
@@ -385,7 +397,7 @@
               <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user3.png" alt="Dona Sônia" />
+                    <img src="/testimonials/user3.webp" alt="Dona Sônia" loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Dona Sônia</h4>
                       <p>visto por último ontem às 21:15</p>
@@ -408,7 +420,7 @@
               <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user4.png" alt="Lucas M." />
+                    <img src="/testimonials/user4.webp" alt="Lucas M." loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Lucas M.</h4>
                       <p>visto hoje às 10:15</p>
@@ -427,7 +439,7 @@
               <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user5.png" alt="Clara S." />
+                    <img src="/testimonials/user5.webp" alt="Clara S." loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Clara S.</h4>
                       <p>visto por último às 14:20</p>
