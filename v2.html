@@ -39,7 +39,8 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"></noscript>
     
     
-    <!-- Performance Carousel Optimization (Native CSS) -->
+    <!-- Swiper.js for Testimonials Carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
     <!-- Performance Preloads -->
     <link rel="preload" href="/logo2-mobile.webp" as="image" type="image/webp" media="(max-width: 768px)" fetchpriority="high">
@@ -367,15 +368,15 @@
             <p class="section-subtitle">O que dizem os membros da nossa comunidade que transformaram sua rotina.</p>
           </div>
           
-          <!-- Native CSS Carousel -->
-          <div class="testimonial-carousel">
-            <div class="carousel-wrapper">
+          <!-- Swiper Carousel -->
+          <div class="swiper testimonial-carousel">
+            <div class="swiper-wrapper">
               
               <!-- Slide 1 -->
-              <div class="carousel-slide">
+              <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user1.webp" alt="Maria Alice" loading="lazy" decoding="async" width="45" height="45" />
+                    <img src="/testimonials/user1.webp" alt="Maria Alice" loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Maria Alice</h4>
                       <p>visto por último hoje às 08:32</p>
@@ -395,10 +396,10 @@
               </div>
 
               <!-- Slide 2 -->
-              <div class="carousel-slide">
+              <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user2.webp" alt="Ricardo P." loading="lazy" decoding="async" width="45" height="45" />
+                    <img src="/testimonials/user2.webp" alt="Ricardo P." loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Ricardo P.</h4>
                       <p>online</p>
@@ -418,10 +419,10 @@
               </div>
 
               <!-- Slide 3 -->
-              <div class="carousel-slide">
+              <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user3.webp" alt="Dona Sônia" loading="lazy" decoding="async" width="45" height="45" />
+                    <img src="/testimonials/user3.webp" alt="Dona Sônia" loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Dona Sônia</h4>
                       <p>visto por último ontem às 21:15</p>
@@ -441,10 +442,10 @@
               </div>
 
               <!-- Slide 4 -->
-              <div class="carousel-slide">
+              <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user4.webp" alt="Lucas M." loading="lazy" decoding="async" width="45" height="45" />
+                    <img src="/testimonials/user4.webp" alt="Lucas M." loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Lucas M.</h4>
                       <p>visto hoje às 10:15</p>
@@ -460,10 +461,10 @@
               </div>
 
               <!-- Slide 5 -->
-              <div class="carousel-slide">
+              <div class="swiper-slide">
                 <div class="wa-testimonial-card">
                   <div class="wa-testimonial-header">
-                    <img src="/testimonials/user5.webp" alt="Clara S." loading="lazy" decoding="async" width="45" height="45" />
+                    <img src="/testimonials/user5.webp" alt="Clara S." loading="lazy" width="45" height="45" />
                     <div class="wa-header-info">
                       <h4>Clara S.</h4>
                       <p>visto por último às 14:20</p>
@@ -477,7 +478,74 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Slide 6 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <div class="user-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000;">SJ</div>
+                    <div class="wa-header-info">
+                      <h4>Seu Jorge</h4>
+                      <p>online</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Sempre quis ler a bíblia inteira, mas nunca passava das primeiras páginas. Com o plano de 365 dias estou no dia 12 e amando cada reflexão. Que Deus abençoe vcs.</p>
+                      <span class="wa-time">19:15</span>
+                    </div>
+                    <div class="wa-bubble sent">
+                      <p>Amém, Seu Jorge! Seguimos firmes na Palavra. 🙌</p>
+                      <span class="wa-time">19:20</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 7 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <div class="user-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #222;">BF</div>
+                    <div class="wa-header-info">
+                      <h4>Beatriz F.</h4>
+                      <p>visto por último às 22:00</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>As orações por áudio personalizadas são incríveis. Eu mando minha intenção e recebo uma oração que toca fundo na alma. Não é só automático, parece que me entendem de verdade.</p>
+                      <span class="wa-time">22:05</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 8 -->
+              <div class="swiper-slide">
+                <div class="wa-testimonial-card">
+                  <div class="wa-testimonial-header">
+                    <div class="user-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #dcf8c6; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #075e54;">HT</div>
+                    <div class="wa-header-info">
+                      <h4>Henrique T.</h4>
+                      <p>online</p>
+                    </div>
+                  </div>
+                  <div class="wa-testimonial-body">
+                    <div class="wa-bubble received">
+                      <p>Tentei várias vezes criar o hábito de rezar diário e sempre falhava. O segredo do Rotina com Deus é que ele te encontra onde vc está, no zap. Agora não tem mais desculpa de "esqueci".</p>
+                      <span class="wa-time">09:30</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
+            
+            <!-- Swiper Pagination/Navigation -->
+            <div class="swiper-pagination testimonial-pagination"></div>
+            <div class="swiper-button-prev testimonial-prev"></div>
+            <div class="swiper-button-next testimonial-next"></div>
           </div>
         </div>
       </section>
@@ -716,8 +784,36 @@
 
     <script type="module" src="/src/main.js" defer></script>
     
-    <script type="module" src="/src/main.js" defer></script>
-    <script type="module" src="/src/main.js" defer></script>
-    <!-- Final Scripts -->
+    <!-- Swiper.js Initialization -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        new Swiper('.testimonial-carousel', {
+          slidesPerView: 1,
+          spaceBetween: 30,
+          loop: true,
+          autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+          },
+          pagination: {
+            el: '.testimonial-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.testimonial-next',
+            prevEl: '.testimonial-prev',
+          },
+          breakpoints: {
+            768: {
+              slidesPerView: 2,
+            },
+            1024: {
+              slidesPerView: 3,
+            }
+          }
+        });
+      });
+    </script>
   </body>
 </html>

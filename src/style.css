@@ -1697,63 +1697,52 @@ section {
 }
 
 /* ==========================================================================
-   NATIVE CSS CAROUSEL (REPLACING SWIPER)
+   SWIPER CAROUSEL CUSTOMIZATION
    ========================================================================== */
 .testimonial-carousel {
-  padding: 2rem 0 4rem 0 !important;
-  margin: 0;
-  width: 100%;
+  padding: 2rem 1rem 5rem 1rem !important;
+  margin: 0 -1rem;
 }
 
-.carousel-wrapper {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  gap: 1.5rem;
-  padding: 1rem;
-  scrollbar-width: none; /* Firefox */
+.swiper-pagination-bullet {
+  background: var(--accent) !important;
+  opacity: 0.3;
 }
 
-.carousel-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+.swiper-pagination-bullet-active {
+  opacity: 1;
+  transform: scale(1.2);
 }
 
-.carousel-slide {
-  flex: 0 0 320px;
-  scroll-snap-align: center;
-  transition: var(--transition);
-}
-
-@media (min-width: 1024px) {
-  .carousel-wrapper {
-    flex-wrap: wrap;
-    justify-content: center;
-    overflow-x: visible;
-    scroll-snap-type: none;
-  }
-  
-  .carousel-slide {
-    flex: 0 0 calc(33.333% - 1.5rem);
-  }
-}
-
-@media (max-width: 480px) {
-  .carousel-slide {
-    flex: 0 0 85vw;
-  }
-}
-
-.wa-testimonial-card {
-  background: #e5ddd5 url('/wa-bg.webp') repeat !important;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+.swiper-button-next,
+.swiper-button-prev {
+  color: var(--accent) !important;
+  transform: scale(0.6);
+  background: rgba(255,255,255,0.05);
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50%;
   border: 1px solid var(--glass-border);
+  backdrop-filter: blur(5px);
   transition: var(--transition);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }
 
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 20px !important;
+  font-weight: bold;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: var(--accent);
+  color: #000 !important;
+  transform: scale(0.7);
+}
+
+@media (max-width: 768px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none !important;
+  }
+}
