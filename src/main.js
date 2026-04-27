@@ -72,10 +72,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-  // Facebook Pixel Events Tracking
+  // Facebook Pixel Events Tracking & Checkout Optimization
   const checkoutLinks = document.querySelectorAll('a[href*="checkout.nexano.com.br"]');
+  
   checkoutLinks.forEach(link => {
-    link.addEventListener('click', () => {
+    // 1. Speculative Preconnect on Hover
+    link.addEventListener('mouseenter', () => {
+      const preconnect = document.createElement('link');
+      preconnect.rel = 'preconnect';
+      preconnect.href = 'https://checkout.nexano.com.br';
+      document.head.appendChild(preconnect);
+    }, { once: true });
+
+    // 2. Click Handling (Pixel + Feedback)
+    link.addEventListener('click', function(e) {
+      // Immediate Visual Feedback
+      const originalText = this.innerText;
+      this.innerText = 'Carregando...';
+      this.style.opacity = '0.8';
+      this.style.pointerEvents = 'none';
+
+      // Pixel Event
       if (typeof fbq !== 'undefined') {
         fbq('track', 'InitiateCheckout', {
           content_name: 'Escolha de Plano - RCD',
@@ -83,6 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         console.log('📈 [Pixel] Evento InitiateCheckout disparado');
       }
+
+      // Restore after a delay if navigation hasn't happened (safety)
+      setTimeout(() => {
+        this.innerText = originalText;
+        this.style.opacity = '1';
+        this.style.pointerEvents = 'all';
+      }, 5000);
     });
   });
 });
