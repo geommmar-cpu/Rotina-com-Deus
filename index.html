@@ -123,8 +123,8 @@
       .hero-logo img { height: clamp(120px, 25vw, 180px); width: auto; object-fit: contain; }
       .hero-video-wrapper {
         position: relative;
-        flex: 1;
-        max-width: 400px;
+        width: 100%;
+        max-width: 700px;
         border-radius: 20px;
         overflow: hidden;
         box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px var(--accent-glow);
@@ -170,13 +170,12 @@
             <h1 class="gradient-text">Mesmo sem tempo ou foco, você pode voltar a falar com Deus todos os dias</h1>
             <h2 class="hero-subtitle">Nós te guiamos direto no WhatsApp</h2>
             <p class="hero-description">Receba orações, terço guiado e a palavra de Deus todos os dias, sem esforço.</p>
-            <div class="hero-video-wrapper" style="margin: 2rem 0;">
+            <div class="hero-video-wrapper" style="margin: 2rem auto;">
               <!-- Ao usar preload="metadata", garantimos que o vídeo não pese no carregamento da página -->
               <video 
                 id="vsl-video"
                 controls 
                 preload="metadata" 
-                poster="/mockups/mockup-terco-mobile.webp"
                 src="/video-vendas.mp4">
                 Seu navegador não suporta a reprodução de vídeo.
               </video>
