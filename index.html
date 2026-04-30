@@ -106,7 +106,7 @@
         padding-top: 120px;
         overflow: hidden;
       }
-      .hero .container { display: flex; align-items: center; justify-content: space-between; gap: 4rem; width: 100%; }
+      .hero .container { display: flex; align-items: center; justify-content: center; gap: 4rem; width: 100%; }
       .hero-logo { margin-bottom: 1.5rem; text-align: left; }
       .hero-logo img { height: clamp(120px, 25vw, 180px); width: auto; object-fit: contain; }
       .gradient-text {
@@ -121,6 +121,32 @@
       .mockup-base { width: 100%; height: auto; display: block; }
       .hero-content { z-index: 10; flex: 1; max-width: 650px; }
       .hero-logo img { height: clamp(120px, 25vw, 180px); width: auto; object-fit: contain; }
+      .hero-video-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px var(--accent-glow);
+        border: 1px solid var(--glass-border);
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+      }
+      .hero-video-wrapper video {
+        width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+        display: block;
+      }
+      @media (max-width: 768px) {
+        .hero-video-wrapper {
+          width: 100%;
+          max-width: 100%;
+        }
+      }
     </style>
     <link rel="stylesheet" href="/src/style.css" media="print" onload="this.media='all'" />
   <body>
@@ -144,25 +170,20 @@
             <h1 class="gradient-text">Mesmo sem tempo ou foco, você pode voltar a falar com Deus todos os dias</h1>
             <h2 class="hero-subtitle">Nós te guiamos direto no WhatsApp</h2>
             <p class="hero-description">Receba orações, terço guiado e a palavra de Deus todos os dias, sem esforço.</p>
+            <div class="hero-video-wrapper" style="margin: 2rem 0;">
+              <!-- Ao usar preload="metadata", garantimos que o vídeo não pese no carregamento da página -->
+              <video 
+                id="vsl-video"
+                controls 
+                preload="metadata" 
+                poster="/mockups/mockup-terco-mobile.webp"
+                src="/video-vendas.mp4">
+                Seu navegador não suporta a reprodução de vídeo.
+              </video>
+            </div>
+
             <div class="hero-btns">
               <a href="#planos" class="btn btn-primary">Quero começar a sentir paz hoje</a>
-            </div>
-          </div>
-
-          <div class="phone-mockup">
-            <div class="phone-screen">
-              <div class="wa-header">
-                <span>Rotina com Deus</span>
-              </div>
-              <div class="wa-body">
-                <div class="wa-msg wa-received">🙏 Bom dia, Maria! Hoje contemplamos os Mistérios Gozosos. Vamos rezar?</div>
-                <div class="wa-msg wa-sent">Vamos sim!</div>
-                <div class="wa-msg wa-received">✝️ Mistério 1: A Anunciação. "Eis aqui a serva do Senhor..."</div>
-                <div class="wa-actions">
-                  <span class="wa-btn">Próximo Passo</span>
-                  <span class="wa-btn">Pausar</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
