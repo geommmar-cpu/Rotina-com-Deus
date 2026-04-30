@@ -136,11 +136,13 @@
         margin: 0 auto;
         aspect-ratio: 9/16; /* Força o formato em pé */
       }
-      .hero-video-wrapper video {
+      .hero-video-wrapper video,
+      .hero-video-wrapper iframe {
         width: 100%;
         height: 100%;
         object-fit: cover; /* Preenche a caixa sem barras pretas */
         display: block;
+        border: none;
       }
       @media (max-width: 768px) {
         .hero-video-wrapper {
@@ -172,14 +174,13 @@
             <h2 class="hero-subtitle">Nós te guiamos direto no WhatsApp</h2>
             <p class="hero-description">Receba orações, terço guiado e a palavra de Deus todos os dias, sem esforço.</p>
             <div class="hero-video-wrapper" style="margin: 2rem auto;">
-              <!-- Ao usar preload="metadata", garantimos que o vídeo não pese no carregamento da página -->
-              <video 
+              <iframe 
                 id="vsl-video"
-                controls 
-                preload="metadata" 
-                src="/video-vendas.mp4">
-                Seu navegador não suporta a reprodução de vídeo.
-              </video>
+                src="https://www.youtube.com/embed/n43CzMlXn3c?rel=0&modestbranding=1&playsinline=1" 
+                title="Apresentação Rotina com Deus" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+              </iframe>
             </div>
 
             <div class="hero-btns">
