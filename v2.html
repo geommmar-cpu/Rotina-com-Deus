@@ -124,7 +124,7 @@
       .hero-video-wrapper {
         position: relative;
         width: 100%;
-        max-width: 700px;
+        max-width: 360px; /* Largura ideal para vídeos verticais no desktop e mobile */
         border-radius: 20px;
         overflow: hidden;
         box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px var(--accent-glow);
@@ -134,11 +134,12 @@
         justify-content: center;
         align-items: center;
         margin: 0 auto;
+        aspect-ratio: 9/16; /* Força o formato em pé */
       }
       .hero-video-wrapper video {
         width: 100%;
-        max-height: 70vh;
-        object-fit: contain;
+        height: 100%;
+        object-fit: cover; /* Preenche a caixa sem barras pretas */
         display: block;
       }
       @media (max-width: 768px) {
