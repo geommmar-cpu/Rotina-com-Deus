@@ -418,6 +418,42 @@ section {
   border-bottom-color: rgba(249, 168, 38, 0.15);
 }
 
+/* Acolhimento Section */
+.acolhimento-section {
+  padding: 6rem 0;
+  background: linear-gradient(to bottom, rgba(18, 18, 43, 0.3), rgba(10, 10, 26, 0.5));
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.acolhimento-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.acolhimento-text {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  color: var(--text);
+  font-weight: 300;
+}
+
+.acolhimento-text p {
+  margin-bottom: 2rem;
+}
+
+.acolhimento-divider {
+  margin: 3rem 0;
+  font-size: 1.5rem;
+  color: var(--accent);
+  opacity: 0.6;
+}
+
+.acolhimento-text strong {
+  color: #fff;
+  font-weight: 600;
+}
+
 /* New Guarantee Section Styles */
 .large-guarantee {
   margin-top: 5rem;
