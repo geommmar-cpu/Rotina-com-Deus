@@ -118,10 +118,18 @@ serve(async (req) => {
     await whatsappService.loadActiveInstance();
 
     const payload = await req.json();
+    const instance: string = payload.instance;
     const event: string = (payload.event || "").toLowerCase();
     const msgId: string | undefined = payload.data?.key?.id;
 
-    console.log(`📡 evento=${event} id=${msgId}`);
+    console.log(`📡 evento=${event} instance=${instance} id=${msgId}`);
+
+    // 🔒 TRAVA DE SEGURANÇA: Só responde se for a instância correta
+    const EVOLUTION_INSTANCE = Deno.env.get("EVOLUTION_INSTANCE");
+    if (instance !== EVOLUTION_INSTANCE) {
+      console.log(`🚫 Ignorando mensagem da instância ${instance} (Esperado: ${EVOLUTION_INSTANCE})`);
+      return new Response("Instance mismatch", { status: 200 });
+    }
 
     // ── Idempotency lock ──
     if (msgId) {
