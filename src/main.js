@@ -29,6 +29,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const revealElements = document.querySelectorAll('.reveal');
   revealElements.forEach((el) => observer.observe(el));
 
+  // Controle de visibilidade do Botão Sticky CTA via IntersectionObserver
+  const stickyCta = document.getElementById('sticky-cta');
+  const heroSection = document.getElementById('hero');
+  if (stickyCta && heroSection) {
+    const stickyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          stickyCta.classList.add('visible');
+        } else {
+          stickyCta.classList.remove('visible');
+        }
+      });
+    }, {
+      threshold: 0.1 // Exibe assim que 90% do hero já sumiu
+    });
+    stickyObserver.observe(heroSection);
+  }
+
   // Optimized Scroll Listener (Throttled)
   let lastScrollY = window.scrollY;
   let ticking = false;

@@ -5,24 +5,35 @@
     <link rel="icon" type="image/png" href="/favicon-premium.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bem-vindo(a) à Família | Rotina com Deus</title>
+    <meta name="description" content="Bem-vindo(a) à família Rotina com Deus. Sua jornada de constância e conexão espiritual diária começa agora." />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rotinacomdeus.com.br/obrigado" />
+    <meta property="og:title" content="Bem-vindo(a) à Família | Rotina com Deus" />
+    <meta property="og:description" content="Sua jornada de constância e conexão espiritual diária começa agora." />
+    <meta property="og:image" content="/logo2.webp" />
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
       :root {
-        --primary: #12122b;
-        --accent: #f9a826;
-        --accent-glow: rgba(249, 168, 38, 0.4);
-        --bg-dark: #0a0a1a;
-        --glass: rgba(255, 255, 255, 0.05);
-        --glass-border: rgba(255, 255, 255, 0.12);
-        --text: #e2e8f0;
-        --text-dim: #94a3b8;
-        --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        --font-heading: 'Playfair Display', serif;
+        --primary: #2C1B10; /* Deep cocoa brown */
+        --accent: #C5A059;  /* Elegant gold */
+        --accent-glow: rgba(197, 160, 89, 0.25);
+        --premium-accent: #A6803B;
+        --bg-dark: #F9F6F0; /* Soft warm cream */
+        --bg-card: #FFFFFF; /* Pure white cards */
+        --glass: rgba(255, 255, 255, 0.9); /* Solid editorial containers */
+        --glass-border: rgba(197, 160, 89, 0.22); /* Thin gold borders */
+        --text: #2C1B10; /* Deep coffee brown text */
+        --text-dim: #6B5B4E; /* Clay brown for body and muted elements */
+        --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        --transition-fast: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --font-heading: 'Cinzel', serif;
         --font-body: 'Outfit', sans-serif;
       }
 
@@ -37,144 +48,179 @@
         align-items: center;
         justify-content: center;
         overflow-x: hidden;
-        background: radial-gradient(circle at center, #1a1f3c 0%, #0a0a1a 100%);
+        background: radial-gradient(circle at center, #FFFFFF 0%, var(--bg-dark) 100%);
+        padding: 1.5rem 1rem;
       }
 
       .success-card {
         max-width: 600px;
-        width: 90%;
+        width: 100%;
         text-align: center;
-        padding: 3rem 2rem;
-        background: var(--glass);
-        backdrop-filter: blur(20px);
+        padding: 3.5rem 2.5rem;
+        background: var(--bg-card);
         border: 1px solid var(--glass-border);
-        border-radius: 40px;
-        box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-        animation: cardAppear 1s ease-out forwards;
+        border-radius: 4px; /* Crisp geometry */
+        box-shadow: 0 20px 50px rgba(44, 27, 16, 0.06);
+        animation: cardAppear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
       @keyframes cardAppear {
-        from { opacity: 0; transform: translateY(40px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       .check-container {
-        width: 100px;
-        height: 100px;
-        background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
-        border-radius: 50%;
-        margin: 0 auto 2rem;
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--premium-accent) 100%);
+        border-radius: 4px; /* Crisp geometry to look like an official wax seal/stamp */
+        margin: 0 auto 2.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 0 50px var(--accent-glow);
-        animation: pulse 2s infinite;
+        box-shadow: 0 8px 24px var(--accent-glow);
+        border: 1px solid var(--premium-accent);
+        position: relative;
+        animation: sealPulse 2.5s infinite ease-in-out;
+      }
+      
+      .check-container::after {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        right: -6px;
+        bottom: -6px;
+        border-radius: 4px;
+        border: 1px solid var(--accent);
+        opacity: 0.3;
       }
 
-      @keyframes pulse {
-        0% { transform: scale(1); box-shadow: 0 0 30px var(--accent-glow); }
-        50% { transform: scale(1.05); box-shadow: 0 0 60px var(--accent-glow); }
-        100% { transform: scale(1); box-shadow: 0 0 30px var(--accent-glow); }
+      @keyframes sealPulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 8px 24px var(--accent-glow); }
+        50% { transform: scale(1.03); box-shadow: 0 12px 32px rgba(197, 160, 89, 0.35); }
       }
 
       .check-container svg {
-        width: 50px;
-        height: 50px;
-        color: #000;
-        animation: checkDraw 0.8s 0.5s ease-in-out both;
+        width: 44px;
+        height: 44px;
+        color: #2C1B10; /* Dark cocoa for maximum contrast */
+        animation: checkDraw 0.8s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
       }
 
       @keyframes checkDraw {
-        from { transform: scale(0); rotate: -45deg; }
-        to { transform: scale(1); rotate: 0deg; }
+        from { transform: scale(0) rotate(-15deg); opacity: 0; }
+        to { transform: scale(1) rotate(0deg); opacity: 1; }
       }
 
       h1 {
         font-family: var(--font-heading);
-        font-size: clamp(2rem, 5vw, 3rem);
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+        font-size: clamp(1.8rem, 5vw, 2.6rem);
+        margin-bottom: 1.2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--premium-accent) 100%);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
       }
 
       p {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         color: var(--text-dim);
-        line-height: 1.6;
-        margin-bottom: 2rem;
+        line-height: 1.8;
+        margin-bottom: 2.2rem;
       }
 
       .next-steps {
         text-align: left;
-        background: rgba(255,255,255,0.03);
-        padding: 2rem;
-        border-radius: 24px;
+        background: rgba(44, 27, 16, 0.02);
+        padding: 2.2rem;
+        border-radius: 4px; /* Crisp geometry */
         margin-bottom: 2.5rem;
-        border: 1px solid rgba(255,255,255,0.05);
+        border: 1px solid var(--glass-border);
       }
 
       .step {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        gap: 1.2rem;
+        margin-bottom: 1.5rem;
         align-items: flex-start;
       }
 
       .step-num {
         background: var(--accent);
-        color: #000;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
+        color: #2C1B10;
+        width: 26px;
+        height: 26px;
+        border-radius: 4px; /* Crisp step shapes */
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         flex-shrink: 0;
-        margin-top: 4px;
+        margin-top: 3px;
+        border: 1px solid var(--premium-accent);
       }
 
       .step-text h4 {
-        color: #fff;
-        margin-bottom: 4px;
-        font-weight: 600;
+        color: var(--primary);
+        font-family: var(--font-heading);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 6px;
+        font-weight: 700;
+        font-size: 1rem;
       }
 
       .step-text p {
         font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text-dim);
         margin-bottom: 0;
       }
 
       .btn {
         display: block;
         width: 100%;
-        padding: 1.2rem;
-        border-radius: 100px;
-        background: linear-gradient(135deg, var(--accent) 0%, #ff8c00 100%);
-        color: #000;
+        padding: 1.25rem;
+        border-radius: 4px; /* Crisp button */
+        background: linear-gradient(135deg, var(--accent) 0%, var(--premium-accent) 100%);
+        color: #2C1B10; /* Dark cocoa brown text for high contrast */
         text-decoration: none;
+        font-family: var(--font-heading);
+        text-transform: uppercase;
         font-weight: 700;
-        font-size: 1.1rem;
-        transition: var(--transition);
-        box-shadow: 0 15px 30px var(--accent-glow);
+        font-size: 1.05rem;
+        letter-spacing: 0.05em;
+        transition: var(--transition-fast);
+        border: 1px solid var(--premium-accent);
+        box-shadow: 0 8px 20px rgba(197, 160, 89, 0.2);
+        cursor: pointer;
       }
 
       .btn:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px var(--accent-glow);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(197, 160, 89, 0.35);
+        filter: brightness(1.08);
       }
 
       .logo-footer {
-        margin-top: 3rem;
-        opacity: 0.5;
+        margin-top: 3.5rem;
+        opacity: 0.85;
         height: 60px;
+        object-fit: contain;
       }
 
       @media (max-width: 480px) {
-        .success-card { padding: 2rem 1.5rem; }
+        .success-card { padding: 2.5rem 1.5rem; }
+        .next-steps { padding: 1.5rem 1.2rem; margin-bottom: 2rem; }
+        p { font-size: 0.98rem; margin-bottom: 1.8rem; }
+        .btn { padding: 1.1rem; font-size: 0.95rem; }
+        .check-container { width: 80px; height: 80px; margin-bottom: 2rem; }
+        .check-container svg { width: 38px; height: 38px; }
       }
     </style>
   </head>
@@ -213,7 +259,7 @@
         </div>
       </div>
 
-      <a href="https://wa.me/5561999220401?text=MENU" class="btn" id="wa-link">Acessar meu Assistente no WhatsApp</a>
+      <a href="https://wa.me/5561999220401?text=MENU" class="btn" id="wa-link" aria-label="Acessar meu Assistente no WhatsApp">Acessar meu Assistente no WhatsApp</a>
 
       <img src="/logo2.webp" alt="Rotina com Deus" class="logo-footer">
     </div>
