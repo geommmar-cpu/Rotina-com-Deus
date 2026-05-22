@@ -223,13 +223,14 @@ setTimeout(loadPixel, 3000);
   /* ─── VIDEO PLACEHOLDER ─── */
   .video-wrap {
     position: relative;
-    max-width: 560px;
+    max-width: 310px;
     margin: 0 auto 48px;
-    border-radius: 16px;
+    border-radius: 28px;
+    border: 6px solid var(--deep);
     overflow: hidden;
-    box-shadow: 0 24px 64px rgba(26,20,9,0.18);
+    box-shadow: 0 24px 64px rgba(26,20,9,0.22);
     background: var(--deep);
-    aspect-ratio: 16/9;
+    aspect-ratio: 9/16;
   }
   .video-wrap iframe {
     width: 100%;
@@ -900,6 +901,53 @@ setTimeout(loadPixel, 3000);
     color: rgba(250,247,242,0.25);
   }
 
+  /* ─── STICKY CTA MOBILE ─── */
+  .sticky-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(26, 20, 9, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 -12px 32px rgba(26, 20, 9, 0.25);
+  }
+  .sticky-cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 480px;
+    background: var(--gold);
+    color: var(--deep);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 100px;
+    text-decoration: none;
+    letter-spacing: .02em;
+    box-shadow: 0 4px 16px rgba(200, 151, 42, 0.3);
+    transition: background .2s, transform .1s;
+    text-align: center;
+  }
+  .sticky-cta-btn:active {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 768px) {
+    .sticky-cta.visible {
+      display: flex;
+    }
+    body {
+      padding-bottom: 72px;
+    }
+  }
+
   /* ─── RESPONSIVE ─── */
   @media (max-width: 480px) {
     .price-card.featured { transform: none; }
@@ -1386,6 +1434,13 @@ setTimeout(loadPixel, 3000);
   © 2025 Rotina com Deus · Todos os direitos reservados
 </footer>
 
+<!-- STICKY CTA MOBILE HTML -->
+<div id="sticky-cta" class="sticky-cta">
+  <a href="#planos" class="sticky-cta-btn">
+    Quero começar agora →
+  </a>
+</div>
+
 <script>
 function toggleFaq(btn) {
   const answer = btn.nextElementSibling;
@@ -1397,6 +1452,26 @@ function toggleFaq(btn) {
     btn.classList.add('open');
   }
 }
+
+// Sticky CTA Scroll Logic
+window.addEventListener('scroll', () => {
+  const stickyCta = document.getElementById('sticky-cta');
+  const heroSection = document.querySelector('.hero');
+  const pricingSection = document.getElementById('planos');
+  
+  if (!stickyCta || !heroSection || !pricingSection) return;
+  
+  const heroHeight = heroSection.offsetHeight;
+  const scrollPos = window.scrollY;
+  const pricingTop = pricingSection.offsetTop;
+  
+  // Show after hero, hide when reaching plans section
+  if (scrollPos > heroHeight - 100 && scrollPos < pricingTop - 400) {
+    stickyCta.classList.add('visible');
+  } else {
+    stickyCta.classList.remove('visible');
+  }
+}, { passive: true });
 </script>
 
 </body>
