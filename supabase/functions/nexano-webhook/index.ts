@@ -55,15 +55,16 @@ serve(async (req) => {
     let phone = customerPhone.toString().replace(/\D/g, "");
     if (!phone.startsWith("55")) phone = "55" + phone;
 
-    // 4. Determinar validade da assinatura baseada no offerCode
+    // 4. Determinar validade da assinatura baseada no offerCode ou payload geral
     // Mensal: ZDR0L7X, Anual: GQ4X0T5, Semestral: TMMWDKA
     let validUntil = new Date();
-    const code = offerCode?.toUpperCase();
+    const code = offerCode?.toUpperCase() || "";
+    const payloadString = JSON.stringify(payload).toLowerCase();
 
-    if (code === "GQ4X0T5") {
+    if (code === "GQ4X0T5" || payloadString.includes("anual") || payloadString.includes("yearly")) {
       validUntil.setFullYear(validUntil.getFullYear() + 1);
       console.log("📅 Plano ANUAL detectado");
-    } else if (code === "TMMWDKA") {
+    } else if (code === "TMMWDKA" || payloadString.includes("semestral")) {
       validUntil.setMonth(validUntil.getMonth() + 6);
       console.log("📅 Plano SEMESTRAL detectado");
     } else {

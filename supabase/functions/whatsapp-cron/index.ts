@@ -98,8 +98,8 @@ serve(async (req) => {
       // Regra 1: Verificação de Assinatura (Somente se não for Admin)
       const isSubscriptionActive = user.subscription_status === "active" || user.subscription_status === "trial";
       
-      // Carência: Para rotina da noite, damos 12h de margem para evitar corte precoce
-      const nowForCheck = routineType === "night" ? new Date(new Date().getTime() - 12 * 3600 * 1000) : new Date();
+      // Carência: Damos 3 dias (72 horas) de margem geral para evitar cortes por atraso no webhook ou cartão
+      const nowForCheck = new Date(new Date().getTime() - 72 * 3600 * 1000);
       const isValidUntil = user.subscription_valid_until ? new Date(user.subscription_valid_until) > nowForCheck : false;
 
       if (!isSpecialAdmin && (!isSubscriptionActive || !isValidUntil)) {
