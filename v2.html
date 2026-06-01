@@ -1583,11 +1583,20 @@ exitOverlay.addEventListener('click', (e) => {
 
 // Desktop Exit Intent (Mouse leaves top of window)
 document.addEventListener('mouseleave', (e) => {
-  if (e.clientY <= 0) showExitPopup();
+  if (e.clientY <= 20) showExitPopup();
 });
 
 // Mobile Exit Intent (Back button interception)
-window.history.pushState({page: 1}, "", "");
+let historyPushed = false;
+['click', 'touchstart', 'scroll'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    if (!historyPushed) {
+      window.history.pushState({page: 1}, "", "");
+      historyPushed = true;
+    }
+  }, { once: true, passive: true });
+});
+
 window.addEventListener('popstate', (e) => {
   if (!popupShown) {
     showExitPopup();
@@ -1611,8 +1620,8 @@ window.addEventListener('scroll', () => {
     const distance = oldest.y - currentScroll; // Positivo significa rolagem para CIMA
     const timeDiff = now - oldest.time;
     
-    // Se rolou + de 150px pra cima de forma rápida e não está no topo da página
-    if (distance > 150 && timeDiff > 50 && currentScroll > 200) {
+    // Se rolou + de 80px pra cima de forma rápida e não está no topo da página
+    if (distance > 80 && currentScroll > 200) {
       showExitPopup();
     }
   }
