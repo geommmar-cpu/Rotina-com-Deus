@@ -958,6 +958,80 @@ setTimeout(loadPixel, 3000);
     .mockup-inner { gap: 40px; }
     .guarantee-inner { padding: 28px 20px; }
   }
+
+  /* ─── EXIT INTENT POPUP ─── */
+  .exit-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .exit-overlay.active { opacity: 1; visibility: visible; }
+  
+  .exit-popup {
+    background: var(--warm-white);
+    width: 100%; max-width: 440px;
+    border-radius: 24px;
+    padding: 32px 32px 24px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .exit-overlay.active .exit-popup { transform: translateY(0) scale(1); }
+  
+  .exit-drag-handle {
+    width: 36px; height: 4px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+    margin: -16px auto 24px;
+  }
+  
+  .exit-emoji { font-size: 36px; margin-bottom: 16px; }
+  .exit-title {
+    font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700;
+    color: var(--brown); margin-bottom: 12px; line-height: 1.2;
+  }
+  .exit-sub { font-size: 15px; color: var(--muted); margin-bottom: 8px; }
+  .exit-price { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+  .exit-price strong { color: var(--gold-dark); font-weight: 700; }
+  
+  .exit-timer-container {
+    background: #1A1409; color: #D4AF37;
+    font-size: 15px; font-weight: 700;
+    padding: 16px; border-radius: 12px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .exit-timer-container span { font-size: 18px; }
+  
+  .exit-btn-main {
+    display: block; width: 100%;
+    background: #C8972A; color: #1A1409;
+    font-size: 16px; font-weight: 700;
+    padding: 18px 24px; border-radius: 100px;
+    text-decoration: none; margin-bottom: 20px;
+    box-shadow: 0 12px 24px rgba(200,151,42,0.25);
+    transition: all 0.2s;
+  }
+  .exit-btn-main:hover { background: #D4AF37; transform: translateY(-2px); }
+  
+  .exit-btn-close {
+    background: none; border: none;
+    font-size: 13px; color: var(--muted);
+    text-decoration: underline; cursor: pointer;
+    font-family: 'Lato', sans-serif;
+  }
+  
+  @media (max-width: 480px) {
+    .exit-overlay { align-items: flex-end; }
+    .exit-popup { border-radius: 32px 32px 0 0; padding: 24px 24px 32px; max-width: 100%; transform: translateY(100%); }
+    .exit-overlay.active .exit-popup { transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
@@ -1304,13 +1378,14 @@ setTimeout(loadPixel, 3000);
   </div>
 
   <div class="price-grid container--wide" style="max-width: 420px; margin: 0 auto 48px;">
-    <!-- Mensal Completo -->
+    <!-- Plano Único Vitalício -->
     <div class="price-card featured">
-      <div class="price-badge">✦ Assinatura Completa</div>
-      <div class="price-name">Mensal</div>
-      <div class="price-amount" style="color:#E8C56A">R$14<span style="font-size:24px">,90</span></div>
-      <div class="price-period">por mês · cobrado mensalmente</div>
-      <div class="price-economy">Cancele quando quiser</div>
+      <div class="price-badge">✦ Acesso Completo</div>
+      <div class="price-name">Vitalício</div>
+      <div style="font-size: 18px; text-decoration: line-through; color: rgba(250,247,242,0.5); font-family: 'Lato', sans-serif; margin-bottom: -4px;">De R$ 97,00</div>
+      <div class="price-amount" style="color:#E8C56A">R$37<span style="font-size:24px">,00</span></div>
+      <div class="price-period">pagamento único · sem mensalidade</div>
+      <div class="price-economy">Acesso vitalício garantido</div>
       <ul class="price-features">
         <li>Oração guiada em áudio todo dia</li>
         <li>Terço completo guiado</li>
@@ -1451,7 +1526,73 @@ window.addEventListener('scroll', () => {
     stickyCta.classList.remove('visible');
   }
 }, { passive: true });
+
+// ─── EXIT INTENT POPUP LOGIC ───
+let popupShown = false;
+const exitOverlay = document.getElementById('exit-popup-overlay');
+const exitClose = document.getElementById('exit-close');
+let timerInterval;
+
+function startExitTimer() {
+  let time = 10 * 60; // 10 minutes
+  const display = document.getElementById('exit-countdown');
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    let minutes = parseInt(time / 60, 10);
+    let seconds = parseInt(time % 60, 10);
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+    display.textContent = minutes + ":" + seconds;
+    if (--time < 0) clearInterval(timerInterval);
+  }, 1000);
+}
+
+function showExitPopup() {
+  if (popupShown) return;
+  popupShown = true;
+  exitOverlay.classList.add('active');
+  startExitTimer();
+}
+
+// Close events
+exitClose.addEventListener('click', () => exitOverlay.classList.remove('active'));
+exitOverlay.addEventListener('click', (e) => {
+  if (e.target === exitOverlay) exitOverlay.classList.remove('active');
+});
+
+// Desktop Exit Intent (Mouse leaves top of window)
+document.addEventListener('mouseleave', (e) => {
+  if (e.clientY <= 0) showExitPopup();
+});
+
+// Mobile Exit Intent (Back button interception)
+window.history.pushState({page: 1}, "", "");
+window.addEventListener('popstate', (e) => {
+  if (!popupShown) {
+    showExitPopup();
+    window.history.pushState({page: 1}, "", "");
+  }
+});
 </script>
+
+<!-- EXIT INTENT POPUP -->
+<div id="exit-popup-overlay" class="exit-overlay">
+  <div class="exit-popup">
+    <div class="exit-drag-handle"></div>
+    <div class="exit-emoji">🙏</div>
+    <h2 class="exit-title">Espera — antes de ir,<br>tem um presente pra você.</h2>
+    <p class="exit-sub">Acesso completo com <strong>50% de desconto</strong>.</p>
+    <p class="exit-price">De R$37 por apenas <strong style="color:var(--gold-dark);">R$18,50</strong> — só agora.</p>
+    
+    <div class="exit-timer-container">
+      ⏱️ Oferta expira em <span id="exit-countdown">10:00</span>
+    </div>
+    
+    <a href="https://pay.hotmart.com/H106057036Q" class="exit-btn-main">Quero acesso completo por R$18,50 →</a>
+    
+    <button class="exit-btn-close" id="exit-close">Não, prefiro continuar começando o dia sem Deus.</button>
+  </div>
+</div>
 
 </body>
 </html>
