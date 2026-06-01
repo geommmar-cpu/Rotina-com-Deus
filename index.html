@@ -1527,6 +1527,27 @@ window.addEventListener('scroll', () => {
   }
 }, { passive: true });
 
+<!-- EXIT INTENT POPUP -->
+<div id="exit-popup-overlay" class="exit-overlay">
+  <div class="exit-popup">
+    <div class="exit-drag-handle"></div>
+    <div class="exit-emoji">🙏</div>
+    <h2 class="exit-title">Espera — antes de ir,<br>tem um presente pra você.</h2>
+    <p class="exit-sub">Acesso completo com <strong>50% de desconto</strong>.</p>
+    <p class="exit-price">De R$37 por apenas <strong style="color:var(--gold-dark);">R$18,50</strong> — só agora.</p>
+    
+    <div class="exit-timer-container">
+      ⏱️ Oferta expira em <span id="exit-countdown">10:00</span>
+    </div>
+    
+    <a href="https://pay.hotmart.com/H106057036Q" class="exit-btn-main">Quero acesso completo por R$18,50 →</a>
+    
+    <button class="exit-btn-close" id="exit-close">Não, prefiro continuar começando o dia sem Deus.</button>
+  </div>
+</div>
+
+
+<script>
 // ─── EXIT INTENT POPUP LOGIC ───
 let popupShown = false;
 const exitOverlay = document.getElementById('exit-popup-overlay');
@@ -1596,26 +1617,8 @@ window.addEventListener('scroll', () => {
     }
   }
 }, { passive: true });
-</script>
 
-<!-- EXIT INTENT POPUP -->
-<div id="exit-popup-overlay" class="exit-overlay">
-  <div class="exit-popup">
-    <div class="exit-drag-handle"></div>
-    <div class="exit-emoji">🙏</div>
-    <h2 class="exit-title">Espera — antes de ir,<br>tem um presente pra você.</h2>
-    <p class="exit-sub">Acesso completo com <strong>50% de desconto</strong>.</p>
-    <p class="exit-price">De R$37 por apenas <strong style="color:var(--gold-dark);">R$18,50</strong> — só agora.</p>
-    
-    <div class="exit-timer-container">
-      ⏱️ Oferta expira em <span id="exit-countdown">10:00</span>
-    </div>
-    
-    <a href="https://pay.hotmart.com/H106057036Q" class="exit-btn-main">Quero acesso completo por R$18,50 →</a>
-    
-    <button class="exit-btn-close" id="exit-close">Não, prefiro continuar começando o dia sem Deus.</button>
-  </div>
-</div>
+</script>
 
 </body>
 </html>
