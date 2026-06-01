@@ -1573,6 +1573,29 @@ window.addEventListener('popstate', (e) => {
     window.history.pushState({page: 1}, "", "");
   }
 });
+
+// Mobile Exit Intent (Fast scroll up)
+let scrollHistory = [];
+window.addEventListener('scroll', () => {
+  if (popupShown) return;
+  const currentScroll = window.scrollY;
+  const now = Date.now();
+  
+  scrollHistory.push({ y: currentScroll, time: now });
+  // Keep só os ultimos 300ms no array
+  scrollHistory = scrollHistory.filter(item => now - item.time < 300);
+  
+  if (scrollHistory.length > 1) {
+    const oldest = scrollHistory[0];
+    const distance = oldest.y - currentScroll; // Positivo significa rolagem para CIMA
+    const timeDiff = now - oldest.time;
+    
+    // Se rolou + de 150px pra cima de forma rápida e não está no topo da página
+    if (distance > 150 && timeDiff > 50 && currentScroll > 200) {
+      showExitPopup();
+    }
+  }
+}, { passive: true });
 </script>
 
 <!-- EXIT INTENT POPUP -->
