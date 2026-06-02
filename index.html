@@ -1582,8 +1582,10 @@ exitOverlay.addEventListener('click', (e) => {
 });
 
 // Desktop Exit Intent (Mouse leaves top of window)
-document.addEventListener('mouseleave', (e) => {
-  if (e.clientY <= 20) showExitPopup();
+document.addEventListener('mouseout', (e) => {
+  if (!e.relatedTarget && e.clientY < 50) {
+    showExitPopup();
+  }
 });
 
 // Mobile Exit Intent (Back button interception)
